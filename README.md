@@ -1,0 +1,7 @@
+# Nucleo-STM32F334R8 ZFP Runtime
+
+This repository contains Ada software for the implementation of a Zero Foot-Print (ZFP) Runtime for the STM32F334 CPU with a complete modified Ada Drivers Library (ADL) from [Adacore](https://www.adacore.com) for its peripherals. It was used [Startup-Gen](https://www.github.com/Adacore/startup-gen) for generating the startup files, [AVD2Ada](https://www.github.com/Adacore/svd2ada) for generating the peripherals specification files and an ADL structure with all the necessary drivers, including CPU clock configuration, Interrupt Services and SysTick timer for Real-Time programming, without using Ravenscar runtime.
+
+The main board used for developing this software is the NUCLEO-F334R8, from [ST Microelectronics](https://www.st.com), that has connectors for Arduino shields and MORPHO expansion connector, so you may connect any Arduino shield on it and develop your own software. There are several examples for testing the runtime with drivers, including a DC-AC 50/60 Hz inverter from 12 V to 220 VAC with a low frequency transformer. The sinusoidal wave is synthesized with PWM modulation.
+
+You may use the GNAT Programming Studio from Adacore or Visual Studio Code from Microsoft to cross-compile these sources. For VSCode, it has a `.vscode/tasks.json` file that permits to check syntax and semantic, compile, build, clean, convert elf to hex and bin files and flash hex and bin files to board. Both IDEs need the [ST-LINK](https://github.com/stlink-org/stlink) (version 1.6 or later) to flash the executable to the nucleo board.

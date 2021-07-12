@@ -1,0 +1,13 @@
+{
+    "ada.projectFile": "inverter.gpr",
+    "ada.scenarioVariables": {
+        "BUILD_MODE": "debug"
+    },
+   "ada.defaultCharset": "utf-8",
+   "ada.enableDiagnostics": true,
+   "ada.enableIndexing": true,
+   "ada.renameInComments": true,
+   "ada.namedNotationThreshold": 3,
+   "ada.foldComments": true,
+
+}

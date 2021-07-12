@@ -1,0 +1,279 @@
+with STM32.Device; use STM32.Device;
+with STM32.Timers; use STM32.Timers;
+with STM32.PWM;    use STM32.PWM;
+
+with STM_Board; use STM_Board;
+
+package body Inverter_ADC is
+   
+   function To_Voltage (Value : in UInt16) return Measure_E
+   with
+      Inline;
+
+   procedure Initialize_ADC_Timer;
+   --  Initialize the timer to start ADCs convertions.
+
+   --------------------
+   -- Initialize_ADC --
+   --------------------
+
+   procedure Initialize_ADC is
+
+      All_Regular_Conversions : constant Regular_Channel_Conversions :=
+        (1 => (Channel     => ADC_Battery_V_Point.Channel,
+               Sample_Time => Sample_32_Cycles),
+         2 => (Channel     => ADC_Battery_I_Point.Channel,
+               Sample_Time => Sample_32_Cycles),
+         3 => (Channel     => ADC_Output_V_Point.Channel,
+               Sample_Time => Sample_32_Cycles));
+      
+   begin
+
+      --  Initialize GPIO for analog input
+      for Reading of ADC_Reading_Settings loop
+         STM32.Device.Enable_Clock (Reading.GPIO_Entry);
+         Reading.GPIO_Entry.Configure_IO
+           (Config => GPIO_Port_Configuration'(Mode   => Mode_Analog,
+                                               others => <>));
+      end loop;
+
+      --  Initialize ADC mode
+      Enable_Clock (Sensor_ADC.all);
+      Reset_All_ADC_Units;
+
+      Configure_Common_Properties
+        (Mode           => Independent,
+         Prescalar      => PCLK2_Div_2,
+         DMA_Mode       => Disabled,
+         Sampling_Delay => Sampling_Delay_5_Cycles);  --  arbitrary
+      
+      Configure_Unit
+        (Sensor_ADC.all,
+         Resolution => ADC_Resolution_12_Bits,
+         Alignment  => Right_Aligned);
+      
+      --  Conversions are triggered by Sensor Timer.
+      Configure_Regular_Conversions
+        (Sensor_ADC.all,
+         Continuous  => False, --  externally triggered
+         Trigger     => (Enabler => Trigger_Rising_Edge,
+                         Event   => Sensor_Trigger_Event),
+         Conversions => All_Regular_Conversions);
+      --  Either rising or falling edge should work. Note that the Event must
+      --  match the timer used!
+
+      Enable_Interrupts (Sensor_ADC.all,
+                         Source => Regular_Channel_Conversion_Complete);
+      --  Each conversion generates an interrupt signalling conversion complete.
+      
+      --  Finally, enable the used ADCs
+      Enable (Sensor_ADC.all);
+      
+      --  Start the timer that trigger ADC conversions
+      Initialize_ADC_Timer;
+
+      Initialized := True;
+   End Initialize_ADC;
+
+   --------------------------
+   -- Initialize_ADC_Timer --
+   --------------------------
+
+   procedure Initialize_ADC_Timer is
+
+      ADC_Trigger : PWM_Modulator;
+
+   begin
+
+      Configure_PWM_Timer (Generator => Sensor_Timer'Access,
+                           Frequency => UInt32(Sensor_Frequency_Hz));
+      
+      ADC_Trigger.Attach_PWM_Channel (Generator => Sensor_Timer'Access,
+                                      Channel   => Sensor_Timer_Channel,
+                                      Point     => Sensor_Timer_Point,
+                                      PWM_AF    => Sensor_Timer_AF);
+
+      ADC_Trigger.Set_Duty_Cycle (Value => 50);
+      
+      ADC_Trigger.Enable_Output;
+      
+      --  It is not necessary to enable interrupt for this timer, only for
+      --  testing it. The ADC conversions are started by the trigger of
+      --  Timer3_CC4_Event. This interrupt is not needed in the final project.
+--      Enable_Interrupt (This   => Sensor_Timer,
+--                        Source => Timer_CC4_Interrupt);
+
+   end Initialize_ADC_Timer;
+
+   ----------------
+   -- To_Voltage --
+   ----------------
+
+   function To_Voltage (Value : in UInt16) return Measure_E is
+   begin
+      return Measure_E (ADC_V_Per_Lsb * Float (Value));
+   end To_Voltage;
+
+   ----------------
+   -- Get_Sample --
+   ----------------
+
+   function Get_Sample (Reading : in ADC_Reading)
+      return Measure_E is
+   begin
+      if Reading'Valid then
+         return To_Voltage (Regular_Samples(Reading));
+      else
+         return 0.0;
+      end if;
+   end Get_Sample;
+
+   ------------------
+   -- Battery_Gain --
+   ------------------
+
+   --  Battery gain is 1.0 when battery voltage is minimum
+   --  and 0.667 when battery voltage is maximum.
+
+   function Battery_Gain
+     (V_Setpoint : Battery_V_Range := Battery_V_Range'First;
+      V_Actual   : Measure_E := Get_Sample (V_Battery))
+   return Gain_Range is
+
+   begin
+      if (V_Actual / Battery_Relation < Battery_V_Range'First)
+      then
+         return 0.0;
+      elsif (V_Actual / Battery_Relation > Battery_V_Range'Last)
+      then
+         return 1.0;
+      else
+         return V_Setpoint / V_Actual * Battery_Relation;
+      end if;
+   end Battery_Gain;
+
+   --------------------
+   -- Test_V_Battery --
+   --------------------
+
+   function Test_V_Battery return Boolean is
+      V_Actual : constant Measure_E := Get_Sample (Reading => V_Battery);
+   begin
+      if (V_Actual / Battery_Relation < Battery_V_Range'First or
+          V_Actual / Battery_Relation > Battery_V_Range'Last)
+      then
+         return False;
+      else
+         return True;
+      end if;
+   end Test_V_Battery;
+
+   --------------------
+   -- Test_I_Battery --
+   --------------------
+
+   function Test_I_Battery return Boolean is
+      V_Actual : constant Measure_E := Get_Sample (Reading => I_Battery);
+   begin
+      if V_Actual > Battery_I_Range'Last then
+         return False;
+      else
+         return True;
+      end if;
+   end Test_I_Battery;
+
+   -------------------
+   -- Test_V_Output --
+   -------------------
+
+   function Test_V_Output return Boolean is
+      V_Actual : constant Measure_E := Get_Sample (Reading => V_Output);
+   begin
+      if (V_Actual / Output_Relation < Output_V_Range'First or
+          V_Actual / Output_Relation > Output_V_Range'Last)
+      then
+         return False;
+      else
+         return True;
+      end if;
+   end Test_V_Output;
+
+   --------------------
+   -- Is_Initialized --
+   --------------------
+
+   function Is_Initialized
+      return Boolean is (Initialized);
+
+   ------------------------
+   -- Sensor_ADC_Handler --
+   ------------------------
+
+   procedure Sensor_ADC_Handler is
+   begin
+      if Status (Sensor_ADC.all,
+                 Flag => Regular_Channel_Conversion_Completed) then
+         if Interrupt_Enabled
+              (Sensor_ADC.all,
+               Source => Regular_Channel_Conversion_Complete) then
+            Clear_Interrupt_Pending
+              (Sensor_ADC.all,
+               Source => Regular_Channel_Conversion_Complete);
+            
+            --  Save the ADC values into a buffer
+            Regular_Samples(Rank) := Conversion_Value (Sensor_ADC.all);
+            if Rank = ADC_Reading'Last then
+               Rank := ADC_Reading'First;
+            else
+               Rank := ADC_Reading'Succ(Rank);
+            end if;
+
+            --  Calculate the new Sine_Gain based on battery voltage
+            Sine_Gain := Battery_Gain;
+
+            --  Testing the 5 kHz output with 1 Hz LED blinking. Because there
+            --  are three regular channel conversions, this frequency will be
+            --  three times greater. Get out this in the final project.
+            --  if Counter = 2_500 then
+            --     Set_Toggle (Green_LED);
+            --     Counter := 0;
+            --  end if;
+            --  Counter := Counter + 1;
+
+         end if;
+      end if;
+   end Sensor_ADC_Handler;
+
+   --------------------------
+   -- Sensor_Timer_Handler --
+   --------------------------
+
+   --  This handler is not used in the final project.
+   --  It is here for testing the timer that starts ADC conversions.
+   procedure Sensor_Timer_Handler is
+   begin
+      if Status (Sensor_Timer, Timer_CC4_Indicated) then
+         if Interrupt_Enabled (Sensor_Timer, Timer_CC4_Interrupt) then
+            Clear_Pending_Interrupt (Sensor_Timer, Timer_CC4_Interrupt);
+            
+            --  Testing the 5 kHz output with 1 Hz LED blinking.
+          --  if Counter = 2_500 then
+          --     Set_Toggle (Green_LED);
+          --     Counter := 0;
+          --  end if;
+          --  Counter := Counter + 1;
+            
+            --  This call to Start_Conversion is used only for testing the ADC
+            --  conversion with his ISR without external trigger, but with the
+            --  timer interrupt. For this, we need to program the trigger in
+            --  the Initialize_ADC procedure at Configure_Regular_Conversions
+            --  procedure to Trigger => (Software_Triggered). This call is not
+            --  necessary in the final project, but is another way to start
+            --  ADC conversions.
+            Start_Conversion (Sensor_ADC.all);
+            
+         end if;
+      end if;
+   end Sensor_Timer_Handler;
+   
+end Inverter_ADC;
