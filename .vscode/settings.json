@@ -1,5 +1,5 @@
 {
-    "ada.projectFile": "inverter.gpr",
+    "ada.projectFile": "stm32f334.gpr",
     "ada.scenarioVariables": {
         "BUILD_MODE": "debug"
     },
