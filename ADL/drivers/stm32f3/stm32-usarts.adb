@@ -238,65 +238,59 @@ package body STM32.USARTs is
       return This.Periph.ISR.RXNE;
    end Rx_Ready;
 
-   ------------
-   -- Status --
-   ------------
+   -----------------------
+   -- Enable_USART_Mode --
+   -----------------------
 
-   function Status (This : USART; Flag : USART_Status_Flag) return Boolean is
+   procedure Enable_USART_Mode
+     (This : in out USART;
+      Mode : USART_Mode;
+      Data : UInt32 := 16#0000#)
+   is
    begin
-      case Flag is
-         when Parity_Error_Indicated =>
-            return This.Periph.ISR.PE;
-         when Framing_Error_Indicated =>
-            return This.Periph.ISR.FE;
-         when USART_Noise_Error_Indicated =>
-            return This.Periph.ISR.NF;
-         when Overrun_Error_Indicated =>
-            return This.Periph.ISR.ORE;
-         when Idle_Line_Detection_Indicated =>
-            return This.Periph.ISR.IDLE;
-         when Read_Data_Register_Not_Empty =>
-            return This.Periph.ISR.RXNE;
-         when Transmission_Complete_Indicated =>
-            return This.Periph.ISR.TC;
-         when Transmit_Data_Register_Empty =>
-            return This.Periph.ISR.TXE;
-         when Line_Break_Detection_Indicated =>
-            return This.Periph.ISR.LBDF;
-         when Clear_To_Send_Indicated =>
-            return This.Periph.ISR.CTS;
+      case Mode is
+         when Modbus_RTU =>
+            --  Set 2-character timeout
+            This.Periph.RTOR.RTO := UInt24(Data);
+            This.Periph.CR2.RTOEN := True;
+         when Modbus_ASCII =>
+            --  Set LF ASCII character (16#0A#)
+            This.Periph.CR2.ADD.Val := UInt8(Data);
+         when LIN =>
+            --  Disable USART
+            This.Periph.CR1.UE := False;
+            --  1 stop bit
+            This.Periph.CR2.STOP := Stopbits_1'Enum_Rep;
+            --  Disable CK pin
+            This.Periph.CR2.CLKEN := False;
+            --  Disable smartcard mode
+            This.Periph.CR3.SCEN := False;
+            --  Disable half-duplex mode
+            This.Periph.CR3.HDSEL := False;
+            --  Disable IrDA mode
+            This.Periph.CR3.IREN := False;
+            --  Enable LIN mode
+            This.Periph.CR2.LINEN := True;
+            --  Enable USART
+            This.Periph.CR1.UE := True;
       end case;
-   end Status;
+   end Enable_USART_Mode;
 
-   ------------------
-   -- Clear_Status --
-   ------------------
+   ------------------------
+   -- Disable_USART_Mode --
+   ------------------------
 
-   procedure Clear_Status (This : in out USART;  Flag : USART_Status_Flag) is
+   procedure Disable_USART_Mode (This : in out USART; Mode : USART_Mode) is
    begin
-      case Flag is
-         when Parity_Error_Indicated =>
-            This.Periph.ISR.PE := False;
-         when Framing_Error_Indicated =>
-            This.Periph.ISR.FE := False;
-         when USART_Noise_Error_Indicated =>
-            This.Periph.ISR.NF := False;
-         when Overrun_Error_Indicated =>
-            This.Periph.ISR.ORE := False;
-         when Idle_Line_Detection_Indicated =>
-            This.Periph.ISR.IDLE := False;
-         when Read_Data_Register_Not_Empty =>
-            This.Periph.ISR.RXNE := False;
-         when Transmission_Complete_Indicated =>
-            This.Periph.ISR.TC := False;
-         when Transmit_Data_Register_Empty =>
-            This.Periph.ISR.TXE := False;
-         when Line_Break_Detection_Indicated =>
-            This.Periph.ISR.LBDF := False;
-         when Clear_To_Send_Indicated =>
-            This.Periph.ISR.CTS := False;
+      case Mode is
+         when Modbus_RTU =>
+            This.Periph.CR2.RTOEN := False;
+         when Modbus_ASCII =>
+            null;
+         when LIN =>
+            This.Periph.CR2.LINEN := False;
       end case;
-   end Clear_Status;
+   end Disable_USART_Mode;
 
    -----------------------
    -- Enable_Interrupts --
@@ -308,6 +302,12 @@ package body STM32.USARTs is
    is
    begin
       case Source is
+         when End_Of_Block =>
+            This.Periph.CR1.EOBIE := True;
+         when Receiver_Timeout =>
+            This.Periph.CR1.RTOIE := True;
+         when Character_Match =>
+            This.Periph.CR1.CMIE := True;
          when Parity_Error =>
             This.Periph.CR1.PEIE := True;
          when Transmit_Data_Register_Empty =>
@@ -318,7 +318,7 @@ package body STM32.USARTs is
             This.Periph.CR1.RXNEIE := True;
          when Idle_Line_Detection =>
             This.Periph.CR1.IDLEIE := True;
-         when Line_Break_Detection =>
+         when LIN_Break_Detection =>
             This.Periph.CR2.LBDIE := True;
          when Clear_To_Send =>
             This.Periph.CR3.CTSIE := True;
@@ -337,6 +337,12 @@ package body STM32.USARTs is
    is
    begin
       case Source is
+         when End_Of_Block =>
+            This.Periph.CR1.EOBIE := False;
+         when Receiver_Timeout =>
+            This.Periph.CR1.RTOIE := False;
+         when Character_Match =>
+            This.Periph.CR1.CMIE := False;
          when Parity_Error =>
             This.Periph.CR1.PEIE := False;
          when Transmit_Data_Register_Empty =>
@@ -347,7 +353,7 @@ package body STM32.USARTs is
             This.Periph.CR1.RXNEIE := False;
          when Idle_Line_Detection =>
             This.Periph.CR1.IDLEIE := False;
-         when Line_Break_Detection =>
+         when LIN_Break_Detection =>
             This.Periph.CR2.LBDIE := False;
          when Clear_To_Send =>
             This.Periph.CR3.CTSIE := False;
@@ -367,6 +373,12 @@ package body STM32.USARTs is
    is
    begin
       case Source is
+         when End_Of_Block =>
+            return This.Periph.CR1.EOBIE;
+         when Receiver_Timeout =>
+            return This.Periph.CR1.RTOIE;
+         when Character_Match =>
+            return This.Periph.CR1.CMIE;
          when Parity_Error =>
             return This.Periph.CR1.PEIE;
          when Transmit_Data_Register_Empty =>
@@ -377,7 +389,7 @@ package body STM32.USARTs is
             return This.Periph.CR1.RXNEIE;
          when Idle_Line_Detection =>
             return This.Periph.CR1.IDLEIE;
-         when Line_Break_Detection =>
+         when LIN_Break_Detection =>
             return This.Periph.CR2.LBDIE;
          when Clear_To_Send =>
             return This.Periph.CR3.CTSIE;
@@ -385,6 +397,78 @@ package body STM32.USARTs is
             return This.Periph.CR3.EIE;
       end case;
    end Interrupt_Enabled;
+
+   ------------
+   -- Status --
+   ------------
+
+   function Status (This : USART; Flag : USART_Status_Flag) return Boolean is
+   begin
+      case Flag is
+         when End_Of_Block_Indicated =>
+            return This.Periph.ISR.EOBF;
+         when Receiver_Timeout_Indicated =>
+            return This.Periph.ISR.RTOF;
+         when Character_Match_Indicated =>
+            return This.Periph.ISR.CMF;
+         when Parity_Error_Indicated =>
+            return This.Periph.ISR.PE;
+         when Framing_Error_Indicated =>
+            return This.Periph.ISR.FE;
+         when USART_Noise_Error_Indicated =>
+            return This.Periph.ISR.NF;
+         when Overrun_Error_Indicated =>
+            return This.Periph.ISR.ORE;
+         when Idle_Line_Detection_Indicated =>
+            return This.Periph.ISR.IDLE;
+         when Read_Data_Register_Not_Empty =>
+            return This.Periph.ISR.RXNE;
+         when Transmission_Complete_Indicated =>
+            return This.Periph.ISR.TC;
+         when Transmit_Data_Register_Empty =>
+            return This.Periph.ISR.TXE;
+         when LIN_Break_Detection_Indicated =>
+            return This.Periph.ISR.LBDF;
+         when Clear_To_Send_Indicated =>
+            return This.Periph.ISR.CTS;
+      end case;
+   end Status;
+
+   ------------------
+   -- Clear_Status --
+   ------------------
+
+   procedure Clear_Status (This : in out USART;  Flag : USART_Status_Flag) is
+   begin
+      case Flag is
+         when End_Of_Block_Indicated =>
+            This.Periph.ICR.EOBCF := True;
+         when Receiver_Timeout_Indicated =>
+            This.Periph.ICR.RTOCF := True;
+         when Character_Match_Indicated =>
+            This.Periph.ICR.CMCF := True;
+         when Parity_Error_Indicated =>
+            This.Periph.ICR.PECF := True;
+         when Framing_Error_Indicated =>
+            This.Periph.ICR.FECF := True;
+         when USART_Noise_Error_Indicated =>
+            This.Periph.ICR.NCF := True;
+         when Overrun_Error_Indicated =>
+            This.Periph.ICR.ORECF := True;
+         when Idle_Line_Detection_Indicated =>
+            This.Periph.ICR.IDLECF := True;
+         when Read_Data_Register_Not_Empty =>
+            null; --  Cleared by a read to the RDR register
+         when Transmission_Complete_Indicated =>
+            This.Periph.ICR.TCCF := True;
+         when Transmit_Data_Register_Empty =>
+            null; --  Cleared by a write to TDR register
+         when LIN_Break_Detection_Indicated =>
+            This.Periph.ICR.LBDCF := True;
+         when Clear_To_Send_Indicated =>
+            This.Periph.ICR.CTSCF := True;
+      end case;
+   end Clear_Status;
 
    ----------------------------------
    -- Enable_DMA_Transmit_Requests --

@@ -115,13 +115,32 @@ package STM32.USARTs is
 
    procedure Set_Flow_Control (This : in out USART;  To : Flow_Control);
 
+   type USART_Mode is (Modbus_RTU, Modbus_ASCII, LIN);
+
+   procedure Enable_USART_Mode
+     (This : in out USART;
+      Mode : USART_Mode;
+      Data : UInt32 := 16#0000#);
+   --  For Modbus RTU mode, the timeout of 2 character times is programmed. If
+   --  the character has 11 bits, then 22 (16#16#).
+   --  For Modbus ASCII mode, the LF ASCII character (16#0A#) of the end of
+   --  blocksequence (CR/LF) is programmed.
+   --  See chapter 28.5.8 at pg. 970 in RM0364 rev. 4.
+   --  For LIN mode, See chapter 28.5.10 at pg. 972 in RM0364 rev. 4.
+
+   procedure Disable_USART_Mode (This : in out USART; Mode : USART_Mode);
+   --  Disble the selected mode.
+
    type USART_Interrupt is
-     (Parity_Error,
+     (End_Of_Block,
+      Receiver_Timeout,
+      Character_Match,
+      Parity_Error,
       Transmit_Data_Register_Empty,
       Transmission_Complete,
       Received_Data_Not_Empty,
       Idle_Line_Detection,
-      Line_Break_Detection,
+      LIN_Break_Detection,
       Clear_To_Send,
       Error);
 
@@ -146,7 +165,10 @@ package STM32.USARTs is
      with Inline;
 
    type USART_Status_Flag is
-     (Parity_Error_Indicated,
+     (End_Of_Block_Indicated,
+      Receiver_Timeout_Indicated,
+      Character_Match_Indicated,
+      Parity_Error_Indicated,
       Framing_Error_Indicated,
       USART_Noise_Error_Indicated,
       Overrun_Error_Indicated,
@@ -154,7 +176,7 @@ package STM32.USARTs is
       Read_Data_Register_Not_Empty,
       Transmission_Complete_Indicated,
       Transmit_Data_Register_Empty,
-      Line_Break_Detection_Indicated,
+      LIN_Break_Detection_Indicated,
       Clear_To_Send_Indicated);
 
    function Status (This : USART; Flag : USART_Status_Flag) return Boolean
