@@ -496,17 +496,17 @@ package body STM32.Device is
    begin
       if This'Address = TIM1_Base then
          return System_Clock_Frequencies.TIM1CLK;
-      elsif This'Address = TIM15_Base or
-        This'Address = TIM16_Base or
-        This'Address = TIM17_Base
-      then
-         return System_Clock_Frequencies.TIMCLK2;
       elsif This'Address = TIM2_Base or
         This'Address = TIM3_Base or
         This'Address = TIM6_Base or
         This'Address = TIM7_Base
       then
          return System_Clock_Frequencies.TIMCLK1;
+      elsif This'Address = TIM15_Base or
+        This'Address = TIM16_Base or
+        This'Address = TIM17_Base
+      then
+         return System_Clock_Frequencies.TIMCLK2;
       else
          raise Unknown_Device;
       end if;
@@ -583,21 +583,21 @@ package body STM32.Device is
       --  Get the correct value of Pll multiplier
       Pllm   : constant UInt32 := UInt32 (RCC_Periph.CFGR.PLLMUL + 2);
 
-      PLLSRC : constant PLL_Source :=
-        PLL_Source'Val (Boolean'Pos (RCC_Periph.CFGR.PLLSRC));
+      --  Get the PLL entry clock source
+      PLLSRC : constant Boolean := RCC_Periph.CFGR.PLLSRC;
 
       Result : RCC_System_Clocks;
       PLLCLK : UInt32;
 
    begin
       --  PLL Source Mux
-      case PLLSRC is
-         when PLL_SRC_HSE => --  HSE as source
-            PLLCLK := HSE_VALUE / Plld * Pllm;
-
-         when PLL_SRC_HSI => --  HSI as source
-            PLLCLK := HSI_VALUE / 2 * Pllm;
-      end case;
+      if PLLSRC then
+         --  HSE/PREDIV selected as PLL input clock
+         PLLCLK := (HSE_VALUE / Plld) * Pllm;
+      else
+         --  HSI/2 selected as PLL input clock
+         PLLCLK := (HSI_VALUE / 2) * Pllm;
+      end if;
 
       -- System Clock Mux
       case Source is
@@ -631,7 +631,7 @@ package body STM32.Device is
          --  is configured to a division factor of 1, TIMxCLK = PCLKx.
          --  Otherwise, the timer clock frequencies are set to twice to the
          --  frequency of the APB domain to which the timers are connected:
-         --  TIMxCLK = 2xPCLKx.
+         --  TIMxCLK = 2 x PCLKx.
 
          --  TIMs 2, 3, 6, 7
          if PPRE_Presc_Table (PPRE1) = 1 then

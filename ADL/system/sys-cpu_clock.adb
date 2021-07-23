@@ -147,11 +147,6 @@ package body SYS.CPU_Clock is
       RCC_Periph.APB1RSTR.PWRRST := False;
 
       --  PWR initialization
-      --  Select higher supply power for stable operation at max. freq.
-      --  See table "General operating conditions" of the STM32 datasheets
-      --  to obtain the maximal operating frequency depending on the power
-      --  scaling mode and the over-drive mode
-
       PWR_Initialize;
 
       if not HSE_Enabled then
@@ -194,9 +189,7 @@ package body SYS.CPU_Clock is
 
          RCC_Periph.CFGR :=
            (PLLMUL => PLLMUL,
-            PLLSRC => (if HSE_Enabled
-                       then Boolean'Val(PLL_Source'Enum_Rep(PLL_SRC_HSE))
-                       else Boolean'Val(PLL_Source'Enum_Rep(PLL_SRC_HSI))),
+            PLLSRC => (if HSE_Enabled then True else False),
             others => <>);
 
          --  Setup PLL and wait for stabilization.
@@ -220,7 +213,7 @@ package body SYS.CPU_Clock is
 
       Flash_Periph.ACR :=
         (LATENCY => FLASH_Latency,
-         PRFTBE  => True,
+         PRFTBE  => True, --  Prefetch buffer enabled.
          others  => <>);
 
       --  Configure derived clocks
