@@ -22,7 +22,6 @@ begin
 
    --  Enter steady state
    loop
-      --  null;
       Set_Toggle (Green_LED);
       Delay_Until (Clock + Seconds (2));
    end loop;

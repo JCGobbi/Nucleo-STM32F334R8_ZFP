@@ -80,28 +80,30 @@ package body Inverter_ADC is
    --------------------------
 
    procedure Initialize_ADC_Timer is
+      Computed_Prescalar : UInt32;
+      Computed_Period    : UInt32;
+   begin   
+      --  Initialize the general timer
+      Enable_Clock (Sensor_Timer);
 
-      ADC_Trigger : PWM_Modulator;
+      Compute_Prescalar_And_Period
+        (Sensor_Timer,
+         Requested_Frequency => Sensor_Frequency_Hz,
+         Prescalar           => Computed_Prescalar,
+         Period              => Computed_Period);
 
-   begin
+      Computed_Period := Computed_Period - 1;
 
-      Configure_PWM_Timer (Generator => Sensor_Timer'Access,
-                           Frequency => UInt32(Sensor_Frequency_Hz));
+      Configure
+        (Sensor_Timer,
+         Prescaler     => UInt16 (Computed_Prescalar),
+         Period        => Computed_Period,
+         Clock_Divisor => Div1,
+         Counter_Mode  => Up);
       
-      ADC_Trigger.Attach_PWM_Channel (Generator => Sensor_Timer'Access,
-                                      Channel   => Sensor_Timer_Channel,
-                                      Point     => Sensor_Timer_Point,
-                                      PWM_AF    => Sensor_Timer_AF);
-
-      ADC_Trigger.Set_Duty_Cycle (Value => 50);
+      Select_Output_Trigger (Sensor_Timer, Update);
       
-      ADC_Trigger.Enable_Output;
-      
-      --  It is not necessary to enable interrupt for this timer, only for
-      --  testing it. The ADC conversions are started by the trigger of
-      --  Timer3_CC4_Event. This interrupt is not needed in the final project.
---      Enable_Interrupt (This   => Sensor_Timer,
---                        Source => Timer_CC4_Interrupt);
+      Enable (Sensor_Timer);
 
    end Initialize_ADC_Timer;
 
@@ -244,36 +246,4 @@ package body Inverter_ADC is
       end if;
    end Sensor_ADC_Handler;
 
-   --------------------------
-   -- Sensor_Timer_Handler --
-   --------------------------
-
-   --  This handler is not used in the final project.
-   --  It is here for testing the timer that starts ADC conversions.
-   procedure Sensor_Timer_Handler is
-   begin
-      if Status (Sensor_Timer, Timer_CC4_Indicated) then
-         if Interrupt_Enabled (Sensor_Timer, Timer_CC4_Interrupt) then
-            Clear_Pending_Interrupt (Sensor_Timer, Timer_CC4_Interrupt);
-            
-            --  Testing the 5 kHz output with 1 Hz LED blinking.
-          --  if Counter = 2_500 then
-          --     Set_Toggle (Green_LED);
-          --     Counter := 0;
-          --  end if;
-          --  Counter := Counter + 1;
-            
-            --  This call to Start_Conversion is used only for testing the ADC
-            --  conversion with his ISR without external trigger, but with the
-            --  timer interrupt. For this, we need to program the trigger in
-            --  the Initialize_ADC procedure at Configure_Regular_Conversions
-            --  procedure to Trigger => (Software_Triggered). This call is not
-            --  necessary in the final project, but is another way to start
-            --  ADC conversions.
-            Start_Conversion (Sensor_ADC.all);
-            
-         end if;
-      end if;
-   end Sensor_Timer_Handler;
-   
 end Inverter_ADC;

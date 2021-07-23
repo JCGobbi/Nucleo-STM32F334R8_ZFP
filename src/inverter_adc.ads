@@ -11,8 +11,8 @@ package Inverter_ADC is
    --  produces an interrupt that actualizes the buffer of ADC values and
    --  corrects the duty cycle for variations in battery voltage.
 
-   Sensor_Frequency_Hz : constant Frequency_Hz := 5_000.0;
-   -- Timer PWM frequency that controls start of ADC convertion.
+   Sensor_Frequency_Hz : constant := 5_000;
+   -- Frequency that controls start of ADC convertion.
 
    subtype Measure_E is Float;
    --  Represents an electric measure.
@@ -120,8 +120,4 @@ private
    procedure Sensor_ADC_Handler;
    pragma Export (Asm, Sensor_ADC_Handler, Sensor_ADC_Interrupt);
 
-   --  For testing Sensor_Timer. This is not used in the final project.
-   procedure Sensor_Timer_Handler;
-   pragma Export (Asm, Sensor_Timer_Handler, Sensor_Timer_Interrupt);
-   
 end Inverter_ADC;

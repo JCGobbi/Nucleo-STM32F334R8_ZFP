@@ -39,7 +39,7 @@ package STM_Board is
    ------------------------------
 
    Sensor_ADC : constant access Analog_To_Digital_Converter := ADC_1'Access;
-   Sensor_Trigger_Event : External_Events_Regular_Group := Timer3_CC4_Event;
+   Sensor_Trigger_Event : External_Events_Regular_Group := Timer6_TRGO_Event;
    Sensor_ADC_Interrupt : constant string := "__ADC1_2_handler";
    -- This interrupt vector is declared inside crt0.S file.
 
@@ -52,21 +52,13 @@ package STM_Board is
    ADC_Output_V_Point : constant ADC_Point := (Sensor_ADC, Channel => 8);
    ADC_Output_V_Pin   : GPIO_Point renames PC2;
 
-   ----------------
-   -- ADCs Timer --
-   ----------------
+   --------------
+   -- ADC Timer --
+   ---------------
 
    --  To syncronize A/D conversion and timers, the ADCs could be triggered
    --  by any of TIM1, TIM2, TIM3, TIM6, TIM7, TIM15, TIM16 or TIM17 timer.
-   Sensor_Timer           : Timer renames Timer_3;
-   Sensor_Timer_Interrupt : constant string := "__TIM3_handler";
-   -- This interrupt vector is declared inside crt0.S file.
-
-   --  Channel for reading analog inputs (5 kHz, 200 us)
-   Sensor_Timer_Channel : Timer_Channel renames Channel_4;
-   Sensor_Timer_AF      : STM32.GPIO_Alternate_Function renames GPIO_AF_TIM3_2;
-   Sensor_Timer_Point   : GPIO_Point renames PB1; --  or PC9
-   --  Point not used because this timer only start an interrupt.
+   Sensor_Timer : Timer renames Timer_6;
 
    -------------------------
    -- Other GPIO Channels --
