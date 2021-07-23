@@ -184,6 +184,22 @@ package STM32.Timers is
       Mode : Timer_One_Pulse_Mode)
      with Post => (if Mode = Single then not Enabled (This));
 
+   procedure Compute_Prescalar_And_Period
+     (This                : Timer;
+      Requested_Frequency : UInt32;
+      Prescalar           : out UInt32;
+      Period              : out UInt32)
+     with Pre => Requested_Frequency > 0;
+   --  Computes the minimum prescaler and thus the maximum resolution for the
+   --  given timer, based on the system clocks and the requested frequency.
+   --  Computes the period required for the requested frequency.
+
+   Invalid_Request : exception;
+   --  Raised when the requested frequency is too high or too low for the given
+   --  timer and system clocks when calling Configure_PWM_Timer, or when
+   --  the requested time is too high for the specified frequency when calling
+   --  Set_Duty_Time.
+
    ----------------------------------------------------------------------------
 
    --  Interrupts, DMA, Flags Management --------------------------------------

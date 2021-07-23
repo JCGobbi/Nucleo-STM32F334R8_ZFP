@@ -33,16 +33,6 @@ with STM32.Device;  use STM32.Device;
 
 package body STM32.PWM is
 
-   procedure Compute_Prescalar_And_Period
-     (This                : access Timer;
-      Requested_Frequency : Hertz;
-      Prescalar           : out UInt32;
-      Period              : out UInt32)
-     with Pre => Requested_Frequency > 0;
-   --  Computes the minimum prescaler and thus the maximum resolution for the
-   --  given timer, based on the system clocks and the requested frequency.
-   --  Computes the period required for the requested frequency.
-
    function Timer_Period (This : PWM_Modulator) return UInt32 is
       (Current_Autoreload (This.Generator.all));
 
@@ -131,7 +121,7 @@ package body STM32.PWM is
       Enable_Clock (Generator.all);
 
       Compute_Prescalar_And_Period
-        (Generator,
+        (Generator.all,
          Requested_Frequency => Frequency,
          Prescalar           => Computed_Prescalar,
          Period              => Computed_Period);
@@ -324,52 +314,6 @@ package body STM32.PWM is
           AF_Output_Type => Push_Pull,
           AF_Speed       => AF_Speed));
    end Configure_PWM_GPIO;
-
-   ----------------------------------
-   -- Compute_Prescalar_and_Period --
-   ----------------------------------
-
-   procedure Compute_Prescalar_And_Period
-     (This                : access Timer;
-      Requested_Frequency : Hertz;
-      Prescalar           : out UInt32;
-      Period              : out UInt32)
-   is
-      Max_Prescalar      : constant := 16#FFFF#;
-      Max_Period         : UInt32;
-      Hardware_Frequency : UInt32;
-      CK_CNT             : UInt32;
-   begin
-
-      Hardware_Frequency := Get_Clock_Source (This.all);
-
-      if Has_32bit_Counter (This.all) then
-         Max_Period := 16#FFFF_FFFF#;
-      else
-         Max_Period := 16#FFFF#;
-      end if;
-
-      if Requested_Frequency > Hardware_Frequency then
-         raise Invalid_Request with "Freq too high";
-      end if;
-
-      Prescalar := 0;
-      loop
-         --  Compute the Counter's clock
-         CK_CNT := Hardware_Frequency / (Prescalar + 1);
-         --  Determine the CK_CNT periods to achieve the requested frequency
-         Period := CK_CNT / Requested_Frequency;
-
-         exit when not
-           ((Period > Max_Period) and (Prescalar <= Max_Prescalar));
-
-         Prescalar := Prescalar + 1;
-      end loop;
-
-      if Prescalar > Max_Prescalar then
-         raise Invalid_Request with "Freq too low";
-      end if;
-   end Compute_Prescalar_And_Period;
 
    -----------------------------
    -- Microseconds_Per_Period --

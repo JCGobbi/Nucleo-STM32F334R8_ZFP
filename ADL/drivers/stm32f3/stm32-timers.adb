@@ -487,6 +487,18 @@ package body STM32.Timers is
       This.CR1.Update_Request_Source := Source /= Global;
    end Set_UpdateRequest;
 
+   ----------------------------
+   -- Set_Autoreload_Preload --
+   ----------------------------
+
+   procedure Set_Autoreload_Preload
+     (This : in out Timer;
+      To   : Boolean)
+   is
+   begin
+      This.CR1.ARPE := To;
+   end Set_Autoreload_Preload;
+
    ---------------------------
    -- Select_One_Pulse_Mode --
    ---------------------------
@@ -499,17 +511,51 @@ package body STM32.Timers is
       This.CR1.One_Pulse_Mode := Mode;
    end Select_One_Pulse_Mode;
 
-   ----------------------------
-   -- Set_Autoreload_Preload --
-   ----------------------------
+   ----------------------------------
+   -- Compute_Prescalar_and_Period --
+   ----------------------------------
 
-   procedure Set_Autoreload_Preload
-     (This : in out Timer;
-      To   : Boolean)
+   procedure Compute_Prescalar_And_Period
+     (This                : Timer;
+      Requested_Frequency : UInt32;
+      Prescalar           : out UInt32;
+      Period              : out UInt32)
    is
+      Max_Prescalar      : constant := 16#FFFF#;
+      Max_Period         : UInt32;
+      Hardware_Frequency : UInt32;
+      CK_CNT             : UInt32;
    begin
-      This.CR1.ARPE := To;
-   end Set_Autoreload_Preload;
+
+      Hardware_Frequency := STM32.Device.Get_Clock_Source (This);
+
+      if Has_32bit_Counter (This) then
+         Max_Period := 16#FFFF_FFFF#;
+      else
+         Max_Period := 16#FFFF#;
+      end if;
+
+      if Requested_Frequency > Hardware_Frequency then
+         raise Invalid_Request with "Freq too high";
+      end if;
+
+      Prescalar := 0;
+      loop
+         --  Compute the Counter's clock
+         CK_CNT := Hardware_Frequency / (Prescalar + 1);
+         --  Determine the CK_CNT periods to achieve the requested frequency
+         Period := CK_CNT / Requested_Frequency;
+
+         exit when
+           ((Period <= Max_Period) or (Prescalar > Max_Prescalar));
+
+         Prescalar := Prescalar + 1;
+      end loop;
+
+      if Prescalar > Max_Prescalar then
+         raise Invalid_Request with "Freq too low";
+      end if;
+   end Compute_Prescalar_And_Period;
 
    -----------------------
    -- Counter_Direction --
@@ -1726,7 +1772,7 @@ package body STM32.Timers is
             when Div1 => 1.0,
             when Div2 => 2.0,
             when Div4 => 4.0);
-      --  The division factor for this timer.
+      --  The division factor for dead-time of this timer.
 
       T_DTS : constant Float := Clock_Divisor / Float (Timer_Frequency);
       --  Time period for one cycle of the input timer frequency.
