@@ -1,4 +1,4 @@
-with "ADL/nucleo_f334r8_zfp.gpr";
+with "ADL/ada_drivers_library.gpr";
 
 project STM32F334 is
 
