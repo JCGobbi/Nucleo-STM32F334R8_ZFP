@@ -278,15 +278,15 @@ package body STM32.EXTI is
    begin
       case Index is
          when 0 .. 17 =>
-            EXTI_Periph.PR1.PR.Arr (Index) := False;
+            EXTI_Periph.PR1.PR.Arr (Index) := True;
          when 19 .. 20 =>
-            EXTI_Periph.PR1.PR_1.Arr (Index) := False;
+            EXTI_Periph.PR1.PR_1.Arr (Index) := True;
          when 22 =>
-            EXTI_Periph.PR1.PR22 := False;
+            EXTI_Periph.PR1.PR22 := True;
          when 30 =>
-            EXTI_Periph.PR1.PR30 := False;
+            EXTI_Periph.PR1.PR30 := True;
          when 32 =>
-            EXTI_Periph.PR2.PR32 := False;
+            EXTI_Periph.PR2.PR32 := True;
          when others =>
             Null;
       end case;
