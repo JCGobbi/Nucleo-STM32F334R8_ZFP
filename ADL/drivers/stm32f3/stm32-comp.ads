@@ -21,22 +21,17 @@ package STM32.COMP is
       One_Half_Vrefint,
       Three_Quarter_Vrefint,
       Vrefint,
-      PA4_DAC1_CH1_Output,
-      DAC1_CH2_Output,
-      PA2,
-      DAC2_CH1_Output);
+      PA4_DAC1_CH1,
+      DAC1_CH2,
+      Option_7,
+      Option_8,
+      DAC2_CH1)
+     with Size => 4;
    --  These bits allows to select the source connected to the inverting input
-   --  of the comparator.
-
-   for Inverting_Input_Port use
-     (One_Quarter_Vrefint   => 2#0000#,
-      One_Half_Vrefint      => 2#0001#,
-      Three_Quarter_Vrefint => 2#0010#,
-      Vrefint               => 2#0011#,
-      PA4_DAC1_CH1_Output   => 2#0100#,
-      DAC1_CH2_Output       => 2#0101#,
-      PA2                   => 2#0110#,
-      DAC2_CH1_Output       => 2#1000#);
+   --  of the comparator:
+   --  Option  COMP2     COMP4     COMP6
+   --  7         PA2
+   --  8                   PB2      PB15
 
    procedure Set_Inverting_Input_Port
      (This  : in out Comparator;
@@ -50,30 +45,35 @@ package STM32.COMP is
 
    type Output_Selection is
      (No_Selection,
-      Timer_1_Break_Input_BRK_ACTH,
-      Timer_1_Break_Input_2_BRK2,
-      Timer_1_Break_Input2,
-      Timer_1_OCREF_CLR_Input,
-      Timer_1_Input_Capture_1,
-      Timer_2_Input_Capture_4,
-      Timer_2_OCREF_CLR_Input,
-      Timer_3_Input_Capture_1,
-      Timer_3_OCrefclear_Input)
+      TIM1_BRK_ACTH,
+      TIM1_BRK2,
+      Option_7,
+      Option_8,
+      Option_9,
+      Option_10,
+      Option_11,
+      Option_12)
      with Size => 4;
    --  These bits select which Timer input must be connected with the
-   --  comparator output.
+   --  comparator output:
+   --  Option         COMP2            COMP4            COMP6
+   --  7     TIM1_OCREF_CLR        TIM3_CAP3        TIM2_CAP2
+   --  8          TIM1_CAP1
+   --  9          TIM2_CAP4       TIM15_CAP2   TIM2_OCREF_CLR
+   --  10    TIM2_OCREF_CLR                   TIM16_OCREF_CLR
+   --  11         TIM3_CAP1  TIM15_OCREF_CLR       TIM16_CAP1
+   --  12    TIM3_OCREF_CLR   TIM3_OCREF_CLR
 
    for Output_Selection use
-     (No_Selection                 => 2#0000#,
-      Timer_1_Break_Input_BRK_ACTH => 2#0001#,
-      Timer_1_Break_Input_2_BRK2   => 2#0010#,
-      Timer_1_Break_Input2         => 2#0101#,
-      Timer_1_OCREF_CLR_Input      => 2#0110#,
-      Timer_1_Input_Capture_1      => 2#0111#,
-      Timer_2_Input_Capture_4      => 2#1000#,
-      Timer_2_OCREF_CLR_Input      => 2#1001#,
-      Timer_3_Input_Capture_1      => 2#1010#,
-      Timer_3_OCrefclear_Input     => 2#1011#);
+     (No_Selection  => 2#0000#,
+      TIM1_BRK_ACTH => 2#0001#,
+      TIM1_BRK2     => 2#0010#,
+      Option_7      => 2#0110#,
+      Option_8      => 2#0111#,
+      Option_9      => 2#1000#,
+      Option_10     => 2#1001#,
+      Option_11     => 2#1010#,
+      Option_12     => 2#1011#);
 
    procedure Set_Output_Timer
      (This   : in out Comparator;
@@ -100,12 +100,18 @@ package STM32.COMP is
 
    type Output_Blanking is
      (No_Blanking,
-      TIM1_OC5,
-      TIM2_OC3,
-      TIM3_OC3)
-     with Size => 4;
-   --  These bits select which Timer output controls the comparator
-   --  output blanking.
+      Option_2,
+      Option_3,
+      Option_4,
+      Option_5)
+     with Size => 3;
+   --  These bits select which Timer output controls the comparator output
+   --  blanking:
+   --  Option  COMP2     COMP4     COMP6
+   --  2    TIM1_OC5  TIM3_OC4
+   --  3    TIM2_OC3
+   --  4    TIM3_OC3 TIM15_OC1  TIM2_OC4
+   --  5                       TIM15_OC2
 
    procedure Set_Output_Blanking
      (This  : in out Comparator;
