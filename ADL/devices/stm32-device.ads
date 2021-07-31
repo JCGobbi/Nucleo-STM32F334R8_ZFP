@@ -235,7 +235,7 @@ package STM32.Device is
 
    VRef_Channel : constant Analog_Input_Channel := 18;
    VRef_Sensor  : constant ADC_Point :=
-     (ADC_1'Access, Channel => Temperature_Channel);
+     (ADC_1'Access, Channel => VRef_Channel);
    --  see RM pg 274, section 13.3.30, also pg 214
 
    VBat_Channel : constant Analog_Input_Channel := 17;
@@ -418,7 +418,7 @@ package STM32.Device is
                     STM32_SVD.RCC.RCC_Periph.CFGR.PPRE.Arr(2) <= 2#100#);
    --  Set the clock for HRTIM1 to PLLCLK = 144 MHz or PCLK2 = 72 MHz.
 
-   function Get_Clock_Source (This : HRTimer_X) return UInt32;
+   function Get_Clock_Source (This : HRTimer_Master) return UInt32;
    --  Returns the timer input frequency in Hz.
 
    ----------------

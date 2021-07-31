@@ -275,7 +275,11 @@ package body STM32.Device is
    -- Reset --
    -----------
 
-   -- This processor doesn't have DMA reset
+   --  This processor doesn't have DMA reset. When a DMA transfer error occurs
+   --  during a DMA read or write access, the faulty channel x is automatically
+   --  disabled through a hardware clear of its EN bit in the corresponding
+   --  DMA_CCRx register. See RM0364 rev 4 pg 181 chapter 11.4.6.
+
    --  procedure Reset (This : aliased in out DMA_Controller) is
    --  begin
    --     if This'Address = STM32_SVD.DMA_Base then
@@ -563,7 +567,7 @@ package body STM32.Device is
    -- Get_Clock_Source --
    ----------------------
 
-   function Get_Clock_Source (This : HRTimer_X) return UInt32 is
+   function Get_Clock_Source (This : HRTimer_Master) return UInt32 is
       pragma Unreferenced (This);
    begin
       return System_Clock_Frequencies.HRTIM1CLK;
