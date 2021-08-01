@@ -52,7 +52,7 @@ package STM32.OPAMP is
    type I_Input_Port is
      (PC5_VM0,
       PA5_VM1,
-      Resistor_Feedback_Output_PGA_Mode,
+      Feedback_Resistor_PGA_Mode,
       Follower_Mode);
 
    procedure Set_I_Input_Port
@@ -100,7 +100,7 @@ package STM32.OPAMP is
    --  Return the secondary source connected to the inverting input of the
    --  operational amplifier.
 
-   type Input_Mux_Mode is (Default, Secondary);
+   type Input_Mux_Mode is (Manual, Automatic);
    --  Timer controlled mux mode.
 
    procedure Set_Input_Mux_Mode
@@ -216,10 +216,8 @@ package STM32.OPAMP is
       Pair : Differential_Pair) return UInt5;
    --  Return the offset trimming value for NMOS or PMOS.
 
-   procedure Calibrate
-     (This : in out Operational_Amplifier;
-      Pair : Differential_Pair);
-   --  Calibrate the NMOS or PMOS differential pair. This routine
+   procedure Calibrate (This : in out Operational_Amplifier);
+   --  Calibrate the NMOS and PMOS differential pair. This routine
    --  is described in the RM0364 pg. 355. The offset trim time,
    --  during calibration, must respect the minimum time needed
    --  between two steps to have 1 mV accuracy.

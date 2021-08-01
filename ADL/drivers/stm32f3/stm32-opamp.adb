@@ -157,7 +157,7 @@ package body STM32.OPAMP is
      (This  : in out Operational_Amplifier;
       Input : Input_Mux_Mode) is
    begin
-      This.CSR.TCM_EN := Input = Secondary;
+      This.CSR.TCM_EN := Input = Automatic;
    end Set_Input_Mux_Mode;
 
    -------------------------
@@ -168,9 +168,9 @@ package body STM32.OPAMP is
      (This : Operational_Amplifier) return Input_Mux_Mode is
    begin
       if This.CSR.TCM_EN = True then
-         return Secondary;
+         return Automatic;
       else
-         return Default;
+         return Manual;
       end if;
    end Read_Input_Mux_Mode;
 
@@ -192,7 +192,7 @@ package body STM32.OPAMP is
    function Read_Calibration_Mode
      (This : Operational_Amplifier) return Calibration_Mode_On is
    begin
-      if This.CSR.CALON = True then
+      if This.CSR.CALON then
          return Enabled;
       else
          return Disabled;
@@ -302,10 +302,8 @@ package body STM32.OPAMP is
    -- Calibrate --
    ---------------
 
-   procedure Calibrate
-     (This : in out Operational_Amplifier;
-      Pair : Differential_Pair)
-   is
+   procedure Calibrate (This : in out Operational_Amplifier) is
+
       Trimoffset : UInt5 := 0;
    begin
       --  1. Enable OPAMP by setting the OPAMPxEN bit.
@@ -319,24 +317,27 @@ package body STM32.OPAMP is
       Set_Calibration_Mode (This, Input => Enabled);
       --  4. Set CALSEL to 11 (OPAMP internal reference = 0.9 x VDDA) for NMOS,
       --  Set CALSEL to 01 (OPAMP internal reference = 0.1 x VDDA) for PMOS.
-      if Pair = NMOS then
-         Set_Calibration_Value (This, Input => VREFOPAMP_Is_90_VDDA);
-      else
-         Set_Calibration_Value (This, Input => VREFOPAMP_Is_10_VDDA);
-      end if;
-      --  5. In a loop, increment the TRIMOFFSETN (for NMOS) or TRIMOFFSETP
-      --  (for PMOS) value. To exit from the loop, the OUTCAL bit must be reset
-      --  (non-inverting < inverting).
-      --  In this case, the TRIMOFFSETN value must be stored.
-      while Read_Output_Status_Flag (This) = NI_Greater_Then_I loop
-         Trimoffset := Trimoffset + 1;
-         Set_Offset_Trimming (This, Pair => Pair, Input => Trimoffset);
+      for Pair in Differential_Pair'Range loop
 
-         --  Wait the OFFTRIMmax delay timing specified in the Datasheet
-         --  DS9994 pg. 101 = 2 ms.
-         Delay_Until (Clock + Milliseconds (2));
+         if Pair = NMOS then
+            Set_Calibration_Value (This, Input => VREFOPAMP_Is_90_VDDA);
+         else
+            Set_Calibration_Value (This, Input => VREFOPAMP_Is_10_VDDA);
+         end if;
+         --  5. In a loop, increment the TRIMOFFSETN (for NMOS) or TRIMOFFSETP
+         --  (for PMOS) value. To exit from the loop, the OUTCAL bit must be reset
+         --  (non-inverting < inverting).
+         --  In this case, the TRIMOFFSETN value must be stored.
+         while Read_Output_Status_Flag (This) = NI_Greater_Then_I loop
+            Trimoffset := Trimoffset + 1;
+            Set_Offset_Trimming (This, Pair => Pair, Input => Trimoffset);
+
+            --  Wait the OFFTRIMmax delay timing specified in the Datasheet
+            --  DS9994 pg. 101 = 2 ms.
+            Delay_Until (Clock + Milliseconds (2));
+         end loop;
+
       end loop;
-
    end Calibrate;
 
    ------------------------------
