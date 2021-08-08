@@ -40,7 +40,7 @@
 ------------------------------------------------------------------------------
 
 --  This file provides interfaces for the digital-to-analog converters on the
---  STM32F4 (ARM Cortex M4F) microcontrollers from ST Microelectronics.
+--  STM32G4 (ARM Cortex M4F) microcontrollers from ST Microelectronics.
 
 with System;                use System;
 private with STM32_SVD.DAC;
@@ -108,13 +108,14 @@ package STM32.DAC is
      with
        Pre => Trigger_Selection (This, Channel) = Software_Trigger and
               Trigger_Enabled (This, Channel);
-   --  Cause the conversion to occur and the output to appear, per 14.3.6 "DAC
-   --  trigger selection" in the RM. This routine is needed when the Software
-   --  Trigger has been selected and the trigger has been enabled, otherwise no
-   --  conversion occurs. If you don't enable the trigger any prior selection
-   --  has no effect, but note that when no *hardware* trigger is selected the
-   --  output happens automatically when the channel is enabled. See the RM,
-   --  section 14.3.4 "DAC conversion" second and third paragraphs.
+   --  Cause the conversion to occur and the output to appear, per 14.5.4 "DAC
+   --  trigger selection" in the RM0364 rev 4. This routine is needed when the
+   --  Software Trigger has been selected and the trigger has been enabled,
+   --  otherwise no conversion occurs. If you don't enable the trigger any prior
+   --  selection has no effect, but note that when no *hardware* trigger is
+   --  selected the output happens automatically when the channel is enabled.
+   --  See the RM0364, section 14.5.2 "DAC channel conversion" second and third
+   --  paragraphs.
 
    function Converted_Output_Value
      (This    : Digital_To_Analog_Converter;
@@ -168,7 +169,7 @@ package STM32.DAC is
       Channel : DAC_Channel;
       Trigger : External_Event_Trigger_Selection)
      with
-       Pre  => not Trigger_Enabled (This, Channel),  -- per note in RM, pg 435
+       Pre  => not Trigger_Enabled (This, Channel),
        Post => Trigger_Selection (This, Channel) = Trigger and
                not Trigger_Enabled (This, Channel);
    --  If the software trigger is selected, output conversion starts once the
