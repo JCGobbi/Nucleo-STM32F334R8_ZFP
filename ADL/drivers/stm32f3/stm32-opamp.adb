@@ -310,11 +310,14 @@ package body STM32.OPAMP is
       if not Enabled (This) then
          Enable (This);
       end if;
+
       --  2. Enable the user offset trimming by setting the USERTRIM bit.
       Set_User_Trimming (This, Input => Enabled);
+
       --  3. Connect VM and VP to the internal reference voltage by setting
       --  the CALON bit.
       Set_Calibration_Mode (This, Input => Enabled);
+
       --  4. Set CALSEL to 11 (OPAMP internal reference = 0.9 x VDDA) for NMOS,
       --  Set CALSEL to 01 (OPAMP internal reference = 0.1 x VDDA) for PMOS.
       for Pair in Differential_Pair'Range loop
@@ -324,14 +327,19 @@ package body STM32.OPAMP is
          else
             Set_Calibration_Value (This, Input => VREFOPAMP_Is_10_VDDA);
          end if;
+
          --  5. In a loop, increment the TRIMOFFSETN (for NMOS) or TRIMOFFSETP
          --  (for PMOS) value. To exit from the loop, the OUTCAL bit must be reset
          --  (non-inverting < inverting).
          --  In this case, the TRIMOFFSETN value must be stored.
+         Set_Offset_Trimming (This, Pair => Pair, Input => Trimoffset);
+         --  Wait the OFFTRIMmax delay timing specified in the Datasheet
+         --  DS9994 pg. 101 = 2 ms.
+         Delay_Until (Clock + Milliseconds (2));
+
          while Read_Output_Status_Flag (This) = NI_Greater_Then_I loop
             Trimoffset := Trimoffset + 1;
             Set_Offset_Trimming (This, Pair => Pair, Input => Trimoffset);
-
             --  Wait the OFFTRIMmax delay timing specified in the Datasheet
             --  DS9994 pg. 101 = 2 ms.
             Delay_Until (Clock + Milliseconds (2));
