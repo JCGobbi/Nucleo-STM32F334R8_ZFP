@@ -17,8 +17,9 @@ project STM32F334 is
    -- generic ZFP run-time compatible with our MCU
    for Runtime ("Ada") use "zfp-cortex-m4f";
 
+   package Compiler renames Ada_Drivers_Library.Compiler;
+   
    package Builder is
---      for Global_Configuration_Pragmas use "gnat.adc";
       for Executable ("main.adb") use "main";
       for Executable_Suffix use ".elf";
    end Builder;
