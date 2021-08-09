@@ -567,7 +567,7 @@ package body STM32.Device is
    -- Get_Clock_Source --
    ----------------------
 
-   function Get_Clock_Source (This : HRTimer_Master) return UInt32 is
+   function Get_Clock_Source (This : HRTimer_X) return UInt32 is
       pragma Unreferenced (This);
    begin
       return System_Clock_Frequencies.HRTIM1CLK;

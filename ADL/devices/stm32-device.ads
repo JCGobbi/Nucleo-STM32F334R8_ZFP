@@ -226,8 +226,6 @@ package STM32.Device is
    ADC_2      : aliased Analog_To_Digital_Converter
      with Volatile, Import, Address => ADC2_Base;
 
-   VBat : constant ADC_Point := (ADC_1'Access, Channel => VBat_Channel);
-
    Temperature_Channel : constant Analog_Input_Channel := 16;
    Temperature_Sensor  : constant ADC_Point :=
      (ADC_1'Access, Channel => Temperature_Channel);
@@ -241,6 +239,8 @@ package STM32.Device is
    VBat_Channel : constant Analog_Input_Channel := 17;
    VBat_Sensor  : constant ADC_Point :=
      (ADC_1'Access, Channel => VBat_Channel);
+   VBat : constant ADC_Point := (ADC_1'Access, Channel => VBat_Channel);
+
    VBat_Bridge_Divisor : constant := 2;
    --  The VBAT pin is internally connected to a bridge divider. The actual
    --  voltage is the raw conversion value * the divisor. See section 13.3.31,
@@ -418,7 +418,7 @@ package STM32.Device is
                     STM32_SVD.RCC.RCC_Periph.CFGR.PPRE.Arr(2) <= 2#100#);
    --  Set the clock for HRTIM1 to PLLCLK = 144 MHz or PCLK2 = 72 MHz.
 
-   function Get_Clock_Source (This : HRTimer_Master) return UInt32;
+   function Get_Clock_Source (This : HRTimer_X) return UInt32;
    --  Returns the timer input frequency in Hz.
 
    ----------------
