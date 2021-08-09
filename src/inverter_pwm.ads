@@ -1,5 +1,3 @@
-with HAL;          use HAL;
-with STM32.Device; use STM32.Device;
 with STM32.GPIO;   use STM32.GPIO;
 with STM32.Timers; use STM32.Timers;
 with STM32.PWM;    use STM32.PWM;

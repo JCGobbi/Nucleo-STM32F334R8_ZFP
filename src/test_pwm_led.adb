@@ -12,12 +12,10 @@
 pragma Restrictions (No_Task_Hierarchy);
 
 with STM32.Device;        use STM32.Device;
-with STM32.GPIO;          use STM32.GPIO;
 with STM32.Timers;        use STM32.Timers;
 with STM32.PWM;           use STM32.PWM;
 
 with SYS.CPU_Clock;       use SYS;
-with SYS.Int.Names;
 
 with STM_Board;           use STM_Board;
 
@@ -27,8 +25,6 @@ with Last_Chance_Handler; pragma Unreferenced (Last_Chance_Handler);
 --  must be somewhere in the closure of the context clauses.
 
 procedure Test_PWM_LED is
-
-   I : Integer := 0;
 
    Selected_Timer : Timer renames Timer_2;
    Timer_AF : constant STM32.GPIO_Alternate_Function := GPIO_AF_TIM2_1;

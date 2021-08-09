@@ -1,8 +1,6 @@
 with STM32.Device; use STM32.Device;
 with STM32.Timers; use STM32.Timers;
 
-with STM_Board; use STM_Board;
-
 package body Inverter_ADC is
    
    function To_Voltage (Value : in UInt16) return Measure_E

@@ -1,3 +1,5 @@
+with HAL; use HAL;
+
 package body Inverter_PWM is
 
    --------------------

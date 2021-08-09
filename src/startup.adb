@@ -77,7 +77,7 @@ package body StartUp is
       Initialize_ADC;
 
       --  Do not start while the battery voltage is outside maximum and minimum
---      Wait_Until_V_Battery;
+      Wait_Until_V_Battery;
 
       -- Set PWM generator (TIM1) clock source to 144 MHz
       Device.Set_Clock_Source (PWM_Timer, Device.PLLCLK);
