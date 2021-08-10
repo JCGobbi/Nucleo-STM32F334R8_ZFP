@@ -324,15 +324,11 @@ package body STM32.PWM is
       Counter_Frequency  : UInt32;
       Platform_Frequency : UInt32;
 
-      Clocks    : constant RCC_System_Clocks := System_Clock_Frequencies;
       Period    : constant UInt32 := Timer_Period (This) + 1;
       Prescalar : constant UInt16 := Current_Prescaler (This.Generator.all) + 1;
    begin
-      if Has_APB1_Frequency (This.Generator.all) then
-         Platform_Frequency := Clocks.TIMCLK1;
-      else
-         Platform_Frequency := Clocks.TIMCLK2;
-      end if;
+
+      Platform_Frequency := Get_Clock_Source (This.Generator.all);
 
       Counter_Frequency := (Platform_Frequency / UInt32 (Prescalar)) / Period;
 
