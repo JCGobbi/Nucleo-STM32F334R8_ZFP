@@ -1210,30 +1210,37 @@ package STM32.Timers is
       This'Address = STM32_SVD.TIM3_Base or
       This'Address = STM32_SVD.TIM15_Base);
 
-   --  Timers 1 .. 3, 15 .. 17
+   --  Timers 1 .. 3, 15
    function External_Trigger_Supported (This : Timer) return Boolean
    is
      (This'Address = STM32_SVD.TIM1_Base or
       This'Address = STM32_SVD.TIM2_Base or
       This'Address = STM32_SVD.TIM3_Base or
-      This'Address = STM32_SVD.TIM15_Base or
-      This'Address = STM32_SVD.TIM16_Base or
-      This'Address = STM32_SVD.TIM17_Base);
+      This'Address = STM32_SVD.TIM15_Base);
 
-   --  Timers 1, 16
+   --  Timers 1 .. 3, 6, 7, 15 .. 17
    function Remapping_Capability_Supported (This : Timer) return Boolean
    is
      (This'Address = STM32_SVD.TIM1_Base or
-      This'Address = STM32_SVD.TIM16_Base);
+      This'Address = STM32_SVD.TIM2_Base or
+      This'Address = STM32_SVD.TIM3_Base or
+      This'Address = STM32_SVD.TIM6_Base or
+      This'Address = STM32_SVD.TIM7_Base or
+      This'Address = STM32_SVD.TIM15_Base or
+      This'Address = STM32_SVD.TIM16_Base or
+      This'Address = STM32_SVD.TIM17_Base);
 
    --  Not all timers support output on all channels
    function Specific_Channel_Output_Supported
      (This : Timer;  Channel : Timer_Channel)
       return Boolean
    is
-     (This'Address = STM32_SVD.TIM1_Base or
-      This'Address = STM32_SVD.TIM2_Base or
-      This'Address = STM32_SVD.TIM3_Base
+     (This'Address = STM32_SVD.TIM1_Base
+      --  the above can be with any of the six channels
+      or
+      ((This'Address = STM32_SVD.TIM2_Base or
+       This'Address = STM32_SVD.TIM3_Base) and
+       Channel in Channel_1 | Channel_2 | Channel_3 | Channel_4)
       --  all the above can be with any of the four channels
       or
       (This'Address = STM32_SVD.TIM15_Base and
@@ -1263,27 +1270,6 @@ package STM32.Timers is
         This'Address = STM32_SVD.TIM16_Base or
         This'Address = STM32_SVD.TIM17_Base) and
        Channel = Channel_1));
-
-   ------------------------
-   -- Has_APB2_Frequency --
-   ------------------------
-
-   function Has_APB2_Frequency (This : Timer) return Boolean is
-     (This'Address = STM32_SVD.TIM1_Base or
-      This'Address = STM32_SVD.TIM15_Base or
-      This'Address = STM32_SVD.TIM16_Base or
-      This'Address = STM32_SVD.TIM17_Base or
-      This'Address = STM32_SVD.HRTIM_Master_Base);
-
-   ------------------------
-   -- Has_APB1_Frequency --
-   ------------------------
-
-   function Has_APB1_Frequency (This : Timer) return Boolean is
-     (This'Address = STM32_SVD.TIM2_Base or
-      This'Address = STM32_SVD.TIM3_Base or
-      This'Address = STM32_SVD.TIM6_Base or
-      This'Address = STM32_SVD.TIM7_Base);
 
 private
 
