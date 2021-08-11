@@ -882,7 +882,7 @@ package body STM32.HRTimers is
          HRTIM_TIMC_Periph.TIMCCR.TEU := Timer_E;
          This.TIMxCR.MSTU := Master;
 
-      elsif This'Address = HRTIM_TIMA_Base then
+      elsif This'Address = HRTIM_TIMD_Base then
          This.TIMxCR.TxREPU := Repetition;
          This.TIMxCR.TxRSTU := Reset;
          HRTIM_TIMD_Periph.TIMDCR.TAU := Timer_A;
@@ -891,7 +891,7 @@ package body STM32.HRTimers is
          HRTIM_TIMD_Periph.TIMDCR.TEU := Timer_E;
          This.TIMxCR.MSTU := Master;
 
-      elsif This'Address = HRTIM_TIMA_Base then
+      elsif This'Address = HRTIM_TIME_Base then
          This.TIMxCR.TxREPU := Repetition;
          This.TIMxCR.TxRSTU := Reset;
          HRTIM_TIME_Periph.TIMECR.TAU := Timer_A;
