@@ -176,6 +176,8 @@ package STM32.HRTimers is
       Reset  : Boolean;
       Start  : Boolean)
      with Pre => not Enabled (This);
+   --  Define if the synchronization input source reset and start the master
+   --  timer.
 
    type Synchronization_Output_Source is
      (Master_Timer_Start,
@@ -1044,8 +1046,8 @@ package STM32.HRTimers is
 
    procedure Set_Burst_Mode_Compare (Value : UInt16)
      with Pre => (if (HRTIM_Common_Periph.BMCR.BMCLK = 2#1010# and
-                      HRTIM_Common_Periph.BMCR.BMPRSC = 2#0000#) then
-                    HRTIM_Common_Periph.BMCMPR.BMCMP /= 16#0000#);
+                      HRTIM_Common_Periph.BMCR.BMPRSC = 2#0000#)
+                  then HRTIM_Common_Periph.BMCMPR.BMCMP /= 16#0000#);
    --  Defines the number of periods during which the selected timers are in
    --  idle state. This register holds either the content of the preload
    --  register or the content of the active register if the preload is
@@ -1123,97 +1125,72 @@ package STM32.HRTimers is
 
    type ADC_Trigger_Output is
      (ADC_Trigger_1,
-      ADC_Trigger_3,
       ADC_Trigger_2,
+      ADC_Trigger_3,
       ADC_Trigger_4);
 
-   subtype ADC_1_3_Trigger_Output is
-     ADC_Trigger_Output range ADC_Trigger_1 .. ADC_Trigger_3;
-
-   subtype ADC_2_4_Trigger_Output is
-     ADC_Trigger_Output range ADC_Trigger_2 .. ADC_Trigger_4;
-
-   type ADC_1_3_Trigger_Source is
+   type ADC_Trigger_Source is
      (Master_Compare_1,
       Master_Compare_2,
       Master_Compare_3,
       Master_Compare_4,
       Master_Period,
-      External_Event_1,
-      External_Event_2,
-      External_Event_3,
-      External_Event_4,
-      External_Event_5,
+      Option_6,
+      Option_7,
+      Option_8,
+      Option_9,
+      Option_10,
       HRTimer_A_Compare_2,
       HRTimer_A_Compare_3,
       HRTimer_A_Compare_4,
       HRTimer_A_Period,
-      HRTimer_A_Reset,
-      HRTimer_B_Compare_2,
-      HRTimer_B_Compare_3,
-      HRTimer_B_Compare_4,
-      HRTimer_B_Period,
-      HRTimer_B_Reset,
-      HRTimer_C_Compare_2,
-      HRTimer_C_Compare_3,
-      HRTimer_C_Compare_4,
-      HRTimer_C_Period,
-      HRTimer_D_Compare_2,
-      HRTimer_D_Compare_3,
-      HRTimer_D_Compare_4,
-      HRTimer_D_Period,
-      HRTimer_E_Compare_2,
-      HRTimer_E_Compare_3,
-      HRTimer_E_Compare_4,
-      HRTimer_E_Period);
-
-   type ADC_1_3_Trigger_List is
-     array (Natural range <>) of ADC_1_3_Trigger_Source;
-
-   procedure Configure_ADC_Trigger
-     (Output   : ADC_1_3_Trigger_Output;
-      Triggers : ADC_1_3_Trigger_List);
-
-   type ADC_2_4_Trigger_Source is
-     (Master_Compare_1,
-      Master_Compare_2,
-      Master_Compare_3,
-      Master_Compare_4,
-      Master_Period,
-      External_Event_6,
-      External_Event_7,
-      External_Event_8,
-      External_Event_9,
-      External_Event_10,
-      HRTimer_A_Compare_2,
-      HRTimer_A_Compare_3,
-      HRTimer_A_Compare_4,
-      HRTimer_A_Period,
-      HRTimer_B_Compare_2,
-      HRTimer_B_Compare_3,
-      HRTimer_B_Compare_4,
-      HRTimer_B_Period,
-      HRTimer_C_Compare_2,
-      HRTimer_C_Compare_3,
-      HRTimer_C_Compare_4,
-      HRTimer_C_Period,
-      HRTimer_C_Reset,
-      HRTimer_D_Compare_2,
-      HRTimer_D_Compare_3,
-      HRTimer_D_Compare_4,
-      HRTimer_D_Period,
-      HRTimer_D_Reset,
-      HRTimer_E_Compare_2,
-      HRTimer_E_Compare_3,
-      HRTimer_E_Compare_4,
-      HRTimer_E_Reset);
-
-   type ADC_2_4_Trigger_List is
-     array (Natural range <>) of ADC_2_4_Trigger_Source;
+      Option_15,
+      Option_16,
+      Option_17,
+      Option_18,
+      Option_19,
+      Option_20,
+      Option_21,
+      Option_22,
+      Option_23,
+      Option_24,
+      Option_25,
+      Option_26,
+      Option_27,
+      Option_28,
+      Option_29,
+      Option_30,
+      Option_31,
+      Option_32);
+   --  These bits select the trigger source for the ADC Trigger output.
+   --  Option ADC13               ADC24
+   --  6      External_Event_1    External_Event_6
+   --  7      External_Event_2    External_Event_7
+   --  8      External_Event_3    External_Event_8
+   --  9      External_Event_4    External_Event_9
+   --  10     External_Event_5    External_Event_10
+   --  15     HRTimer_A_Reset     HRTimer_B_Compare_2
+   --  16     HRTimer_B_Compare_2 HRTimer_B_Compare_3
+   --  17     HRTimer_B_Compare_3 HRTimer_B_Compare_4
+   --  18     HRTimer_B_Compare_4 HRTimer_B_Period
+   --  19     HRTimer_B_Period    HRTimer_C_Compare_2
+   --  20     HRTimer_B_Reset     HRTimer_C_Compare_3
+   --  21     HRTimer_C_Compare_2 HRTimer_C_Compare_4
+   --  22     HRTimer_C_Compare_3 HRTimer_C_Period
+   --  23     HRTimer_C_Compare_4 HRTimer_C_Reset
+   --  24     HRTimer_C_Period    HRTimer_D_Compare_2
+   --  25     HRTimer_D_Compare_2 HRTimer_D_Compare_3
+   --  26     HRTimer_D_Compare_3 HRTimer_D_Compare_4
+   --  27     HRTimer_D_Compare_4 HRTimer_D_Period
+   --  28     HRTimer_D_Period    HRTimer_D_Reset
+   --  29     HRTimer_E_Compare_2 HRTimer_E_Compare_2
+   --  30     HRTimer_E_Compare_3 HRTimer_E_Compare_3
+   --  31     HRTimer_E_Compare_4 HRTimer_E_Compare_4
+   --  32     HRTimer_E_Period    HRTimer_E_Reset
 
    procedure Configure_ADC_Trigger
-     (Output   : ADC_2_4_Trigger_Output;
-      Triggers : ADC_2_4_Trigger_List);
+     (Output : ADC_Trigger_Output;
+      Source : ADC_Trigger_Source);
 
    type ADC_Trigger_Update_Source is
      (Master_Timer,

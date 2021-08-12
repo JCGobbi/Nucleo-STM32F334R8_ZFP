@@ -855,50 +855,39 @@ package body STM32.HRTimers is
       Master     : Boolean)
    is
    begin
+      This.TIMxCR.TxREPU := Repetition;
+      This.TIMxCR.TxRSTU := Reset;
+      This.TIMxCR.MSTU := Master;
+
       if This'Address = HRTIM_TIMA_Base then
-         This.TIMxCR.TxREPU := Repetition;
-         This.TIMxCR.TxRSTU := Reset;
          HRTIM_TIMA_Periph.TIMACR.TBU := Timer_B;
          HRTIM_TIMA_Periph.TIMACR.TCU := Timer_C;
          HRTIM_TIMA_Periph.TIMACR.TDU := Timer_D;
          HRTIM_TIMA_Periph.TIMACR.TEU := Timer_E;
-         This.TIMxCR.MSTU := Master;
 
       elsif This'Address = HRTIM_TIMB_Base then
-         This.TIMxCR.TxREPU := Repetition;
-         This.TIMxCR.TxRSTU := Reset;
          HRTIM_TIMB_Periph.TIMBCR.TAU := Timer_A;
          HRTIM_TIMB_Periph.TIMBCR.TCU := Timer_C;
          HRTIM_TIMB_Periph.TIMBCR.TDU := Timer_D;
          HRTIM_TIMB_Periph.TIMBCR.TEU := Timer_E;
-         This.TIMxCR.MSTU := Master;
 
       elsif This'Address = HRTIM_TIMC_Base then
-         This.TIMxCR.TxREPU := Repetition;
-         This.TIMxCR.TxRSTU := Reset;
          HRTIM_TIMC_Periph.TIMCCR.TAU := Timer_A;
          HRTIM_TIMC_Periph.TIMCCR.TBU := Timer_B;
          HRTIM_TIMC_Periph.TIMCCR.TDU := Timer_D;
          HRTIM_TIMC_Periph.TIMCCR.TEU := Timer_E;
-         This.TIMxCR.MSTU := Master;
 
       elsif This'Address = HRTIM_TIMD_Base then
-         This.TIMxCR.TxREPU := Repetition;
-         This.TIMxCR.TxRSTU := Reset;
          HRTIM_TIMD_Periph.TIMDCR.TAU := Timer_A;
          HRTIM_TIMD_Periph.TIMDCR.TBU := Timer_B;
          HRTIM_TIMD_Periph.TIMDCR.TCU := Timer_C;
          HRTIM_TIMD_Periph.TIMDCR.TEU := Timer_E;
-         This.TIMxCR.MSTU := Master;
 
       elsif This'Address = HRTIM_TIME_Base then
-         This.TIMxCR.TxREPU := Repetition;
-         This.TIMxCR.TxRSTU := Reset;
          HRTIM_TIME_Periph.TIMECR.TAU := Timer_A;
          HRTIM_TIME_Periph.TIMECR.TBU := Timer_B;
          HRTIM_TIME_Periph.TIMECR.TCU := Timer_C;
          HRTIM_TIME_Periph.TIMECR.TDU := Timer_D;
-         This.TIMxCR.MSTU := Master;
       end if;
    end Configure_Timer_Update;
 
@@ -2356,44 +2345,19 @@ package body STM32.HRTimers is
    ---------------------------
 
    procedure Configure_ADC_Trigger
-     (Output   : ADC_1_3_Trigger_Output;
-      Triggers : ADC_1_3_Trigger_List)
+     (Output : ADC_Trigger_Output;
+      Source : ADC_Trigger_Source)
    is
    begin
       case Output is
          when ADC_Trigger_1 =>
-            for Trigger of Triggers loop
-               HRTimer_Common_Periph.ADC1R :=
-                 HRTimer_Common_Periph.ADC1R or (2 ** Trigger'Enum_Rep);
-            end loop;
-         when ADC_Trigger_3 =>
-            for Trigger of Triggers loop
-               HRTimer_Common_Periph.ADC3R :=
-                 HRTimer_Common_Periph.ADC3R or (2 ** Trigger'Enum_Rep);
-            end loop;
-      end case;
-   end Configure_ADC_Trigger;
-
-   ---------------------------
-   -- Configure_ADC_Trigger --
-   ---------------------------
-
-   procedure Configure_ADC_Trigger
-     (Output   : ADC_2_4_Trigger_Output;
-      Triggers : ADC_2_4_Trigger_List)
-   is
-   begin
-      case Output is
+            HRTimer_Common_Periph.ADC1R := 2 ** Source'Enum_Rep;
          when ADC_Trigger_2 =>
-            for Trigger of Triggers loop
-               HRTimer_Common_Periph.ADC2R :=
-                 HRTimer_Common_Periph.ADC2R or (2 ** Trigger'Enum_Rep);
-            end loop;
+            HRTimer_Common_Periph.ADC2R := 2 ** Source'Enum_Rep;
+         when ADC_Trigger_3 =>
+            HRTimer_Common_Periph.ADC3R := 2 ** Source'Enum_Rep;
          when ADC_Trigger_4 =>
-            for Trigger of Triggers loop
-               HRTimer_Common_Periph.ADC4R :=
-                 HRTimer_Common_Periph.ADC4R or (2 ** Trigger'Enum_Rep);
-            end loop;
+            HRTimer_Common_Periph.ADC4R := 2 ** Source'Enum_Rep;
       end case;
    end Configure_ADC_Trigger;
 
