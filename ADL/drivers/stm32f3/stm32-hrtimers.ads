@@ -1099,7 +1099,7 @@ package STM32.HRTimers is
       fFLTS_Over_32_N8);
 
    procedure Configure_External_Event
-     (Number      : External_Event_Number;
+     (Event       : External_Event_Number;
       Source      : External_Event_Source;
       Polarity    : External_Event_Polarity;
       Sensitivity : External_Event_Sensitivity;

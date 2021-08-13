@@ -1610,37 +1610,36 @@ package body STM32.HRTimers is
    begin
       case Event_Number is
          when Event_1 =>
-            This.EEFxR1.EE1LTCH := Boolean'Val (Event_Latch'Enum_Rep);
+            This.EEFxR1.EE1LTCH := Event_Latch = Latch;
             This.EEFxR1.EE1FLTR := Event_Filter'Enum_Rep;
          when Event_2 =>
-            This.EEFxR1.EE2LTCH := Boolean'Val (Event_Latch'Enum_Rep);
+            This.EEFxR1.EE2LTCH := Event_Latch = Latch;
             This.EEFxR1.EE2FLTR := Event_Filter'Enum_Rep;
          when Event_3 =>
-            This.EEFxR1.EE3LTCH := Boolean'Val (Event_Latch'Enum_Rep);
+            This.EEFxR1.EE3LTCH := Event_Latch = Latch;
             This.EEFxR1.EE3FLTR := Event_Filter'Enum_Rep;
          when Event_4 =>
-            This.EEFxR1.EE4LTCH := Boolean'Val (Event_Latch'Enum_Rep);
+            This.EEFxR1.EE4LTCH := Event_Latch = Latch;
             This.EEFxR1.EE4FLTR := Event_Filter'Enum_Rep;
          when Event_5 =>
-            This.EEFxR1.EE5LTCH := Boolean'Val (Event_Latch'Enum_Rep);
+            This.EEFxR1.EE5LTCH := Event_Latch = Latch;
             This.EEFxR1.EE5FLTR := Event_Filter'Enum_Rep;
          when Event_6 =>
-            This.EEFxR2.EE6LTCH := Boolean'Val (Event_Latch'Enum_Rep);
+            This.EEFxR2.EE6LTCH := Event_Latch = Latch;
             This.EEFxR2.EE6FLTR := Event_Filter'Enum_Rep;
          when Event_7 =>
-            This.EEFxR2.EE7LTCH := Boolean'Val (Event_Latch'Enum_Rep);
+            This.EEFxR2.EE7LTCH := Event_Latch = Latch;
             This.EEFxR2.EE7FLTR := Event_Filter'Enum_Rep;
          when Event_8 =>
-            This.EEFxR2.EE8LTCH := Boolean'Val (Event_Latch'Enum_Rep);
+            This.EEFxR2.EE8LTCH := Event_Latch = Latch;
             This.EEFxR2.EE8FLTR := Event_Filter'Enum_Rep;
          when Event_9 =>
-            This.EEFxR2.EE9LTCH := Boolean'Val (Event_Latch'Enum_Rep);
+            This.EEFxR2.EE9LTCH := Event_Latch = Latch;
             This.EEFxR2.EE9FLTR := Event_Filter'Enum_Rep;
          when Event_10 =>
-            This.EEFxR2.EE10LTCH := Boolean'Val (Event_Latch'Enum_Rep);
+            This.EEFxR2.EE10LTCH := Event_Latch = Latch;
             This.EEFxR2.EE10FLTR := Event_Filter'Enum_Rep;
       end case;
-
    end Configure_External_Event;
 
    ----------------------
@@ -2191,7 +2190,7 @@ package body STM32.HRTimers is
       Preload_Enable : Boolean)
    is
    begin
-      HRTimer_Common_Periph.BMCR.BMOM := Boolean'Val (Operating_Mode'Enum_Rep);
+      HRTimer_Common_Periph.BMCR.BMOM := Operating_Mode = Continuous;
       HRTimer_Common_Periph.BMCR.BMCLK := Clock_Source'Enum_Rep;
       HRTimer_Common_Periph.BMCR.BMPRSC := Prescaler'Enum_Rep;
       HRTimer_Common_Periph.BMCR.BMPREN := Preload_Enable;
@@ -2208,17 +2207,17 @@ package body STM32.HRTimers is
    begin
       case Counter is
          when HRTimer_M =>
-            HRTimer_Common_Periph.BMCR.MTBM := Boolean'Val (Mode'Enum_Rep);
+            HRTimer_Common_Periph.BMCR.MTBM := Mode = Stopped;
          when HRTimer_A =>
-            HRTimer_Common_Periph.BMCR.TABM := Boolean'Val (Mode'Enum_Rep);
+            HRTimer_Common_Periph.BMCR.TABM := Mode = Stopped;
          when HRTimer_B =>
-            HRTimer_Common_Periph.BMCR.TBBM := Boolean'Val (Mode'Enum_Rep);
+            HRTimer_Common_Periph.BMCR.TBBM := Mode = Stopped;
          when HRTimer_C =>
-            HRTimer_Common_Periph.BMCR.TCBM := Boolean'Val (Mode'Enum_Rep);
+            HRTimer_Common_Periph.BMCR.TCBM := Mode = Stopped;
          when HRTimer_D =>
-            HRTimer_Common_Periph.BMCR.TDBM := Boolean'Val (Mode'Enum_Rep);
+            HRTimer_Common_Periph.BMCR.TDBM := Mode = Stopped;
          when HRTimer_E =>
-            HRTimer_Common_Periph.BMCR.TEBM := Boolean'Val (Mode'Enum_Rep);
+            HRTimer_Common_Periph.BMCR.TEBM := Mode = Stopped;
       end case;
    end Configure_HRTimer_Burst_Mode;
 
@@ -2267,7 +2266,7 @@ package body STM32.HRTimers is
    ------------------------------
 
    procedure Configure_External_Event
-     (Number      : External_Event_Number;
+     (Event       : External_Event_Number;
       Source      : External_Event_Source;
       Polarity    : External_Event_Polarity;
       Sensitivity : External_Event_Sensitivity;
@@ -2275,55 +2274,55 @@ package body STM32.HRTimers is
       Filter      : External_Event_Frequency_Filter)
    is
    begin
-      case Number is
+      case Event is
          when Event_1 =>
             HRTimer_Common_Periph.EECR1.EE1SRC := Source'Enum_Rep;
-            HRTimer_Common_Periph.EECR1.EE1POL := Boolean'Val (Polarity'Enum_Rep);
+            HRTimer_Common_Periph.EECR1.EE1POL := Polarity = Active_Low;
             HRTimer_Common_Periph.EECR1.EE1SNS := Sensitivity'Enum_Rep;
-            HRTimer_Common_Periph.EECR1.EE1FAST := Boolean'Val (Fast_Mode'Enum_Rep);
+            HRTimer_Common_Periph.EECR1.EE1FAST := Fast_Mode = Low_Latency;
          when Event_2 =>
             HRTimer_Common_Periph.EECR1.EE2SRC := Source'Enum_Rep;
-            HRTimer_Common_Periph.EECR1.EE2POL := Boolean'Val (Polarity'Enum_Rep);
+            HRTimer_Common_Periph.EECR1.EE2POL := Polarity = Active_Low;
             HRTimer_Common_Periph.EECR1.EE2SNS := Sensitivity'Enum_Rep;
-            HRTimer_Common_Periph.EECR1.EE2FAST := Boolean'Val (Fast_Mode'Enum_Rep);
+            HRTimer_Common_Periph.EECR1.EE2FAST := Fast_Mode = Low_Latency;
          when Event_3 =>
             HRTimer_Common_Periph.EECR1.EE3SRC := Source'Enum_Rep;
-            HRTimer_Common_Periph.EECR1.EE3POL := Boolean'Val (Polarity'Enum_Rep);
+            HRTimer_Common_Periph.EECR1.EE3POL := Polarity = Active_Low;
             HRTimer_Common_Periph.EECR1.EE3SNS := Sensitivity'Enum_Rep;
-            HRTimer_Common_Periph.EECR1.EE3FAST := Boolean'Val (Fast_Mode'Enum_Rep);
+            HRTimer_Common_Periph.EECR1.EE3FAST := Fast_Mode = Low_Latency;
          when Event_4 =>
             HRTimer_Common_Periph.EECR1.EE4SRC := Source'Enum_Rep;
-            HRTimer_Common_Periph.EECR1.EE4POL := Boolean'Val (Polarity'Enum_Rep);
+            HRTimer_Common_Periph.EECR1.EE4POL := Polarity = Active_Low;
             HRTimer_Common_Periph.EECR1.EE4SNS := Sensitivity'Enum_Rep;
-            HRTimer_Common_Periph.EECR1.EE4FAST := Boolean'Val (Fast_Mode'Enum_Rep);
+            HRTimer_Common_Periph.EECR1.EE4FAST := Fast_Mode = Low_Latency;
          when Event_5 =>
             HRTimer_Common_Periph.EECR1.EE5SRC := Source'Enum_Rep;
-            HRTimer_Common_Periph.EECR1.EE5POL := Boolean'Val (Polarity'Enum_Rep);
+            HRTimer_Common_Periph.EECR1.EE5POL := Polarity = Active_Low;
             HRTimer_Common_Periph.EECR1.EE5SNS := Sensitivity'Enum_Rep;
-            HRTimer_Common_Periph.EECR1.EE5FAST := Boolean'Val (Fast_Mode'Enum_Rep);
+            HRTimer_Common_Periph.EECR1.EE5FAST := Fast_Mode = Low_Latency;
          when Event_6 =>
             HRTimer_Common_Periph.EECR2.EE6SRC := Source'Enum_Rep;
-            HRTimer_Common_Periph.EECR2.EE6POL := Boolean'Val (Polarity'Enum_Rep);
+            HRTimer_Common_Periph.EECR2.EE6POL := Polarity = Active_Low;
             HRTimer_Common_Periph.EECR2.EE6SNS := Sensitivity'Enum_Rep;
             HRTimer_Common_Periph.EECR3.EE6F := Filter'Enum_Rep;
          when Event_7 =>
             HRTimer_Common_Periph.EECR2.EE7SRC := Source'Enum_Rep;
-            HRTimer_Common_Periph.EECR2.EE7POL := Boolean'Val (Polarity'Enum_Rep);
+            HRTimer_Common_Periph.EECR2.EE7POL := Polarity = Active_Low;
             HRTimer_Common_Periph.EECR2.EE7SNS := Sensitivity'Enum_Rep;
             HRTimer_Common_Periph.EECR3.EE7F := Filter'Enum_Rep;
          when Event_8 =>
             HRTimer_Common_Periph.EECR2.EE8SRC := Source'Enum_Rep;
-            HRTimer_Common_Periph.EECR2.EE8POL := Boolean'Val (Polarity'Enum_Rep);
+            HRTimer_Common_Periph.EECR2.EE8POL := Polarity = Active_Low;
             HRTimer_Common_Periph.EECR2.EE8SNS := Sensitivity'Enum_Rep;
             HRTimer_Common_Periph.EECR3.EE8F := Filter'Enum_Rep;
          when Event_9 =>
             HRTimer_Common_Periph.EECR2.EE9SRC := Source'Enum_Rep;
-            HRTimer_Common_Periph.EECR2.EE9POL := Boolean'Val (Polarity'Enum_Rep);
+            HRTimer_Common_Periph.EECR2.EE9POL := Polarity = Active_Low;
             HRTimer_Common_Periph.EECR2.EE9SNS := Sensitivity'Enum_Rep;
             HRTimer_Common_Periph.EECR3.EE9F := Filter'Enum_Rep;
          when Event_10 =>
             HRTimer_Common_Periph.EECR2.EE10SRC := Source'Enum_Rep;
-            HRTimer_Common_Periph.EECR2.EE10POL := Boolean'Val (Polarity'Enum_Rep);
+            HRTimer_Common_Periph.EECR2.EE10POL := Polarity = Active_Low;
             HRTimer_Common_Periph.EECR2.EE10SNS := Sensitivity'Enum_Rep;
             HRTimer_Common_Periph.EECR3.EE10F := Filter'Enum_Rep;
       end case;
@@ -2423,28 +2422,28 @@ package body STM32.HRTimers is
       case Input is
          when Fault_1 =>
             HRTimer_Common_Periph.FLTINR1.FLT1E := Enable;
-            HRTimer_Common_Periph.FLTINR1.FLT1P := Boolean'Val (Polarity'Enum_Rep);
-            HRTimer_Common_Periph.FLTINR1.FLT1SRC := Boolean'Val (Source'Enum_Rep);
+            HRTimer_Common_Periph.FLTINR1.FLT1P := Polarity = Active_High;
+            HRTimer_Common_Periph.FLTINR1.FLT1SRC := Source = FLTx_Int_Signal;
             HRTimer_Common_Periph.FLTINR1.FLT1F := Filter'Enum_Rep;
          when Fault_2 =>
             HRTimer_Common_Periph.FLTINR1.FLT2E := Enable;
-            HRTimer_Common_Periph.FLTINR1.FLT2P := Boolean'Val (Polarity'Enum_Rep);
-            HRTimer_Common_Periph.FLTINR1.FLT2SRC := Boolean'Val (Source'Enum_Rep);
+            HRTimer_Common_Periph.FLTINR1.FLT2P := Polarity = Active_High;
+            HRTimer_Common_Periph.FLTINR1.FLT2SRC := Source = FLTx_Int_Signal;
             HRTimer_Common_Periph.FLTINR1.FLT2F := Filter'Enum_Rep;
          when Fault_3 =>
             HRTimer_Common_Periph.FLTINR1.FLT3E := Enable;
-            HRTimer_Common_Periph.FLTINR1.FLT3P := Boolean'Val (Polarity'Enum_Rep);
-            HRTimer_Common_Periph.FLTINR1.FLT3SRC := Boolean'Val (Source'Enum_Rep);
+            HRTimer_Common_Periph.FLTINR1.FLT3P := Polarity = Active_High;
+            HRTimer_Common_Periph.FLTINR1.FLT3SRC := Source = FLTx_Int_Signal;
             HRTimer_Common_Periph.FLTINR1.FLT3F := Filter'Enum_Rep;
          when Fault_4 =>
             HRTimer_Common_Periph.FLTINR1.FLT4E := Enable;
-            HRTimer_Common_Periph.FLTINR1.FLT4P := Boolean'Val (Polarity'Enum_Rep);
-            HRTimer_Common_Periph.FLTINR1.FLT4SRC := Boolean'Val (Source'Enum_Rep);
+            HRTimer_Common_Periph.FLTINR1.FLT4P := Polarity = Active_High;
+            HRTimer_Common_Periph.FLTINR1.FLT4SRC := Source = FLTx_Int_Signal;
             HRTimer_Common_Periph.FLTINR1.FLT4F := Filter'Enum_Rep;
          when Fault_5 =>
             HRTimer_Common_Periph.FLTINR2.FLT5E := Enable;
-            HRTimer_Common_Periph.FLTINR2.FLT5P := Boolean'Val (Polarity'Enum_Rep);
-            HRTimer_Common_Periph.FLTINR2.FLT5SRC := Boolean'Val (Source'Enum_Rep);
+            HRTimer_Common_Periph.FLTINR2.FLT5P := Polarity = Active_High;
+            HRTimer_Common_Periph.FLTINR2.FLT5SRC := Source = FLTx_Int_Signal;
             HRTimer_Common_Periph.FLTINR2.FLT5F := Filter'Enum_Rep;
       end case;
    end Configure_Fault_Input;
