@@ -43,8 +43,8 @@ package STM32_SVD.USART is
       PCE            : Boolean := False;
       --  Receiver wakeup method
       WAKE           : Boolean := False;
-      --  Word length
-      M              : Boolean := False;
+      --  Word length bit 0
+      M0             : Boolean := False;
       --  Mute mode enable
       MME            : Boolean := False;
       --  Character match interrupt enable
@@ -59,8 +59,10 @@ package STM32_SVD.USART is
       RTOIE          : Boolean := False;
       --  End of Block interrupt enable
       EOBIE          : Boolean := False;
+      --  Word length bit 1
+      M1             : Boolean := False;
       --  unspecified
-      Reserved_28_31 : HAL.UInt4 := 16#0#;
+      Reserved_29_31 : HAL.UInt3 := 16#0#;
    end record
      with Volatile_Full_Access, Object_Size => 32,
           Bit_Order => System.Low_Order_First;
@@ -78,7 +80,7 @@ package STM32_SVD.USART is
       PS             at 0 range 9 .. 9;
       PCE            at 0 range 10 .. 10;
       WAKE           at 0 range 11 .. 11;
-      M              at 0 range 12 .. 12;
+      M0             at 0 range 12 .. 12;
       MME            at 0 range 13 .. 13;
       CMIE           at 0 range 14 .. 14;
       OVER8          at 0 range 15 .. 15;
@@ -86,7 +88,8 @@ package STM32_SVD.USART is
       DEAT           at 0 range 21 .. 25;
       RTOIE          at 0 range 26 .. 26;
       EOBIE          at 0 range 27 .. 27;
-      Reserved_28_31 at 0 range 28 .. 31;
+      M1             at 0 range 28 .. 28;
+      Reserved_29_31 at 0 range 29 .. 31;
    end record;
 
    subtype CR2_STOP_Field is HAL.UInt2;

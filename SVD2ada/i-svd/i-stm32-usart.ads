@@ -29,7 +29,7 @@ package Interfaces.STM32.USART is
    subtype CR1_PS_Field is Interfaces.STM32.Bit;
    subtype CR1_PCE_Field is Interfaces.STM32.Bit;
    subtype CR1_WAKE_Field is Interfaces.STM32.Bit;
-   subtype CR1_M_Field is Interfaces.STM32.Bit;
+   subtype CR1_M0_Field is Interfaces.STM32.Bit;
    subtype CR1_MME_Field is Interfaces.STM32.Bit;
    subtype CR1_CMIE_Field is Interfaces.STM32.Bit;
    subtype CR1_OVER8_Field is Interfaces.STM32.Bit;
@@ -37,6 +37,7 @@ package Interfaces.STM32.USART is
    subtype CR1_DEAT_Field is Interfaces.STM32.UInt5;
    subtype CR1_RTOIE_Field is Interfaces.STM32.Bit;
    subtype CR1_EOBIE_Field is Interfaces.STM32.Bit;
+   subtype CR1_M1_Field is Interfaces.STM32.Bit;
 
    --  Control register 1
    type CR1_Register is record
@@ -64,8 +65,8 @@ package Interfaces.STM32.USART is
       PCE            : CR1_PCE_Field := 16#0#;
       --  Receiver wakeup method
       WAKE           : CR1_WAKE_Field := 16#0#;
-      --  Word length
-      M              : CR1_M_Field := 16#0#;
+      --  Word length bit 0
+      M0             : CR1_M0_Field := 16#0#;
       --  Mute mode enable
       MME            : CR1_MME_Field := 16#0#;
       --  Character match interrupt enable
@@ -80,8 +81,10 @@ package Interfaces.STM32.USART is
       RTOIE          : CR1_RTOIE_Field := 16#0#;
       --  End of Block interrupt enable
       EOBIE          : CR1_EOBIE_Field := 16#0#;
+      --  Word length bit 1
+      M1             : CR1_M1_Field := 16#0#;
       --  unspecified
-      Reserved_28_31 : Interfaces.STM32.UInt4 := 16#0#;
+      Reserved_29_31 : Interfaces.STM32.UInt3 := 16#0#;
    end record
      with Volatile_Full_Access, Object_Size => 32,
           Bit_Order => System.Low_Order_First;
@@ -99,7 +102,7 @@ package Interfaces.STM32.USART is
       PS             at 0 range 9 .. 9;
       PCE            at 0 range 10 .. 10;
       WAKE           at 0 range 11 .. 11;
-      M              at 0 range 12 .. 12;
+      M0             at 0 range 12 .. 12;
       MME            at 0 range 13 .. 13;
       CMIE           at 0 range 14 .. 14;
       OVER8          at 0 range 15 .. 15;
@@ -107,7 +110,8 @@ package Interfaces.STM32.USART is
       DEAT           at 0 range 21 .. 25;
       RTOIE          at 0 range 26 .. 26;
       EOBIE          at 0 range 27 .. 27;
-      Reserved_28_31 at 0 range 28 .. 31;
+      M1             at 0 range 28 .. 28;
+      Reserved_29_31 at 0 range 29 .. 31;
    end record;
 
    subtype CR2_ADDM7_Field is Interfaces.STM32.Bit;

@@ -11280,6 +11280,12 @@ xs:noNamespaceSchemaLocation="CMSIS-SVD_Schema_1_1.xsd">
           <resetValue>0x0000</resetValue>
           <fields>
             <field>
+              <name>M1</name>
+              <description>Word length bit 1</description>
+              <bitOffset>28</bitOffset>
+              <bitWidth>1</bitWidth>
+            </field>
+            <field>
               <name>EOBIE</name>
               <description>End of Block interrupt
               enable</description>
@@ -11327,8 +11333,8 @@ xs:noNamespaceSchemaLocation="CMSIS-SVD_Schema_1_1.xsd">
               <bitWidth>1</bitWidth>
             </field>
             <field>
-              <name>M</name>
-              <description>Word length</description>
+              <name>M0</name>
+              <description>Word length bit 0</description>
               <bitOffset>12</bitOffset>
               <bitWidth>1</bitWidth>
             </field>
