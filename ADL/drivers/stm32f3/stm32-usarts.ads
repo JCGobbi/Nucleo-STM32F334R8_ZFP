@@ -84,9 +84,9 @@ package STM32.USARTs is
 
    procedure Set_Stop_Bits (This : in out USART;  To : Stop_Bits);
 
-   type Word_Lengths is (Word_Length_7, Word_Length_8, Word_Length_9);
+   type Word_Length is (Word_7_Bits, Word_8_Bits, Word_9_Bits);
 
-   procedure Set_Word_Length (This : in out USART;  To : Word_Lengths);
+   procedure Set_Word_Length (This : in out USART;  To : Word_Length);
 
    type Parities is (No_Parity, Even_Parity, Odd_Parity);
 
@@ -243,6 +243,15 @@ package STM32.USARTs is
    overriding
    procedure Transmit
      (This    : in out USART;
+      Data    : UART_Data_7b;
+      Status  : out UART_Status;
+      Timeout : Natural := 1000)
+     with
+       Pre'Class => Data_Size (This) = Data_Size_7b;
+
+   overriding
+   procedure Transmit
+     (This    : in out USART;
       Data    : UART_Data_8b;
       Status  : out UART_Status;
       Timeout : Natural := 1000)
@@ -257,6 +266,15 @@ package STM32.USARTs is
       Timeout : Natural := 1000)
      with
        Pre'Class => Data_Size (This) = Data_Size_9b;
+
+   overriding
+   procedure Receive
+     (This    : in out USART;
+      Data    : out UART_Data_7b;
+      Status  : out UART_Status;
+      Timeout : Natural := 1000)
+     with
+       Pre'Class => Data_Size (This) = Data_Size_7b;
 
    overriding
    procedure Receive

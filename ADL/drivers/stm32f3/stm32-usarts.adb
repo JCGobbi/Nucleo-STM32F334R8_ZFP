@@ -40,9 +40,10 @@
 ------------------------------------------------------------------------------
 
 with System;          use System;
-with STM32_SVD.USART; use STM32_SVD, STM32_SVD.USART;
+with STM32_SVD.USART; use STM32_SVD.USART;
+                      use STM32_SVD;
 
-with STM32.Device;    use STM32.Device;
+with STM32.Device;
 
 package body STM32.USARTs is
 
@@ -51,6 +52,7 @@ package body STM32.USARTs is
    ---------------
 
    function APB_Clock (This : USART) return UInt32 is
+      use STM32.Device;
       Clocks : constant RCC_System_Clocks := System_Clock_Frequencies;
    begin
       if This.Periph.all'Address = USART1_Base
@@ -102,10 +104,20 @@ package body STM32.USARTs is
 
    procedure Set_Word_Length
      (This : in out USART;
-      To : Word_Lengths)
+      To : Word_Length)
    is
    begin
-      This.Periph.CR1.M := To = Word_Length_9;
+      case To is
+         when Word_8_Bits =>
+            This.Periph.CR1.M0 := False;
+            This.Periph.CR1.M1 := False;
+         when Word_9_Bits =>
+            This.Periph.CR1.M0 := True;
+            This.Periph.CR1.M1 := False;
+         when Word_7_Bits =>
+            This.Periph.CR1.M0 := False;
+            This.Periph.CR1.M1 := True;
+         end case;
    end Set_Word_Length;
 
    ----------------
@@ -566,12 +578,39 @@ package body STM32.USARTs is
    function Data_Size (This : USART) return HAL.UART.UART_Data_Size
    is
    begin
-      if This.Periph.CR1.M then
+      if not This.Periph.CR1.M1 and not This.Periph.CR1.M0
+      then
+         return Data_Size_8b;
+      elsif not This.Periph.CR1.M1 and This.Periph.CR1.M0
+      then
          return Data_Size_9b;
       else
-         return Data_Size_8b;
+         return Data_Size_7b;
       end if;
    end Data_Size;
+
+   --------------
+   -- Transmit --
+   --------------
+
+   overriding
+   procedure Transmit
+     (This    : in out USART;
+      Data    : UART_Data_7b;
+      Status  : out UART_Status;
+      Timeout : Natural := 1000)
+   is
+      pragma Unreferenced (Status, Timeout);
+   begin
+      for Elt of Data loop
+         loop
+            exit when This.Tx_Ready;
+         end loop;
+
+         This.Transmit (UInt9 (Elt));
+      end loop;
+      Status := Ok;
+   end Transmit;
 
    --------------
    -- Transmit --
@@ -618,6 +657,29 @@ package body STM32.USARTs is
       end loop;
       Status := Ok;
    end Transmit;
+
+   -------------
+   -- Receive --
+   -------------
+
+   overriding
+   procedure Receive
+     (This    : in out USART;
+      Data    : out UART_Data_7b;
+      Status  : out UART_Status;
+      Timeout : Natural := 1000)
+   is
+      pragma Unreferenced (Status, Timeout);
+   begin
+      for Elt of Data loop
+         loop
+            exit when This.Rx_Ready;
+         end loop;
+
+         This.Receive (UInt9 (Elt));
+      end loop;
+      Status := Ok;
+   end Receive;
 
    -------------
    -- Receive --
