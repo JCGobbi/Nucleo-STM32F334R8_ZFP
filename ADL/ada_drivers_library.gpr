@@ -31,10 +31,18 @@ library project Ada_Drivers_Library is
       case Build is
          when "Production" =>
             for Default_Switches ("Ada") use
+<<<<<<< HEAD
               ("-O3",     --  Optimization level 3
                --  "-Os",     --  Optimization for size (may be necessary)
                "-gnatp",  --  Supress checks
                "-gnatn"); --  Enable inlining
+=======
+              ("-O3",     -- Optimization level 3
+               -- Optimization for size (may be necessary, but take care with loops)
+               --  "-Os",
+               "-gnatp",  -- Supress checks
+               "-gnatn"); -- Enable inlining
+>>>>>>> 791727e6ec59ba98f7dc261ea164b6df534b6123
          when "Debug" =>
             for Default_Switches ("Ada") use
               ("-O0",    --  No optimization
