@@ -170,8 +170,8 @@ package SYS.Int is
    --  Board_Support.Set_Current_Priority routine must also be implemented in
    --  order to do the board-specific enable/disable operations.
 
-   procedure Power_Down;
-   pragma Inline (Power_Down);
+   procedure Wait_For_Interrupt;
+   pragma Inline (Wait_For_Interrupt);
    --  Power-down the current CPU and wait for interrupts. This procedure is
    --  called only by the idle task, with interrupt enabled.
 

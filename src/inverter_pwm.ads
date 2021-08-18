@@ -155,7 +155,7 @@ package Inverter_PWM is
 
    procedure Set_PWM_Gate_Power (Enabled : in Boolean)
    with
-      Pre => (if Enabled = False then STM_Board.Is_Initialized 
+      Pre => (if Enabled = False then STM_Board.Is_Initialized
               else Is_Initialized and STM_Board.Is_Initialized);
    --  Enable or disable the output of the gate drivers.
 
@@ -176,7 +176,7 @@ private
    Initialized : Boolean := False;
 
    Sine_Step : Sine_Step_Range := 250;
-   -- The table last step value is 0.
+   --  The table last step value is 0.
 
    PWM_Timer_Ref : access Timer := PWM_Timer'Access;
 
@@ -209,5 +209,5 @@ private
 
    procedure PWM_Handler;
    pragma Export (Asm, PWM_Handler, PWM_Interrupt);
-   
+
 end Inverter_PWM;

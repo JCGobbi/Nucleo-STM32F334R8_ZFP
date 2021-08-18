@@ -125,7 +125,7 @@ package body STM32.CRC is
       Address : IDR_Address := 1)
    is
    begin
-      This.IDR.Arr(Integer(Address)) := Value;
+      This.IDR.Arr (Integer (Address)) := Value;
    end Set_Independent_Data;
 
    ----------------------
@@ -134,6 +134,6 @@ package body STM32.CRC is
 
    function Independent_Data
      (This : CRC_32; Address : IDR_Address := 1) return UInt8 is
-     (This.IDR.Arr(Integer(Address)));
+     (This.IDR.Arr (Integer (Address)));
 
 end STM32.CRC;

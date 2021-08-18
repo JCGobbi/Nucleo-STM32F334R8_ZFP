@@ -9,8 +9,8 @@ project STM32F334 is
    for Create_Missing_Dirs use "True";
 
    -- Executable files to choose:
-   -- test_led.adb, test_led_rt.adb, test_pwm_led, demo_inverter.adb, main.adb
-   for Main use ("main.adb");
+   -- test_led_pwm.adb, test_led_rt, demo_inverter.adb, main.adb
+   for Main use ("test_led_pwm.adb");
    
    --  Target architecture
    for Target use "arm-eabi";   

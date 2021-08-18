@@ -355,7 +355,7 @@ package STM32.Device is
    -- RTC --
    ---------
 
-   --RTC : aliased RTC_Device;
+   --  RTC : aliased RTC_Device;
 
    -----------
    -- Timer --
@@ -382,7 +382,7 @@ package STM32.Device is
      with pre => (if This'Address = TIM1_Base then
                     STM32_SVD.RCC.RCC_Periph.CR.PLLON = True and
                     STM32_SVD.RCC.RCC_Periph.CFGR.HPRE < 2#1000# and
-                    STM32_SVD.RCC.RCC_Periph.CFGR.PPRE.Arr(2) < 2#100#);
+                    STM32_SVD.RCC.RCC_Periph.CFGR.PPRE.Arr (2) < 2#100#);
    --  Set the clock for TIM1 to PLLCLK = 144 MHz or PCLK2 = 72 MHz.
 
    function Get_Clock_Source (This : Timer) return UInt32;
@@ -415,7 +415,7 @@ package STM32.Device is
       Source : Timer_Clock_Source)
      with pre => (if This'Address = HRTIM_Master_Base then
                     STM32_SVD.RCC.RCC_Periph.CR.PLLON = True and
-                    STM32_SVD.RCC.RCC_Periph.CFGR.PPRE.Arr(2) <= 2#100#);
+                    STM32_SVD.RCC.RCC_Periph.CFGR.PPRE.Arr (2) <= 2#100#);
    --  Set the clock for HRTIM1 to PLLCLK = 144 MHz or PCLK2 = 72 MHz.
 
    function Get_Clock_Source (This : HRTimer_X) return UInt32;

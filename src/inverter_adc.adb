@@ -2,7 +2,7 @@ with STM32.Device; use STM32.Device;
 with STM32.Timers; use STM32.Timers;
 
 package body Inverter_ADC is
-   
+
    function To_Voltage (Value : in UInt16) return Measure_E
    with
       Inline;
@@ -23,7 +23,7 @@ package body Inverter_ADC is
                Sample_Time => Sample_32_Cycles),
          3 => (Channel     => ADC_Output_V_Point.Channel,
                Sample_Time => Sample_32_Cycles));
-      
+
    begin
 
       --  Initialize GPIO for analog input
@@ -43,12 +43,12 @@ package body Inverter_ADC is
          Prescalar      => PCLK2_Div_2,
          DMA_Mode       => Disabled,
          Sampling_Delay => Sampling_Delay_5_Cycles);  --  arbitrary
-      
+
       Configure_Unit
         (Sensor_ADC.all,
          Resolution => ADC_Resolution_12_Bits,
          Alignment  => Right_Aligned);
-      
+
       --  Conversions are triggered by Sensor Timer.
       Configure_Regular_Conversions
         (Sensor_ADC.all,
@@ -62,15 +62,15 @@ package body Inverter_ADC is
       Enable_Interrupts (Sensor_ADC.all,
                          Source => Regular_Channel_Conversion_Complete);
       --  Each conversion generates an interrupt signalling conversion complete.
-      
+
       --  Finally, enable the used ADCs
       Enable (Sensor_ADC.all);
-      
+
       --  Start the timer that trigger ADC conversions
       Initialize_ADC_Timer;
 
       Initialized := True;
-   End Initialize_ADC;
+   end Initialize_ADC;
 
    --------------------------
    -- Initialize_ADC_Timer --
@@ -79,7 +79,7 @@ package body Inverter_ADC is
    procedure Initialize_ADC_Timer is
       Computed_Prescalar : UInt32;
       Computed_Period    : UInt32;
-   begin   
+   begin
       --  Initialize the general timer
       Enable_Clock (Sensor_Timer);
 
@@ -97,9 +97,9 @@ package body Inverter_ADC is
          Period        => Computed_Period,
          Clock_Divisor => Div1,
          Counter_Mode  => Up);
-      
+
       Select_Output_Trigger (Sensor_Timer, Update);
-      
+
       Enable (Sensor_Timer);
 
    end Initialize_ADC_Timer;
@@ -121,7 +121,7 @@ package body Inverter_ADC is
       return Measure_E is
    begin
       if Reading'Valid then
-         return To_Voltage (Regular_Samples(Reading));
+         return To_Voltage (Regular_Samples (Reading));
       else
          return 0.0;
       end if;
@@ -211,20 +211,23 @@ package body Inverter_ADC is
    procedure Sensor_ADC_Handler is
    begin
       if Status (Sensor_ADC.all,
-                 Flag => Regular_Channel_Conversion_Completed) then
+                 Flag => Regular_Channel_Conversion_Completed)
+      then
          if Interrupt_Enabled
               (Sensor_ADC.all,
-               Source => Regular_Channel_Conversion_Complete) then
+               Source => Regular_Channel_Conversion_Complete)
+         then
             Clear_Interrupt_Pending
               (Sensor_ADC.all,
                Source => Regular_Channel_Conversion_Complete);
-            
+
             --  Save the ADC values into a buffer
-            Regular_Samples(Rank) := Conversion_Value (Sensor_ADC.all);
-            if Rank = ADC_Reading'Last then
+            Regular_Samples (Rank) := Conversion_Value (Sensor_ADC.all);
+            if Rank = ADC_Reading'Last
+            then
                Rank := ADC_Reading'First;
             else
-               Rank := ADC_Reading'Succ(Rank);
+               Rank := ADC_Reading'Succ (Rank);
             end if;
 
             --  Calculate the new Sine_Gain based on battery voltage

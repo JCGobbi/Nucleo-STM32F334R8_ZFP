@@ -879,7 +879,7 @@ package STM32.Timers is
      (This : in out Timer;
       Lock : Timer_Lock_Level)
      with Pre => Complementary_Outputs_Supported (This);
-   -- Write protection against software errors.
+   --  Write protection against software errors.
 
    ----------------------------------------------------------------------------
 
@@ -1058,7 +1058,7 @@ package STM32.Timers is
      (This : in out Timer)
      with Pre => Hall_Sensor_Supported (This);
 
-   type UIF_Remapping_State is (Disable, Enable);-- See RM pg. 443
+   type UIF_Remapping_State is (Disable, Enable); --  See RM pg. 443
 
    type Timer_1_ADC1_Remapping_Options is --  see RM pg 472
      (TIM1_ADC1_NO_AWD,

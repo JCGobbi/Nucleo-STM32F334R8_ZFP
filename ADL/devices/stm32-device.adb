@@ -603,7 +603,7 @@ package body STM32.Device is
          PLLCLK := (HSI_VALUE / 2) * Pllm;
       end if;
 
-      -- System Clock Mux
+      --  System Clock Mux
       case Source is
          --  HSI as source
          when SYSCLK_SRC_HSI =>

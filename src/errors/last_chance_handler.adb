@@ -31,7 +31,7 @@
 
 --  Note this version is for use with the ravenscar-sfp runtime.
 
---with Ada.Real_Time; use Ada.Real_Time;
+with SYS.Real_Time; use SYS.Real_Time;
 
 with STM_Board;
 with Error_Handling;
@@ -50,7 +50,7 @@ package body Last_Chance_Handler is
       --  No-return procedure...
       loop
          STM_Board.Set_Toggle (STM_Board.LCH_LED);
---         delay until Clock + Milliseconds (250);
+         Delay_Until (Clock + Milliseconds (250));
       end loop;
    end Last_Chance_Handler;
 

@@ -29,7 +29,7 @@
 --                                                                          --
 ------------------------------------------------------------------------------
 
-with Ada.Real_Time; use Ada.Real_Time;
+with SYS.Real_Time; use SYS.Real_Time;
 
 with STM32_SVD.I2C; use STM32_SVD.I2C;
 with STM32_SVD.RCC; use STM32_SVD.RCC;
@@ -305,9 +305,9 @@ package body STM32.I2C is
 
    procedure Tx_Data_Register_Gen_Event (This : in out I2C_Port) is
    begin
-     if This.Periph.CR1.NOSTRETCH = True then
-        This.Periph.ISR.TXIS := True;
-     end if;
+      if This.Periph.CR1.NOSTRETCH = True then
+         This.Periph.ISR.TXIS := True;
+      end if;
    end Tx_Data_Register_Gen_Event;
 
    ---------------------
@@ -674,7 +674,7 @@ package body STM32.I2C is
    begin
       Start := Clock;
       while This.Periph.ISR.BUSY loop
-         if Clock - Start > Milliseconds (Timeout) then
+         if Clock > Start + Milliseconds (Timeout) then
             Status := Busy;
             return;
          end if;
@@ -816,7 +816,7 @@ package body STM32.I2C is
       Start := Clock;
 
       while This.Periph.ISR.BUSY loop
-         if Clock - Start > Milliseconds (Timeout) then
+         if Clock > Start + Milliseconds (Timeout) then
             Status := Busy;
             return;
          end if;

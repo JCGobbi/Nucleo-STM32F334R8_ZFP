@@ -13,12 +13,12 @@ procedure Main is
 begin
 
    --  Set CPU clock and global and NVIC interrupts
-   StartUp.Initialize;
+   Startup.Initialize;
 
    --  Start-up GPIOs, ADCs, Timer and PWM
-   StartUp.Initialize_Inverter;
+   Startup.Initialize_Inverter;
 
-   StartUp.Start_Inverter;
+   Startup.Start_Inverter;
 
    --  Enter steady state
    loop

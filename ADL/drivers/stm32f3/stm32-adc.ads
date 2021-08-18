@@ -174,7 +174,7 @@ package STM32.ADC is
       Timer6_TRGO_Event,
       Timer15_TRGO_Event,
       Timer3_CC4_Event);
-   -- External triggers for regular channels.
+   --  External triggers for regular channels.
 
    for External_Events_Regular_Group use --  RM pg. 231
      (Timer1_CC1_Event      => 2#0000#,

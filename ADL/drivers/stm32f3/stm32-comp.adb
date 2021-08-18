@@ -12,7 +12,7 @@ package body STM32.COMP is
    begin
       --  Enable clock for the SYSCFG_COMP_OPAMP peripheral
       Enable_SYSCFG_Clock;
-      
+
       This.CSR.COMPxEN := True;
    end Enable;
 
@@ -56,7 +56,7 @@ package body STM32.COMP is
 
    function Read_Inverting_Input_Port
      (This : Comparator) return Inverting_Input_Port
-   is      
+   is
       Value : UInt4;
    begin
       if This.CSR.COMPxINMSEL_3 = True then
@@ -64,7 +64,7 @@ package body STM32.COMP is
       else
          Value := UInt4 (This.CSR.COMPxINMSEL);
       end if;
-      return Inverting_Input_Port'Val (Value);         
+      return Inverting_Input_Port'Val (Value);
    end Read_Inverting_Input_Port;
 
    ----------------------
@@ -125,7 +125,7 @@ package body STM32.COMP is
 
    function Read_Output_Blanking (This : Comparator) return Output_Blanking is
    begin
-      Return Output_Blanking'Val (This.CSR.COMPx_BLANKING);
+      return Output_Blanking'Val (This.CSR.COMPx_BLANKING);
    end Read_Output_Blanking;
 
    ----------------------------
@@ -140,7 +140,7 @@ package body STM32.COMP is
       else
          return Low;
       end if;
-   end Read_Comparator_Output;      
+   end Read_Comparator_Output;
 
    -------------------------
    -- Set_Lock_Comparator --

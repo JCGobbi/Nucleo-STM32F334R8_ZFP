@@ -1,7 +1,7 @@
 
 --  Initialization is executed only once at power-on and executes
 --  routines that set-up peripherals.
-package StartUp is
+package Startup is
 
    procedure Initialize
    --  Procedure to initialize the board. This procedure must be called before
@@ -23,7 +23,7 @@ package StartUp is
    procedure Start_Inverter;
    --  Start the inverter
 
-   Function Is_Initialized return Boolean;
+   function Is_Initialized return Boolean;
 
 private
 
@@ -31,4 +31,4 @@ private
    --  Boolean that indicates whether the basic executive has finished its
    --  initialization.
 
-end StartUp;
+end Startup;

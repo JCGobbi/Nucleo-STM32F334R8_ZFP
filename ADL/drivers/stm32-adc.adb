@@ -173,8 +173,8 @@ package body STM32.ADC is
 
    function Multimode_Conversion_Value return UInt32 is
    begin
-      return Shift_Left(UInt32(ADC_Common_Periph.CDR.RDATA_MST), 16) or
-               UInt32(ADC_Common_Periph.CDR.RDATA_SLV);
+      return Shift_Left (UInt32 (ADC_Common_Periph.CDR.RDATA_MST), 16) or
+               UInt32 (ADC_Common_Periph.CDR.RDATA_SLV);
    end Multimode_Conversion_Value;
 
    --------------------
@@ -243,7 +243,7 @@ package body STM32.ADC is
       if Trigger.Enabler /= Trigger_Disabled then
          This.CFGR.EXTSEL := External_Events_Regular_Group'Enum_Rep (Trigger.Event);
          This.CFGR.EXTEN := External_Trigger'Enum_Rep (Trigger.Enabler);
-         --  ADSTART need to be set (RM pg. 230)
+         --  ADSTART need to be set (RM3064 pg. 230 chapter 13.3.18).
          This.CR.ADSTART := True;
       else
          This.CFGR.EXTSEL := 0;
@@ -294,7 +294,7 @@ package body STM32.ADC is
       if Trigger.Enabler /= Trigger_Disabled then
          This.JSQR.JEXTEN := External_Trigger'Enum_Rep (Trigger.Enabler);
          This.JSQR.JEXTSEL := External_Events_Injected_Group'Enum_Rep (Trigger.Event);
-         --  JADSTART need to be set (RM pg. 230)
+         --  JADSTART need to be set (RM3064 pg. 230 chapter 13.3.18).
          This.CR.JADSTART := True;
       else
          This.JSQR.JEXTEN := 0;
@@ -384,7 +384,7 @@ package body STM32.ADC is
 
    function Scan_Mode_Enabled (This : Analog_To_Digital_Converter)
                                return Boolean
-     is (This.SQR1.L > UInt4(1));
+     is (This.SQR1.L > UInt4 (1));
 
    -------------------------------
    -- Configure_Regular_Channel --
@@ -752,11 +752,11 @@ package body STM32.ADC is
          when Injected_Sequence_Conversion_Completed =>
             return This.ISR.JEOS;
          when Analog_Watchdog_1_Event_Occurred =>
-            return This.ISR.AWD.Arr(1);
+            return This.ISR.AWD.Arr (1);
          when Analog_Watchdog_2_Event_Occurred =>
-            return This.ISR.AWD.Arr(2);
+            return This.ISR.AWD.Arr (2);
          when Analog_Watchdog_3_Event_Occurred =>
-            return This.ISR.AWD.Arr(3);
+            return This.ISR.AWD.Arr (3);
          when Sampling_Completed =>
             return This.ISR.EOSMP;
          when Overrun =>
@@ -787,11 +787,11 @@ package body STM32.ADC is
          when Injected_Sequence_Conversion_Completed =>
             This.ISR.JEOS := True;
          when Analog_Watchdog_1_Event_Occurred =>
-            This.ISR.AWD.Arr(1) := True;
+            This.ISR.AWD.Arr (1) := True;
          when Analog_Watchdog_2_Event_Occurred =>
-            This.ISR.AWD.Arr(2) := True;
+            This.ISR.AWD.Arr (2) := True;
          when Analog_Watchdog_3_Event_Occurred =>
-            This.ISR.AWD.Arr(3) := True;
+            This.ISR.AWD.Arr (3) := True;
          when Sampling_Completed =>
             This.ISR.EOSMP := True;
          when Overrun =>
@@ -928,11 +928,11 @@ package body STM32.ADC is
          when Injected_Sequence_Conversion_Complete =>
             This.ISR.JEOS := True;
          when Analog_Watchdog_1_Event_Occurr =>
-            This.ISR.AWD.Arr(1) := True;
+            This.ISR.AWD.Arr (1) := True;
          when Analog_Watchdog_2_Event_Occurr =>
-            This.ISR.AWD.Arr(2) := True;
+            This.ISR.AWD.Arr (2) := True;
          when Analog_Watchdog_3_Event_Occurr =>
-            This.ISR.AWD.Arr(3) := True;
+            This.ISR.AWD.Arr (3) := True;
          when Sampling_Complete =>
             This.ISR.EOSMP := True;
          when Overrun =>

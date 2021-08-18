@@ -18,7 +18,7 @@ package STM_Board is
 
    PWM_Timer     : Timer renames Timer_1;
    --  Timer for reading sine table values.
-   PWM_Interrupt : constant string := "__TIM1_UP_TIM16_handler";
+   PWM_Interrupt : constant String := "__TIM1_UP_TIM16_handler";
    --  TIM1_UP_TIM16 interrupt vector
 
    PWM_A_Channel : Timer_Channel renames Channel_1;
@@ -40,8 +40,8 @@ package STM_Board is
 
    Sensor_ADC : constant access Analog_To_Digital_Converter := ADC_1'Access;
    Sensor_Trigger_Event : External_Events_Regular_Group := Timer6_TRGO_Event;
-   Sensor_ADC_Interrupt : constant string := "__ADC1_2_handler";
-   -- This interrupt vector is declared inside crt0.S file.
+   Sensor_ADC_Interrupt : constant String := "__ADC1_2_handler";
+   --  This interrupt vector is declared inside crt0.S file.
 
    ADC_Battery_V_Point : constant ADC_Point := (Sensor_ADC, Channel => 6);
    ADC_Battery_V_Pin   : GPIO_Point renames PC0;
@@ -69,8 +69,8 @@ package STM_Board is
 
    Button : GPIO_Point renames PC13;
    --  B1 user button input
-   Button_Interrupt : constant string := "__EXTI15_10_handler";
-   -- This interrupt vector is declared inside crt0.S file.
+   Button_Interrupt : constant String := "__EXTI15_10_handler";
+   --  This interrupt vector is declared inside crt0.S file.
    Button_EXTI_Line : constant External_Line_Number :=
      Button.Interrupt_Line_Number;
 

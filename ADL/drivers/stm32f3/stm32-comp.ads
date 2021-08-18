@@ -39,7 +39,7 @@ package STM32.COMP is
      with Post => Read_Inverting_Input_Port (This) = Input;
    --  Select the source connected to the inverting input of the comparator.
 
-   function Read_Inverting_Input_POrt
+   function Read_Inverting_Input_Port
      (This : Comparator) return Inverting_Input_Port;
    --  Return the source connected to the inverting input of the comparator.
 

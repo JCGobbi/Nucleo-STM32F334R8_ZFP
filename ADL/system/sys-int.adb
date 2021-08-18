@@ -5,8 +5,7 @@ with System.Machine_Code;
 
 with STM32_SVD.SCB;            use STM32_SVD.SCB;
 with STM32_SVD.NVIC;           use STM32_SVD.NVIC;
-                               use STM32_SVD;
-with STM32_SVD.STK;            use STM32_SVD.STK;
+with STM32_SVD.STK;            use STM32_SVD.STK, STM32_SVD;
 
 package body SYS.Int is
 
@@ -154,14 +153,14 @@ package body SYS.Int is
       Machine_Code.Asm (Template => "cpsid i", Volatile => True);
    end Disable_Interrupts;
 
-   ----------------
-   -- Power_Down --
-   ----------------
+   ------------------------
+   -- Wait_For_Interrupt --
+   ------------------------
 
-   procedure Power_Down is
+   procedure Wait_For_Interrupt is
    begin
       Machine_Code.Asm (Template => "wfi", Volatile => True);
-   end Power_Down;
+   end Wait_For_Interrupt;
 
    -----------
    -- Traps --

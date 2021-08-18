@@ -117,12 +117,12 @@ package body STM_Board is
       I : Integer := 0;
    begin
       if External_Interrupt_Pending (Button_EXTI_Line) then
-         -- Debouce
+         --  Debouce
          while I < 360000 loop
             I := I + 1;
          end loop;
 
-         -- Key pressed => GPIO = 0; not pressed => GPIO = 1.
+         --  Key pressed => GPIO = 0; not pressed => GPIO = 1.
          if not Button.Set then
             Set_Toggle (Green_LED);
          end if;

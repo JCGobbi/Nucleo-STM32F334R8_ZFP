@@ -40,8 +40,7 @@
 ------------------------------------------------------------------------------
 
 with System;          use System;
-with STM32_SVD.USART; use STM32_SVD.USART;
-                      use STM32_SVD;
+with STM32_SVD.USART; use STM32_SVD.USART, STM32_SVD;
 
 with STM32.Device;
 
@@ -117,7 +116,7 @@ package body STM32.USARTs is
          when Word_7_Bits =>
             This.Periph.CR1.M0 := False;
             This.Periph.CR1.M1 := True;
-         end case;
+      end case;
    end Set_Word_Length;
 
    ----------------
@@ -263,11 +262,11 @@ package body STM32.USARTs is
       case Mode is
          when Modbus_RTU =>
             --  Set 2-character timeout
-            This.Periph.RTOR.RTO := UInt24(Data);
+            This.Periph.RTOR.RTO := UInt24 (Data);
             This.Periph.CR2.RTOEN := True;
          when Modbus_ASCII =>
             --  Set LF ASCII character (16#0A#)
-            This.Periph.CR2.ADD.Val := UInt8(Data);
+            This.Periph.CR2.ADD.Val := UInt8 (Data);
          when LIN =>
             --  Disable USART
             This.Periph.CR1.UE := False;

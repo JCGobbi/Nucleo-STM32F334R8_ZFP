@@ -20,7 +20,7 @@ package body SYS.Real_Time is
    subtype LLI is Long_Long_Integer;
 
    Max_Pos_Time_Span : constant := UInt64 (Time_Span'Last);
-   Pragma Unreferenced (Max_Pos_Time_Span);
+   pragma Unreferenced (Max_Pos_Time_Span);
 
    Max_Neg_Time_Span : constant := UInt64 (2 ** 63);
    --  Absolute value of Time_Span_Last and Time_Span_First. Used in overflow
@@ -129,6 +129,7 @@ package body SYS.Real_Time is
       end if;
    end "+";
 
+   overriding
    function "+" (Left, Right : Time_Span) return Time_Span is
       pragma Unsuppress (Overflow_Check);
    begin
@@ -207,7 +208,7 @@ package body SYS.Real_Time is
    begin
       while Clock < T loop
          --  Wait for interrupt.
-         Int.Power_Down;
+         Int.Wait_For_Interrupt;
       end loop;
    end Delay_Until;
 

@@ -39,7 +39,7 @@ package body STM32.HRTimers is
    begin
       case Counter is
          when HRTimer_A =>
-            -- Test if HRTimer A has no outputs enabled.
+            --  Test if HRTimer A has no outputs enabled.
             if not (HRTimer_Common_Periph.OENR.TA1OEN or
                       HRTimer_Common_Periph.OENR.TA2OEN)
             then
@@ -47,7 +47,7 @@ package body STM32.HRTimers is
             end if;
 
          when HRTimer_B =>
-            -- Test if HRTimer B has no outputs enabled.
+            --  Test if HRTimer B has no outputs enabled.
             if not (HRTimer_Common_Periph.OENR.TB1OEN or
                       HRTimer_Common_Periph.OENR.TB2OEN)
             then
@@ -55,7 +55,7 @@ package body STM32.HRTimers is
             end if;
 
          when HRTimer_C =>
-            -- Test if HRTimer C has no outputs enabled.
+            --  Test if HRTimer C has no outputs enabled.
             if not (HRTimer_Common_Periph.OENR.TC1OEN or
                       HRTimer_Common_Periph.OENR.TC2OEN)
             then
@@ -63,7 +63,7 @@ package body STM32.HRTimers is
             end if;
 
          when HRTimer_D =>
-            -- Test if HRTimer D has no outputs enabled.
+            --  Test if HRTimer D has no outputs enabled.
             if not (HRTimer_Common_Periph.OENR.TD1OEN or
                       HRTimer_Common_Periph.OENR.TD2OEN)
             then
@@ -71,7 +71,7 @@ package body STM32.HRTimers is
             end if;
 
          when HRTimer_E =>
-            -- Test if HRTimer E has no outputs enabled.
+            --  Test if HRTimer E has no outputs enabled.
             if not (HRTimer_Common_Periph.OENR.TE1OEN or
                       HRTimer_Common_Periph.OENR.TE2OEN)
             then
@@ -152,7 +152,7 @@ package body STM32.HRTimers is
       for Counter of Counters loop
          case Counter is
             when HRTimer_A =>
-               -- Test if HRTimer A has no outputs enabled.
+               --  Test if HRTimer A has no outputs enabled.
                if not (HRTimer_Common_Periph.OENR.TA1OEN or
                          HRTimer_Common_Periph.OENR.TA2OEN)
                then
@@ -160,7 +160,7 @@ package body STM32.HRTimers is
                end if;
 
             when HRTimer_B =>
-               -- Test if HRTimer B has no outputs enabled.
+               --  Test if HRTimer B has no outputs enabled.
                if not (HRTimer_Common_Periph.OENR.TB1OEN or
                          HRTimer_Common_Periph.OENR.TB2OEN)
                then
@@ -168,7 +168,7 @@ package body STM32.HRTimers is
                end if;
 
             when HRTimer_C =>
-               -- Test if HRTimer C has no outputs enabled.
+               --  Test if HRTimer C has no outputs enabled.
                if not (HRTimer_Common_Periph.OENR.TC1OEN or
                          HRTimer_Common_Periph.OENR.TC2OEN)
                then
@@ -176,7 +176,7 @@ package body STM32.HRTimers is
                end if;
 
             when HRTimer_D =>
-               -- Test if HRTimer D has no outputs enabled.
+               --  Test if HRTimer D has no outputs enabled.
                if not (HRTimer_Common_Periph.OENR.TD1OEN or
                          HRTimer_Common_Periph.OENR.TD2OEN)
                then
@@ -184,7 +184,7 @@ package body STM32.HRTimers is
                end if;
 
             when HRTimer_E =>
-               -- Test if HRTimer E has no outputs enabled.
+               --  Test if HRTimer E has no outputs enabled.
                if not (HRTimer_Common_Periph.OENR.TE1OEN or
                          HRTimer_Common_Periph.OENR.TE2OEN)
                then
@@ -450,7 +450,7 @@ package body STM32.HRTimers is
      (This   : HRTimer_Master;
       Number : HRTimer_Compare_Number) return UInt16
    is
-     pragma Unreferenced (This);
+      pragma Unreferenced (This);
    begin
       case Number is
          when Compare_1 =>
@@ -585,13 +585,13 @@ package body STM32.HRTimers is
    begin
       case Source is
          when Compare_1_Interrupt =>
-            return This.MISR.MCMP.Arr(1);
+            return This.MISR.MCMP.Arr (1);
          when Compare_2_Interrupt =>
-            return This.MISR.MCMP.Arr(2);
+            return This.MISR.MCMP.Arr (2);
          when Compare_3_Interrupt =>
-            return This.MISR.MCMP.Arr(3);
+            return This.MISR.MCMP.Arr (3);
          when Compare_4_Interrupt =>
-            return This.MISR.MCMP.Arr(4);
+            return This.MISR.MCMP.Arr (4);
          when Repetition_Interrupt =>
             return This.MISR.MREP;
          when Sync_Input_Interrupt =>
@@ -719,7 +719,7 @@ package body STM32.HRTimers is
    -- Enabled --
    -------------
 
-   function Enabled (This : HRTimer_x) return Boolean is
+   function Enabled (This : HRTimer_X) return Boolean is
    begin
       if This'Address = HRTIM_TIMA_Base then
          return HRTIM_Master_Periph.MCR.TACEN;
@@ -752,7 +752,7 @@ package body STM32.HRTimers is
    -------------------------
 
    procedure Configure_Prescaler
-     (This        : in out HRTimer_x;
+     (This        : in out HRTimer_X;
       Prescaler   : UInt3)
    is
    begin
@@ -763,7 +763,7 @@ package body STM32.HRTimers is
    -- Current_Prescaler --
    -----------------------
 
-   function Current_Prescaler (This : HRTimer_x) return UInt3 is
+   function Current_Prescaler (This : HRTimer_X) return UInt3 is
    begin
       return This.TIMxCR.CKPSCx;
    end Current_Prescaler;
@@ -812,7 +812,7 @@ package body STM32.HRTimers is
       Mode : CMP2_AutoDelayed_Mode)
    is
    begin
-      This.TIMxCR.DELCMP.Arr(2) := Mode'Enum_Rep;
+      This.TIMxCR.DELCMP.Arr (2) := Mode'Enum_Rep;
    end Configure_AutoDelayed_Mode;
 
    --------------------------------
@@ -824,7 +824,7 @@ package body STM32.HRTimers is
       Mode : CMP4_AutoDelayed_Mode)
    is
    begin
-      This.TIMxCR.DELCMP.Arr(3) := Mode'Enum_Rep;
+      This.TIMxCR.DELCMP.Arr (3) := Mode'Enum_Rep;
    end Configure_AutoDelayed_Mode;
 
    ----------------------------------
@@ -985,7 +985,7 @@ package body STM32.HRTimers is
    ----------------------------------
 
    procedure Configure_Repetition_Counter
-     (This        : in out HRTimer_x;
+     (This        : in out HRTimer_X;
       Counter     : UInt8;
       Interrupt   : Boolean;
       DMA_Request : Boolean)
@@ -1241,21 +1241,21 @@ package body STM32.HRTimers is
    begin
       case Source is
          when Compare_1_Interrupt =>
-            return This.TIMxISR.CMP.Arr(1);
+            return This.TIMxISR.CMP.Arr (1);
          when Compare_2_Interrupt =>
-            return This.TIMxISR.CMP.Arr(2);
+            return This.TIMxISR.CMP.Arr (2);
          when Compare_3_Interrupt =>
-            return This.TIMxISR.CMP.Arr(3);
+            return This.TIMxISR.CMP.Arr (3);
          when Compare_4_Interrupt =>
-            return This.TIMxISR.CMP.Arr(4);
+            return This.TIMxISR.CMP.Arr (4);
          when Repetition_Interrupt =>
             return This.TIMxISR.REP;
          when Update_Interrupt =>
             return This.TIMxISR.UPD;
          when Capture_1_Interrupt =>
-            return This.TIMxISR.CPT.Arr(1);
+            return This.TIMxISR.CPT.Arr (1);
          when Capture_2_Interrupt =>
-            return This.TIMxISR.CPT.Arr(2);
+            return This.TIMxISR.CPT.Arr (2);
          when Output_1_Set_Interrupt =>
             return This.TIMxISR.SETx1;
          when Output_1_Reset_Interrupt =>
@@ -1479,8 +1479,8 @@ package body STM32.HRTimers is
       This.DTxR.DTRx := Rising_Value;
       This.DTxR.DTFx := Falling_Value;
 
-      -- The sign determines whether the deadtime is positive or negative
-      -- (overlaping signals). See pg. 649 in RM0364 rev. 4.
+      --  The sign determines whether the deadtime is positive or negative
+      --  (overlaping signals). See pg. 649 in RM0364 rev. 4.
       This.DTxR.SDTRx := Rising_Sign;
       This.DTxR.SDTFx := Falling_Sign;
    end Configure_Deadtime;
@@ -1530,21 +1530,21 @@ package body STM32.HRTimers is
          DTPRSC := DTPRSC + 1;
       end loop;
 
-      -- Save the minimum prescaler value into the prescaler register.
+      --  Save the minimum prescaler value into the prescaler register.
       This.DTxR.DTPRSC := DTPRSC;
 
-      -- Calculates the rising deadtime value and save it into the register.
+      --  Calculates the rising deadtime value and save it into the register.
       DTRx := UInt9 (Rising_Value / (tHRTIM / 8.0) /
                        Float (2 ** Natural (DTPRSC)));
       This.DTxR.DTRx := DTRx;
 
-      -- Calculates the falling deadtime value and save it into the register.
+      --  Calculates the falling deadtime value and save it into the register.
       DTFx := UInt9 (Falling_Value / (tHRTIM / 8.0) /
                        Float (2 ** Natural (DTPRSC)));
       This.DTxR.DTFx := DTFx;
 
-      -- The sign determines whether the deadtime is positive or negative
-      -- (overlaping signals). See pg. 649 in RM0364 rev. 4.
+      --  The sign determines whether the deadtime is positive or negative
+      --  (overlaping signals). See pg. 649 in RM0364 rev. 4.
       This.DTxR.SDTRx := Rising_Sign;
       This.DTxR.SDTFx := Falling_Sign;
    end Configure_Deadtime;
@@ -1879,15 +1879,15 @@ package body STM32.HRTimers is
    begin
       case Source is
          when Fault_1_Interrupt =>
-            return HRTimer_Common_Periph.ISR.FLT.Arr(1);
+            return HRTimer_Common_Periph.ISR.FLT.Arr (1);
          when Fault_2_Interrupt =>
-            return HRTimer_Common_Periph.ISR.FLT.Arr(2);
+            return HRTimer_Common_Periph.ISR.FLT.Arr (2);
          when Fault_3_Interrupt =>
-            return HRTimer_Common_Periph.ISR.FLT.Arr(3);
+            return HRTimer_Common_Periph.ISR.FLT.Arr (3);
          when Fault_4_Interrupt =>
-            return HRTimer_Common_Periph.ISR.FLT.Arr(4);
+            return HRTimer_Common_Periph.ISR.FLT.Arr (4);
          when Fault_5_Interrupt =>
-            return HRTimer_Common_Periph.ISR.FLT.Arr(5);
+            return HRTimer_Common_Periph.ISR.FLT.Arr (5);
          when System_Fault_Interrupt =>
             return HRTimer_Common_Periph.ISR.SYSFLT;
          when DLL_Ready_Interrupt =>
@@ -2107,7 +2107,7 @@ package body STM32.HRTimers is
    -- No_Outputs_Enabled --
    ------------------------
 
-   function No_Outputs_Enabled (This : HRTimer_x) return Boolean is
+   function No_Outputs_Enabled (This : HRTimer_X) return Boolean is
    begin
       if This'Address = HRTIM_TIMA_Base then
          if (HRTimer_Common_Periph.OENR.TA1OEN or

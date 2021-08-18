@@ -878,13 +878,13 @@ package body STM32.Timers is
             Temp := This.CCMR3;
       end case;
 
-      Mode0_2 := UInt3(Mode'Enum_Rep);
+      Mode0_2 := UInt3 (Mode'Enum_Rep);
       Mode_3 := Mode'Enum_Rep > 7;
 
-      Description_1 := (OCxMode  => Mode0_2,
-                        OCxFast_Enable => Fast_Enabled,
+      Description_1 := (OCxMode           => Mode0_2,
+                        OCxFast_Enable    => Fast_Enabled,
                         OCxPreload_Enable => Preload_Enabled,
-                        OCxClear_Enable => OC_Clear_Enabled);
+                        OCxClear_Enable   => OC_Clear_Enabled);
 
       Description_2 := (OCxMode_3  => Mode_3);
 
@@ -951,7 +951,7 @@ package body STM32.Timers is
          raise Timer_Channel_Access_Error;
       end if;
 
-      Mode0_2 := UInt3(Mode'Enum_Rep);
+      Mode0_2 := UInt3 (Mode'Enum_Rep);
       Mode_3 := Mode'Enum_Rep > 7;
 
       Temp.Low_Descriptors (Descriptor_Index).Compare_1.OCxMode := Mode0_2;
@@ -1066,12 +1066,12 @@ package body STM32.Timers is
       end if;
 
       if Active then
-         Mode0_2 := UInt3(Force_Active'Enum_Rep);
+         Mode0_2 := UInt3 (Force_Active'Enum_Rep);
          Mode_3 := Force_Active'Enum_Rep > 7;
          Temp.Low_Descriptors (Descriptor_Index).Compare_1.OCxMode := Mode0_2;
          Temp.High_Descriptors (Descriptor_Index).Compare_2.OCxMode_3 := Mode_3;
       else
-         Mode0_2 := UInt3(Force_Inactive'Enum_Rep);
+         Mode0_2 := UInt3 (Force_Inactive'Enum_Rep);
          Mode_3 := Force_Inactive'Enum_Rep > 7;
          Temp.Low_Descriptors (Descriptor_Index).Compare_1.OCxMode := Mode0_2;
          Temp.High_Descriptors (Descriptor_Index).Compare_2.OCxMode_3 := Mode_3;

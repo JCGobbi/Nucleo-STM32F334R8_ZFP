@@ -36,11 +36,11 @@ begin
    Int.Enable_Interrupt_Request (Int.Names.EXTI15_10_Interrupt);
    --  Enable Button interrupt ID;
 
-   -- Initialize the SysTick downcounter timer
+   --  Initialize the SysTick downcounter timer
    Initialize_SysTick;
    Initialize_Timers;
 
-   -- Set TIM1 clock source to 144 MHz
+   --  Set TIM1 clock source to 144 MHz
    Device.Set_Clock_Source (PWM_Timer, Device.PLLCLK);
 
    --  Initialize GPIO ports

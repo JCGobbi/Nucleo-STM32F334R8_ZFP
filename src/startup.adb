@@ -8,10 +8,11 @@ with STM_Board;     use STM_Board;
 with Inverter_ADC;  use Inverter_ADC;
 with Inverter_PWM;  use Inverter_PWM;
 
-package body StartUp is
+package body Startup is
 
-   procedure Wait_Until_V_Battery;
+   --  procedure Wait_Until_V_Battery;
    --  Wait until battery voltage is between minimum and maximum.
+   --  Enable this routine when the hardware is connected to ADC.
 
    ----------------
    -- Initialize --
@@ -77,9 +78,9 @@ package body StartUp is
       Initialize_ADC;
 
       --  Do not start while the battery voltage is outside maximum and minimum
-      Wait_Until_V_Battery;
+      --  Wait_Until_V_Battery;
 
-      -- Set PWM generator (TIM1) clock source to 144 MHz
+      --  Set PWM generator (TIM1) clock source to 144 MHz
       Device.Set_Clock_Source (PWM_Timer, Device.PLLCLK);
 
       --  Disable PWM gate drivers because some gate drivers enable with
@@ -96,7 +97,7 @@ package body StartUp is
          Inverter_ADC.Is_Initialized and
          Inverter_PWM.Is_Initialized;
 
-   End Initialize_Inverter;
+   end Initialize_Inverter;
 
    --------------------
    -- Start_Inverter --
@@ -122,31 +123,31 @@ package body StartUp is
    -- Wait_Until_V_Battery --
    --------------------------
 
-   procedure Wait_Until_V_Battery is
-      Period : constant Time_Span := Milliseconds (1);
-      Next_Release : Time := Clock;
-      Counter : Integer := 0;
-   begin
-      loop
-         exit when Test_V_Battery;
-         Next_Release := Next_Release + Period;
-         Delay_Until (Next_Release);
-         Counter := Counter + 1;
-         if (Counter > 1_000) then
-            Set_Toggle (Red_LED);
-            Counter := 0;
-         end if;
-      end loop;
-      Turn_Off (Red_LED);
-   end Wait_Until_V_Battery;
+   --  procedure Wait_Until_V_Battery is
+   --     Period : constant Time_Span := Milliseconds (1);
+   --     Next_Release : Time := Clock;
+   --     Counter : Integer := 0;
+   --  begin
+   --     loop
+   --        exit when Test_V_Battery;
+   --        Next_Release := Next_Release + Period;
+   --        Delay_Until (Next_Release);
+   --        Counter := Counter + 1;
+   --        if (Counter > 1_000) then
+   --           Set_Toggle (Red_LED);
+   --           Counter := 0;
+   --        end if;
+   --     end loop;
+   --     Turn_Off (Red_LED);
+   --  end Wait_Until_V_Battery;
 
    --------------------
    -- Is_Initialized --
    --------------------
 
-   Function Is_Initialized return Boolean is
+   function Is_Initialized return Boolean is
    begin
       return Initialized;
    end Is_Initialized;
 
-end StartUp;
+end Startup;

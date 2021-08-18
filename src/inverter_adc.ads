@@ -12,7 +12,7 @@ package Inverter_ADC is
    --  corrects the duty cycle for variations in battery voltage.
 
    Sensor_Frequency_Hz : constant := 5_000;
-   -- Frequency that controls start of ADC convertion.
+   --  Frequency that controls start of ADC convertion.
 
    subtype Measure_E is Float;
    --  Represents an electric measure.
@@ -113,7 +113,7 @@ private
                        Channel_Rank => 3));
 
    Rank : ADC_Reading := ADC_Reading'First;
-   
+
    --  For testing the ADC conversion frequency.
    Counter : Integer := 0;
 

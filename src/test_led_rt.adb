@@ -13,7 +13,7 @@ begin
    CPU_Clock.Initialize_Clocks (HSE_Enabled  => True,
                                 Activate_PLL => True);
 
-   -- Initialize the SysTick downcounter timer
+   --  Initialize the SysTick downcounter timer
    Initialize_SysTick;
    Initialize_Timers;
 

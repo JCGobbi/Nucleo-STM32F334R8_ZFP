@@ -94,6 +94,7 @@ package SYS.Real_Time is
      (Right + Left)
      with Global => null;
 
+   overriding
    function "+" (Left, Right : Time_Span) return Time_Span
      with Global => null;
 
@@ -155,6 +156,12 @@ package SYS.Real_Time is
 private
    pragma Inline (Clock);
    pragma Inline (Epoch);
+
+   pragma Inline (Microseconds);
+   pragma Inline (Milliseconds);
+   pragma Inline (Nanoseconds);
+   pragma Inline (Seconds);
+   pragma Inline (Minutes);
 
    procedure SysTick_Handler;
    pragma Export (Asm, SysTick_Handler, "SysTick_Handler");

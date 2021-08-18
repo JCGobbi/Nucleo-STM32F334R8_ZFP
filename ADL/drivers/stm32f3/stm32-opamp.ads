@@ -164,7 +164,7 @@ package STM32.OPAMP is
       NI_Gain_8_Internal_Feedback_VM1,
       NI_Gain_16_Internal_Feedback_VM1);
    --  Gain in PGA mode.
-   
+
    for PGA_Mode_Gain use
      (NI_Gain_2                        => 2#0000#,
       NI_Gain_4                        => 2#0001#,
@@ -203,7 +203,7 @@ package STM32.OPAMP is
    --  Return the state of user trimming.
 
    type Differential_Pair is (NMOS, PMOS);
-   
+
    procedure Set_Offset_Trimming
      (This  : in out Operational_Amplifier;
       Pair  : Differential_Pair;
@@ -221,7 +221,7 @@ package STM32.OPAMP is
    --  is described in the RM0364 pg. 355. The offset trim time,
    --  during calibration, must respect the minimum time needed
    --  between two steps to have 1 mV accuracy.
-   
+
    type Internal_VRef_Output is
      (VRef_Is_Output,
       VRef_Is_Not_Output);
@@ -239,7 +239,7 @@ package STM32.OPAMP is
    type Output_Status_Flag is
      (NI_Lesser_Then_I,
       NI_Greater_Then_I);
-   
+
    function Read_Output_Status_Flag
      (This : Operational_Amplifier) return Output_Status_Flag;
    --  Return the output status flag when the OPAMP is used as comparator
@@ -334,5 +334,5 @@ private
    for Operational_Amplifier use record
       CSR at 16#00# range  0 .. 31;
    end record;
-   
+
 end STM32.OPAMP;

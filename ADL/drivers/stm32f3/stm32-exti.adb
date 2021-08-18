@@ -239,7 +239,7 @@ package body STM32.EXTI is
          when 32 =>
             EXTI_Periph.SWIER2.SWIER32 := True;
          when others =>
-            Null;
+            null;
       end case;
    end Generate_SWI;
 
@@ -288,7 +288,7 @@ package body STM32.EXTI is
          when 32 =>
             EXTI_Periph.PR2.PR32 := True;
          when others =>
-            Null;
+            null;
       end case;
    end Clear_External_Interrupt;
 

@@ -5,7 +5,7 @@ library project Ada_Drivers_Library is
    Build : Build_Type := external ("ADL_BUILD", "Production");
 
    type Build_Checks_Type is ("Disabled", "Enabled");
-   Build_Checks : Build_Checks_Type := external ("ADL_BUILD_CHECKS", "Disabled");
+   Build_Checks : Build_Checks_Type := external ("ADL_BUILD_CHECKS", "Enabled");
 
    --  Target architecture and runtime
    Target := Project'Target;
@@ -31,27 +31,27 @@ library project Ada_Drivers_Library is
       case Build is
          when "Production" =>
             for Default_Switches ("Ada") use
-              ("-O3",     -- Optimization level 3
-               "-Os",     -- Optimization for size (may be necessary)
-               "-gnatp",  -- Supress checks
-               "-gnatn"); -- Enable inlining
+              ("-O3",     --  Optimization level 3
+               "-Os",     --  Optimization for size (may be necessary)
+               "-gnatp",  --  Supress checks
+               "-gnatn"); --  Enable inlining
          when "Debug" =>
             for Default_Switches ("Ada") use
-              ("-O0",    -- No optimization
-               "-gnata") -- Enable assertions
+              ("-O0",    --  No optimization
+               "-gnata") --  Enable assertions
               & Callgraph_Switch;
       end case;
 
       for Default_Switches ("ada") use Compiler'Default_Switches ("Ada") &
         Callgraph_Switch &
         Build_Checks_Switches &
-        ("-g",       -- Debug info
-         "-gnatwa",  -- All warnings
-         "-gnatw_A", -- Turn off warnings for anonymous allocators
-         "-gnatQ",   -- Don't quit. Generate ALI and tree files even if illegalities
-         "-gnatw.X", -- Disable warnings for No_Exception_Propagation
-         "-ffunction-sections", -- Create a linker section for each function
-         "-fdata-sections");  -- Create a linker section for each data
+        ("-g",       --  Debug info
+         "-gnatwa",  --  All warnings
+         "-gnatw_A", --  Turn off warnings for anonymous allocators
+         "-gnatQ",   --  Don't quit. Generate ALI and tree files even if illegalities
+         "-gnatw.X", --  Disable warnings for No_Exception_Propagation
+         "-ffunction-sections", --  Create a linker section for each function
+         "-fdata-sections");  --  Create a linker section for each data
    end Compiler;
 
    --  crt0.S is inside ADL/src, so we need to compile assembly code

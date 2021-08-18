@@ -29,7 +29,7 @@
 --                                                                          --
 ------------------------------------------------------------------------------
 
-with STM32.Device;  use STM32.Device;
+with STM32.Device; use STM32.Device;
 
 package body STM32.PWM is
 

@@ -24,8 +24,10 @@ with Last_Chance_Handler; pragma Unreferenced (Last_Chance_Handler);
 --  an exception is propagated. We need it in the executable, therefore it
 --  must be somewhere in the closure of the context clauses.
 
-procedure Test_PWM_LED is
+procedure Test_LED_PWM is
 
+   --  The LD2 green led at GPIO PA5 is the TIM2_CH1 timer output when
+   --  programmed as AF1 alternate function.
    Selected_Timer : Timer renames Timer_2;
    Timer_AF : constant STM32.GPIO_Alternate_Function := GPIO_AF_TIM2_1;
    Output_Channel : constant Timer_Channel := Channel_1;
@@ -81,4 +83,4 @@ begin
          Arg := Arg + Increment;
       end loop;
    end;
-end Test_PWM_LED;
+end Test_LED_PWM;

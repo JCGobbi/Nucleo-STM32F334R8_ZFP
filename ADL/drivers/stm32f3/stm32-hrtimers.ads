@@ -6,8 +6,7 @@ pragma Restrictions (No_Elaboration_Code);
 
 with System;          use System;
 
-with STM32_SVD.HRTIM; use STM32_SVD.HRTIM;
-                      use STM32_SVD;
+with STM32_SVD.HRTIM; use STM32_SVD.HRTIM, STM32_SVD;
 
 package STM32.HRTimers is
 
@@ -623,7 +622,7 @@ package STM32.HRTimers is
    --  and set/reset by another timer. See pg.761 in RM0364 rev. 4.
 
    function Read_Deadtime (This : HRTimer_X) return Boolean;
-   -- Return True if the timer deadtime is enabled.
+   --  Return True if the timer deadtime is enabled.
 
    procedure Configure_Deadtime
      (This          : in out HRTimer_X;
@@ -1042,7 +1041,7 @@ package STM32.HRTimers is
    procedure Configure_Burst_Mode_Trigger
      (Triggers : Burst_Mode_Trigger_List;
       Value    : Boolean);
-   -- Enable/disable one or several burst mode triggers.
+   --  Enable/disable one or several burst mode triggers.
 
    procedure Set_Burst_Mode_Compare (Value : UInt16)
      with Pre => (if (HRTIM_Common_Periph.BMCR.BMCLK = 2#1010# and
