@@ -42,7 +42,7 @@
 --  This file provides declarations for devices on the STM32F334x8 MCUs
 --  manufactured by ST Microelectronics.  For example, an STM32F334R8.
 
-with System.Storage_Elements; use System.Storage_Elements;
+--  with System.Storage_Elements; use System.Storage_Elements;
 with System;         use System;
 
 with STM32_SVD.RCC;  use STM32_SVD;
@@ -59,9 +59,9 @@ with STM32.ADC;      use STM32.ADC;
 --  with STM32.I2C.DMA;  use STM32.I2C.DMA;
 --  with STM32.RTC;      use STM32.RTC;
 with STM32.Timers;   use STM32.Timers;
-with STM32.HRTimers; use STM32.HRTimers;
-with STM32.OPAMP;    use STM32.OPAMP;
-with STM32.COMP;     use STM32.COMP;
+--  with STM32.HRTimers; use STM32.HRTimers;
+--  with STM32.OPAMP;    use STM32.OPAMP;
+--  with STM32.COMP;     use STM32.COMP;
 
 package STM32.Device is
    pragma Elaborate_Body;
@@ -392,61 +392,61 @@ package STM32.Device is
    -- HRTimer --
    -------------
 
-   HRTimer_M : aliased HRTimer_Master
-     with Import, Volatile, Address => HRTIM_Master_Base;
-
-   HRTimer_A : aliased HRTimer_X
-     with Import, Volatile, Address => HRTIM_TIMA_Base;
-   HRTimer_B : aliased HRTimer_X
-     with Import, Volatile, Address => HRTIM_TIMB_Base;
-   HRTimer_C : aliased HRTimer_X
-     with Import, Volatile, Address => HRTIM_TIMC_Base;
-   HRTimer_D : aliased HRTimer_X
-     with Import, Volatile, Address => HRTIM_TIMD_Base;
-   HRTimer_E : aliased HRTimer_X
-     with Import, Volatile, Address => HRTIM_TIME_Base;
-
-   procedure Enable_Clock (This : in out HRTimer_Master);
-
-   procedure Reset (This : in out HRTimer_Master);
-
-   procedure Set_Clock_Source
-     (This   : in out HRTimer_Master;
-      Source : Timer_Clock_Source)
-     with pre => (if This'Address = HRTIM_Master_Base then
-                    STM32_SVD.RCC.RCC_Periph.CR.PLLON = True and
-                    STM32_SVD.RCC.RCC_Periph.CFGR.PPRE.Arr (2) <= 2#100#);
-   --  Set the clock for HRTIM1 to PLLCLK = 144 MHz or PCLK2 = 72 MHz.
-
-   function Get_Clock_Source (This : HRTimer_X) return UInt32;
-   --  Returns the timer input frequency in Hz.
+   --  HRTimer_M : aliased HRTimer_Master
+   --    with Import, Volatile, Address => HRTIM_Master_Base;
+   --
+   --  HRTimer_A : aliased HRTimer_X
+   --    with Import, Volatile, Address => HRTIM_TIMA_Base;
+   --  HRTimer_B : aliased HRTimer_X
+   --    with Import, Volatile, Address => HRTIM_TIMB_Base;
+   --  HRTimer_C : aliased HRTimer_X
+   --    with Import, Volatile, Address => HRTIM_TIMC_Base;
+   --  HRTimer_D : aliased HRTimer_X
+   --    with Import, Volatile, Address => HRTIM_TIMD_Base;
+   --  HRTimer_E : aliased HRTimer_X
+   --    with Import, Volatile, Address => HRTIM_TIME_Base;
+   --
+   --  procedure Enable_Clock (This : in out HRTimer_Master);
+   --
+   --  procedure Reset (This : in out HRTimer_Master);
+   --
+   --  procedure Set_Clock_Source
+   --    (This   : in out HRTimer_Master;
+   --     Source : Timer_Clock_Source)
+   --    with pre => (if This'Address = HRTIM_Master_Base then
+   --                   STM32_SVD.RCC.RCC_Periph.CR.PLLON = True and
+   --                   STM32_SVD.RCC.RCC_Periph.CFGR.PPRE.Arr (2) <= 2#100#);
+   --  --  Set the clock for HRTIM1 to PLLCLK = 144 MHz or PCLK2 = 72 MHz.
+   --
+   --  function Get_Clock_Source (This : HRTimer_X) return UInt32;
+   --  --  Returns the HRTIM1 input frequency in Hz.
 
    ----------------
    -- Comparator --
    ----------------
 
-   SYSCFG_Base : Integer_Address := To_Integer (SYSCFG_COMP_OPAMP_Base);
-
-   Comp_2_Base : constant System.Address :=
-     System'To_Address (SYSCFG_Base + 16#00000020#);
-   Comp_4_Base : constant System.Address :=
-     System'To_Address (SYSCFG_Base + 16#00000028#);
-   Comp_6_Base : constant System.Address :=
-     System'To_Address (SYSCFG_Base + 16#00000030#);
-
-   Comp_2 : aliased Comparator with Import, Volatile, Address => Comp_2_Base;
-   Comp_4 : aliased Comparator with Import, Volatile, Address => Comp_4_Base;
-   Comp_6 : aliased Comparator with Import, Volatile, Address => Comp_6_Base;
+   --  SYSCFG_Base : Integer_Address := To_Integer (SYSCFG_COMP_OPAMP_Base);
+   --
+   --  Comp_2_Base : constant System.Address :=
+   --    System'To_Address (SYSCFG_Base + 16#00000020#);
+   --  Comp_4_Base : constant System.Address :=
+   --    System'To_Address (SYSCFG_Base + 16#00000028#);
+   --  Comp_6_Base : constant System.Address :=
+   --    System'To_Address (SYSCFG_Base + 16#00000030#);
+   --
+   --  Comp_2 : aliased Comparator with Import, Volatile, Address => Comp_2_Base;
+   --  Comp_4 : aliased Comparator with Import, Volatile, Address => Comp_4_Base;
+   --  Comp_6 : aliased Comparator with Import, Volatile, Address => Comp_6_Base;
 
    -----------
    -- OpAmp --
    -----------
 
-   Opamp_2_Base : constant System.Address :=
-     System'To_Address (SYSCFG_Base + 16#0000003C#);
-
-   Opamp_2 : aliased Operational_Amplifier
-     with Import, Volatile, Address => Opamp_2_Base;
+   --  Opamp_2_Base : constant System.Address :=
+   --    System'To_Address (SYSCFG_Base + 16#0000003C#);
+   --
+   --  Opamp_2 : aliased Operational_Amplifier
+   --    with Import, Volatile, Address => Opamp_2_Base;
 
    -----------------------------
    -- Reset and Clock Control --

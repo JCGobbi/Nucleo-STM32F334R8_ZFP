@@ -520,58 +520,58 @@ package body STM32.Device is
    -- Enable_Clock --
    ------------------
 
-   procedure Enable_Clock (This : in out HRTimer_Master) is
-   begin
-      if This'Address = HRTIM_Master_Base then
-         RCC_Periph.APB2ENR.HRTIM1EN := True;
-      else
-         raise Unknown_Device;
-      end if;
-   end Enable_Clock;
+   --  procedure Enable_Clock (This : in out HRTimer_Master) is
+   --  begin
+   --     if This'Address = HRTIM_Master_Base then
+   --        RCC_Periph.APB2ENR.HRTIM1EN := True;
+   --     else
+   --        raise Unknown_Device;
+   --     end if;
+   --  end Enable_Clock;
 
    -----------
    -- Reset --
    -----------
 
-   procedure Reset (This : in out HRTimer_Master) is
-   begin
-      if This'Address = HRTIM_Master_Base then
-         RCC_Periph.APB2RSTR.HRTIM1RST := True;
-         RCC_Periph.APB2RSTR.HRTIM1RST := False;
-      else
-         raise Unknown_Device;
-      end if;
-   end Reset;
+   --  procedure Reset (This : in out HRTimer_Master) is
+   --  begin
+   --     if This'Address = HRTIM_Master_Base then
+   --        RCC_Periph.APB2RSTR.HRTIM1RST := True;
+   --        RCC_Periph.APB2RSTR.HRTIM1RST := False;
+   --     else
+   --        raise Unknown_Device;
+   --     end if;
+   --  end Reset;
 
    ----------------------
    -- Set_Clock_Source --
    ----------------------
 
-   procedure Set_Clock_Source (This : in out HRTimer_Master;
-                               Source : Timer_Clock_Source)
-   is
-      Activate_Pll : constant Boolean := RCC_Periph.CR.PLLON;
-   begin
-      if This'Address = HRTIM_Master_Base then
-         if Activate_Pll and Source = PLLCLK then
-            RCC_Periph.CFGR3.HRTIM1SW := True;
-         else
-            RCC_Periph.CFGR3.HRTIM1SW := False;
-         end if;
-      else
-         raise Unknown_Device;
-      end if;
-   end Set_Clock_Source;
+   --  procedure Set_Clock_Source (This : in out HRTimer_Master;
+   --                              Source : Timer_Clock_Source)
+   --  is
+   --     Activate_Pll : constant Boolean := RCC_Periph.CR.PLLON;
+   --  begin
+   --     if This'Address = HRTIM_Master_Base then
+   --        if Activate_Pll and Source = PLLCLK then
+   --           RCC_Periph.CFGR3.HRTIM1SW := True;
+   --        else
+   --           RCC_Periph.CFGR3.HRTIM1SW := False;
+   --        end if;
+   --     else
+   --        raise Unknown_Device;
+   --     end if;
+   --  end Set_Clock_Source;
 
    ----------------------
    -- Get_Clock_Source --
    ----------------------
 
-   function Get_Clock_Source (This : HRTimer_X) return UInt32 is
-      pragma Unreferenced (This);
-   begin
-      return System_Clock_Frequencies.HRTIM1CLK;
-   end Get_Clock_Source;
+   --  function Get_Clock_Source (This : HRTimer_X) return UInt32 is
+   --     pragma Unreferenced (This);
+   --  begin
+   --     return System_Clock_Frequencies.HRTIM1CLK;
+   --  end Get_Clock_Source;
 
    ------------------------------
    -- System_Clock_Frequencies --
