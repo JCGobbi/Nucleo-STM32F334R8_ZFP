@@ -77,14 +77,15 @@ package body Inverter_ADC is
    --------------------------
 
    procedure Initialize_ADC_Timer is
+      ADC_Timer : constant access Timer := Sensor_Timer'Access;
       Computed_Prescalar : UInt32;
       Computed_Period    : UInt32;
    begin
       --  Initialize the general timer
-      Enable_Clock (Sensor_Timer);
+      Enable_Clock (ADC_Timer.all);
 
       Compute_Prescalar_And_Period
-        (Sensor_Timer,
+        (ADC_Timer,
          Requested_Frequency => Sensor_Frequency_Hz,
          Prescalar           => Computed_Prescalar,
          Period              => Computed_Period);
@@ -92,15 +93,15 @@ package body Inverter_ADC is
       Computed_Period := Computed_Period - 1;
 
       Configure
-        (Sensor_Timer,
+        (ADC_Timer.all,
          Prescaler     => UInt16 (Computed_Prescalar),
          Period        => Computed_Period,
          Clock_Divisor => Div1,
          Counter_Mode  => Up);
 
-      Select_Output_Trigger (Sensor_Timer, Update);
+      Select_Output_Trigger (ADC_Timer.all, Update);
 
-      Enable (Sensor_Timer);
+      Enable (ADC_Timer.all);
 
    end Initialize_ADC_Timer;
 

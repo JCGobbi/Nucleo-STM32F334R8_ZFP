@@ -185,7 +185,7 @@ package STM32.Timers is
      with Post => (if Mode = Single then not Enabled (This));
 
    procedure Compute_Prescalar_And_Period
-     (This                : Timer;
+     (This                : access Timer;
       Requested_Frequency : UInt32;
       Prescalar           : out UInt32;
       Period              : out UInt32)

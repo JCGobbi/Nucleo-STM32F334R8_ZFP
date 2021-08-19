@@ -516,7 +516,7 @@ package body STM32.Timers is
    ----------------------------------
 
    procedure Compute_Prescalar_And_Period
-     (This                : Timer;
+     (This                : access Timer;
       Requested_Frequency : UInt32;
       Prescalar           : out UInt32;
       Period              : out UInt32)
@@ -527,9 +527,9 @@ package body STM32.Timers is
       CK_CNT             : UInt32;
    begin
 
-      Hardware_Frequency := STM32.Device.Get_Clock_Source (This);
+      Hardware_Frequency := STM32.Device.Get_Clock_Source (This.all);
 
-      if Has_32bit_Counter (This) then
+      if Has_32bit_Counter (This.all) then
          Max_Period := 16#FFFF_FFFF#;
       else
          Max_Period := 16#FFFF#;

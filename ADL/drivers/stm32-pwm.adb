@@ -121,7 +121,7 @@ package body STM32.PWM is
       Enable_Clock (Generator.all);
 
       Compute_Prescalar_And_Period
-        (Generator.all,
+        (Generator,
          Requested_Frequency => Frequency,
          Prescalar           => Computed_Prescalar,
          Period              => Computed_Period);
