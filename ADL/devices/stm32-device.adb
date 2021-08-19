@@ -581,29 +581,13 @@ package body STM32.Device is
    is
       Source : constant SYSCLK_Source :=
         SYSCLK_Source'Val (RCC_Periph.CFGR.SWS);
-
-      --  Get the correct value of Pll divisor
-      Plld   : constant UInt32 := UInt32 (RCC_Periph.CFGR2.PREDIV + 1);
-      --  Get the correct value of Pll multiplier
-      Pllm   : constant UInt32 := UInt32 (RCC_Periph.CFGR.PLLMUL + 2);
-
-      --  Get the PLL entry clock source
-      PLLSRC : constant Boolean := RCC_Periph.CFGR.PLLSRC;
+      --  Get System Clock Mux
+      PLLCLK : UInt32;
+      --  PLL output
 
       Result : RCC_System_Clocks;
-      PLLCLK : UInt32;
 
    begin
-      --  PLL Source Mux
-      if PLLSRC then
-         --  HSE/PREDIV selected as PLL input clock
-         PLLCLK := (HSE_VALUE / Plld) * Pllm;
-      else
-         --  HSI/2 selected as PLL input clock
-         PLLCLK := (HSI_VALUE / 2) * Pllm;
-      end if;
-
-      --  System Clock Mux
       case Source is
          --  HSI as source
          when SYSCLK_SRC_HSI =>
@@ -617,8 +601,26 @@ package body STM32.Device is
 
          --  PLL as source
          when SYSCLK_SRC_PLL =>
-            Result.SYSCLK := PLLCLK;
-            Result.I2CCLK := PLLCLK;
+            declare
+               Plld   : constant UInt32 := UInt32 (RCC_Periph.CFGR2.PREDIV + 1);
+               --  Get the correct value of Pll divisor
+               Pllm   : constant UInt32 := UInt32 (RCC_Periph.CFGR.PLLMUL + 2);
+               --  Get the correct value of Pll multiplier
+               PLLSRC : constant Boolean := RCC_Periph.CFGR.PLLSRC;
+               --  Get the PLL entry clock source
+            begin
+               --  PLL Source Mux
+               if PLLSRC then
+                  --  HSE/PREDIV selected as PLL input clock
+                  PLLCLK := (HSE_VALUE / Plld) * Pllm;
+               else
+                  --  HSI/2 selected as PLL input clock
+                  PLLCLK := (HSI_VALUE / 2) * Pllm;
+               end if;
+
+               Result.SYSCLK := PLLCLK;
+               Result.I2CCLK := PLLCLK;
+            end;
       end case;
 
       declare
