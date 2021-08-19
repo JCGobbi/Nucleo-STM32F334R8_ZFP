@@ -164,7 +164,7 @@ package SYS.CPU_Clock is
 
    procedure Initialize_Clocks
      (HSE_Enabled  : Boolean := True;
-      HSE_Bypass   : Boolean := True;
+      HSE_Bypass   : Boolean := False;
       LSI_Enabled  : Boolean := True;
       Activate_PLL : Boolean := True);
    --  HSE_Enabled = True: use high-speed ext. clock,

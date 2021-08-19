@@ -10,8 +10,7 @@ begin
    --  Configure the CPU clock
    --  Change from HSI clock (8 MHz) to HSE + PLL (72 MHz)
    CPU_Clock.Reset_Clocks;
-   CPU_Clock.Initialize_Clocks (HSE_Enabled  => True,
-                                Activate_PLL => True);
+   CPU_Clock.Initialize_Clocks;
 
    --  Initialize the SysTick downcounter timer
    Initialize_SysTick;
