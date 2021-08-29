@@ -23,23 +23,23 @@ project ZFP is
       -- Specify from which memory bank the program will load
       for Boot_Memory use "FLASH";
 
-      -- Allocate the main stack in CCM with 8K size
+      -- Allocate the main stack in CCM with 1K size
       for Main_Stack_Memory use "CCM";
       for Main_Stack_Size use "1K";
 
       -- Specification of the SRAM
       for Mem_Kind ("SRAM") use "ram";
-      for Address ("SRAM") use "0x20000000";
+      for Address ("SRAM") use "0x2000_0000";
       for Size ("SRAM") use "16K";
 
       -- Specification of the FLASH
       for Mem_Kind ("FLASH") use "rom";
-      for Address ("FLASH") use "0x08000000";
+      for Address ("FLASH") use "0x0800_0000";
       for Size ("FLASH") use "64K";
 
       -- Specification of the CCM RAM
       for Mem_Kind ("CCM") use "ram";
-      for Address ("CCM") use "0x10000000";
+      for Address ("CCM") use "0x1000_0000";
       for Size ("CCM") use "4K";
 
       -- Number and description of interrupt lines on the STM32F334
@@ -76,6 +76,7 @@ project ZFP is
       for Interrupt("29") use "TIM3";
       for Interrupt("31") use "I2C1_EV_EXTI23";
       for Interrupt("32") use "I2C1_ER";
+      for Interrupt("35") use "SPI1";
       for Interrupt("37") use "USART1_EXTI25";
       for Interrupt("38") use "USART2_EXTI26";
       for Interrupt("39") use "USART3_EXTI28";

@@ -112,7 +112,8 @@ package SYS.Int is
    --    __I2C1_EV_EXTI23_handler /* 31 */
    --    __I2C1_ER_handler        /* 32 */
    --    __unknown_interrupt_handler /* 33 */
-   --    ...
+   --    __unknown_interrupt_handler /* 34 */
+   --    __SPI1_handler           /* 35 */
    --    __unknown_interrupt_handler /* 36 */
    --    __USART1_EXTI25_handler  /* 37 */
    --    __USART2_EXTI26_handler  /* 38 */
