@@ -940,7 +940,7 @@ package body STM32.HRTimers is
       CK_CNT             : UInt32;
    begin
 
-      Hardware_Frequency := STM32.Device.Get_Clock_Source (This);
+      Hardware_Frequency := STM32.Device.Get_Clock_Frequency (This);
 
       if Requested_Frequency > Hardware_Frequency then
          raise Invalid_Request with "Frequency too high";
@@ -1546,7 +1546,7 @@ package body STM32.HRTimers is
       Falling_Sign  : Boolean)
    is
       Timer_Frequency : constant UInt32 :=
-        STM32.Device.Get_Clock_Source (This);
+        STM32.Device.Get_Clock_Frequency (This);
       --  The clock frequency of this timer.
 
       tHRTIM : constant Float := 1.0 / Float (Timer_Frequency);

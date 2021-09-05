@@ -383,7 +383,7 @@ package STM32.Device is
                     STM32_SVD.RCC.RCC_Periph.CFGR.PPRE.Arr (2) < 2#100#);
    --  Set the clock for TIM1 to PLLCLK = 144 MHz or PCLK2 = 72 MHz.
 
-   function Get_Clock_Source (This : Timer) return UInt32;
+   function Get_Clock_Frequency (This : Timer) return UInt32;
    --  Returns the timer input frequency in Hz.
 
    -------------
@@ -416,7 +416,7 @@ package STM32.Device is
    --                   STM32_SVD.RCC.RCC_Periph.CFGR.PPRE.Arr (2) <= 2#100#);
    --  --  Set the clock for HRTIM1 to PLLCLK = 144 MHz or PCLK2 = 72 MHz.
    --
-   --  function Get_Clock_Source (This : HRTimer_X) return UInt32;
+   --  function Get_Clock_Frequency (This : HRTimer_X) return UInt32;
    --  --  Returns the HRTIM1 input frequency in Hz.
 
    ----------------

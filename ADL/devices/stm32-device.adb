@@ -492,11 +492,11 @@ package body STM32.Device is
       end if;
    end Set_Clock_Source;
 
-   ----------------------
-   -- Get_Clock_Source --
-   ----------------------
+   -------------------------
+   -- Get_Clock_Frequency --
+   -------------------------
 
-   function Get_Clock_Source (This : Timer) return UInt32 is
+   function Get_Clock_Frequency (This : Timer) return UInt32 is
    begin
       if This'Address = TIM1_Base then
          return System_Clock_Frequencies.TIM1CLK;
@@ -514,7 +514,7 @@ package body STM32.Device is
       else
          raise Unknown_Device;
       end if;
-   end Get_Clock_Source;
+   end Get_Clock_Frequency;
 
    ------------------
    -- Enable_Clock --
@@ -567,11 +567,11 @@ package body STM32.Device is
    -- Get_Clock_Source --
    ----------------------
 
-   --  function Get_Clock_Source (This : HRTimer_X) return UInt32 is
+   --  function Get_Clock_Frequency (This : HRTimer_X) return UInt32 is
    --     pragma Unreferenced (This);
    --  begin
    --     return System_Clock_Frequencies.HRTIM1CLK;
-   --  end Get_Clock_Source;
+   --  end Get_Clock_Frequency;
 
    ------------------------------
    -- System_Clock_Frequencies --

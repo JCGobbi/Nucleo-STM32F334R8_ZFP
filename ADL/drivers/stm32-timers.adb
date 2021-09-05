@@ -527,7 +527,7 @@ package body STM32.Timers is
       CK_CNT             : UInt32;
    begin
 
-      Hardware_Frequency := STM32.Device.Get_Clock_Source (This.all);
+      Hardware_Frequency := STM32.Device.Get_Clock_Frequency (This.all);
 
       if Has_32bit_Counter (This.all) then
          Max_Period := 16#FFFF_FFFF#;
