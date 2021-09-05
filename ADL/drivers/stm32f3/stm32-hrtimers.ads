@@ -145,15 +145,26 @@ package STM32.HRTimers is
    --  accesses to the memory mapped registers are done into HRTIM active or
    --  preload registers.
 
+   type HRTimer_Prescaler is
+     (Div_1,
+      Div_2,
+      Div_4,
+      Div_8,
+      Div_16,
+      Div_32,
+      Div_64,
+      Div_128)
+     with Size => 3;
+
    procedure Configure_Prescaler
      (This        : in out HRTimer_Master;
-      Prescaler   : UInt3)
+      Prescaler   : HRTimer_Prescaler)
      with Pre => not Enabled (This),
      Post => Current_Prescaler (This) = Prescaler;
    --  The actual prescaler value is (2 ** Prescaler). The counter clock
    --  equivalent frequency (fCOUNTER) is equal to fHRCK / 2 ** CKPSC[2:0].
 
-   function Current_Prescaler (This : HRTimer_Master) return UInt3;
+   function Current_Prescaler (This : HRTimer_Master) return HRTimer_Prescaler;
 
    type Synchronization_Input_Source is
      (Disabled,
@@ -385,12 +396,12 @@ package STM32.HRTimers is
 
    procedure Configure_Prescaler
      (This        : in out HRTimer_X;
-      Prescaler   : UInt3)
+      Prescaler   : HRTimer_Prescaler)
      with Pre => not Enabled (This),
        Post => Current_Prescaler (This) = Prescaler;
    --  The actual prescaler value is (2 ** Prescaler).
 
-   function Current_Prescaler (This : HRTimer_X) return UInt3;
+   function Current_Prescaler (This : HRTimer_X) return HRTimer_Prescaler;
 
    procedure Set_PushPull_Mode (This : in out HRTimer_X; Mode : Boolean)
      with Pre => not Enabled (This);
@@ -475,6 +486,20 @@ package STM32.HRTimers is
      with Post => Current_Period (This) = Value;
 
    function Current_Period (This : HRTimer_X) return UInt16;
+
+   procedure Compute_Prescaler_And_Period
+     (This                : HRTimer_X;
+      Requested_Frequency : UInt32;
+      Prescaler           : out HRTimer_Prescaler;
+      Period              : out UInt16)
+     with Pre => Requested_Frequency > 0;
+   --  Computes the minimum prescaler and thus the maximum resolution for the
+   --  given timer, based on the system clocks and the requested frequency.
+   --  Computes the period required for the requested frequency.
+
+   Invalid_Request : exception;
+   --  Raised when the requested frequency is too high or too low for the given
+   --  timer and system clocks.
 
    procedure Set_Counter_Operating_Mode
      (This : in out HRTimer_X;
