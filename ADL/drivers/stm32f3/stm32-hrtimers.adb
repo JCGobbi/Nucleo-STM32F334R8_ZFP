@@ -930,13 +930,13 @@ package body STM32.HRTimers is
      (This                : HRTimer_X;
       Requested_Frequency : UInt32;
       Prescaler           : out HRTimer_Prescaler;
-      Period              : out UInt16)
+      Period              : out UInt32)
    is
       Max_Prescaler      : constant HRTimer_Prescaler := HRTimer_Prescaler'Last;
-      Max_Period         : constant := 16#FFFF#;
+      Max_Period         : constant := 16#FFFF#; --  UInt16'Last
       Prescaler_Enum     : UInt8; --  Counter for HRTimer_Prescaler'Enum_Rep
-      Period_32          : UInt32;
-      Hardware_Frequency : UInt32;
+      fHRCK              : UInt32; --  High frequency into HRTIM
+      Hardware_Frequency : UInt32; --  fHRTIM
       CK_CNT             : UInt32;
    begin
 
@@ -946,17 +946,24 @@ package body STM32.HRTimers is
          raise Invalid_Request with "Frequency too high";
       end if;
 
+      --  fHRCK is the high-resolution equivalent clock into HRTIM and all
+      --  subsequent clocks are derived and synchronous with this source.
+      --  Considering the fHRTIM clock period division by 32, it is equivalent
+      --  to a frequency of fHRCK = 144 x 32 = 4.608 GHz. The HRtimer
+      --  resolutions is tHRCK = 1 / fHRCK = 217 ps.
+      fHRCK := Hardware_Frequency * 32;
+
       --  We use a numeric prescaler value to calculate the Hardware_Frequency
       --  division considering that the clock prescaler is a power of 2 of this
       --  value, as are the HRTimer_Prescaler discrete values.
       Prescaler_Enum := 0;
       loop
          --  Compute the Counter's clock
-         CK_CNT := Hardware_Frequency / UInt32 (2**Integer (Prescaler_Enum));
+         CK_CNT := fHRCK / UInt32 (2**Integer (Prescaler_Enum));
          --  Determine the CK_CNT periods to achieve the requested frequency
-         Period_32 := CK_CNT / Requested_Frequency;
+         Period := CK_CNT / Requested_Frequency;
 
-         exit when ((Period_32 <= Max_Period) or
+         exit when ((Period <= Max_Period) or
                       (Prescaler_Enum > Max_Prescaler'Enum_Rep));
 
          Prescaler_Enum := Prescaler_Enum + 1;
@@ -966,7 +973,6 @@ package body STM32.HRTimers is
          raise Invalid_Request with "Frequency too low";
       end if;
 
-      Period := UInt16 (Period_32);
       Prescaler := HRTimer_Prescaler'Val (Prescaler_Enum);
    end Compute_Prescaler_And_Period;
 

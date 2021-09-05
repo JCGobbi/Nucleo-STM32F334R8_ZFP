@@ -491,7 +491,7 @@ package STM32.HRTimers is
      (This                : HRTimer_X;
       Requested_Frequency : UInt32;
       Prescaler           : out HRTimer_Prescaler;
-      Period              : out UInt16)
+      Period              : out UInt32)
      with Pre => Requested_Frequency > 0;
    --  Computes the minimum prescaler and thus the maximum resolution for the
    --  given timer, based on the system clocks and the requested frequency.
