@@ -512,16 +512,16 @@ package body STM32.Timers is
    end Select_One_Pulse_Mode;
 
    ----------------------------------
-   -- Compute_Prescalar_and_Period --
+   -- Compute_Prescaler_and_Period --
    ----------------------------------
 
-   procedure Compute_Prescalar_And_Period
+   procedure Compute_Prescaler_And_Period
      (This                : access Timer;
       Requested_Frequency : UInt32;
-      Prescalar           : out UInt32;
+      Prescaler           : out UInt32;
       Period              : out UInt32)
    is
-      Max_Prescalar      : constant := 16#FFFF#;
+      Max_Prescaler      : constant := 16#FFFF#;
       Max_Period         : UInt32;
       Hardware_Frequency : UInt32;
       CK_CNT             : UInt32;
@@ -539,23 +539,23 @@ package body STM32.Timers is
          raise Invalid_Request with "Freq too high";
       end if;
 
-      Prescalar := 0;
+      Prescaler := 0; --  Corresponds to value 1
       loop
          --  Compute the Counter's clock
-         CK_CNT := Hardware_Frequency / (Prescalar + 1);
+         CK_CNT := Hardware_Frequency / (Prescaler + 1);
          --  Determine the CK_CNT periods to achieve the requested frequency
          Period := CK_CNT / Requested_Frequency;
 
          exit when
-           ((Period <= Max_Period) or (Prescalar > Max_Prescalar));
+           ((Period <= Max_Period) or (Prescaler > Max_Prescaler));
 
-         Prescalar := Prescalar + 1;
+         Prescaler := Prescaler + 1;
       end loop;
 
-      if Prescalar > Max_Prescalar then
+      if Prescaler > Max_Prescaler then
          raise Invalid_Request with "Freq too low";
       end if;
-   end Compute_Prescalar_And_Period;
+   end Compute_Prescaler_And_Period;
 
    -----------------------
    -- Counter_Direction --

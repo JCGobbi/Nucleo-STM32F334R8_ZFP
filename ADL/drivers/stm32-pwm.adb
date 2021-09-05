@@ -115,22 +115,22 @@ package body STM32.PWM is
      (Generator : not null access Timer;
       Frequency : Hertz)
    is
-      Computed_Prescalar : UInt32;
+      Computed_Prescaler : UInt32;
       Computed_Period    : UInt32;
    begin
       Enable_Clock (Generator.all);
 
-      Compute_Prescalar_And_Period
+      Compute_Prescaler_And_Period
         (Generator,
          Requested_Frequency => Frequency,
-         Prescalar           => Computed_Prescalar,
+         Prescaler           => Computed_Prescaler,
          Period              => Computed_Period);
 
       Computed_Period := Computed_Period - 1;
 
       Configure
         (Generator.all,
-         Prescaler     => UInt16 (Computed_Prescalar),
+         Prescaler     => UInt16 (Computed_Prescaler),
          Period        => Computed_Period,
          Clock_Divisor => Div1,
          Counter_Mode  => Up);

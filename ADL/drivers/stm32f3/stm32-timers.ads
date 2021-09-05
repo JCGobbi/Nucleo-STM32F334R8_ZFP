@@ -184,10 +184,10 @@ package STM32.Timers is
       Mode : Timer_One_Pulse_Mode)
      with Post => (if Mode = Single then not Enabled (This));
 
-   procedure Compute_Prescalar_And_Period
+   procedure Compute_Prescaler_And_Period
      (This                : access Timer;
       Requested_Frequency : UInt32;
-      Prescalar           : out UInt32;
+      Prescaler           : out UInt32;
       Period              : out UInt32)
      with Pre => Requested_Frequency > 0;
    --  Computes the minimum prescaler and thus the maximum resolution for the
