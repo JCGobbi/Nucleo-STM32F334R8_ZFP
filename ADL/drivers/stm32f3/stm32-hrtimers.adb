@@ -332,6 +332,20 @@ package body STM32.HRTimers is
       return This.MPER.MPER;
    end Current_Period;
 
+   ---------------
+   -- Configure --
+   ---------------
+
+   procedure Configure
+     (This      : in out HRTimer_Master;
+      Prescaler : HRTimer_Prescaler;
+      Period    : UInt16)
+   is
+   begin
+      This.MCR.CKPSC := Prescaler'Enum_Rep;
+      This.MPER.MPER := Period;
+   end Configure;
+
    --------------------------------
    -- Set_Counter_Operating_Mode --
    --------------------------------
@@ -720,7 +734,7 @@ package body STM32.HRTimers is
    -- Enabled --
    -------------
 
-   function Enabled (This : HRTimer_X) return Boolean is
+   function Enabled (This : HRTimer_Channel) return Boolean is
    begin
       if This'Address = HRTIM_TIMA_Base then
          return HRTIM_Master_Periph.MCR.TACEN;
@@ -741,7 +755,7 @@ package body STM32.HRTimers is
    ------------------------
 
    procedure Set_Preload_Enable
-     (This   : in out HRTimer_X;
+     (This   : in out HRTimer_Channel;
       Enable : Boolean)
    is
    begin
@@ -753,7 +767,7 @@ package body STM32.HRTimers is
    -------------------------
 
    procedure Configure_Prescaler
-     (This        : in out HRTimer_X;
+     (This        : in out HRTimer_Channel;
       Prescaler   : HRTimer_Prescaler)
    is
    begin
@@ -764,7 +778,7 @@ package body STM32.HRTimers is
    -- Current_Prescaler --
    -----------------------
 
-   function Current_Prescaler (This : HRTimer_X) return HRTimer_Prescaler is
+   function Current_Prescaler (This : HRTimer_Channel) return HRTimer_Prescaler is
    begin
       return HRTimer_Prescaler'Val (This.TIMxCR.CKPSCx);
    end Current_Prescaler;
@@ -773,7 +787,7 @@ package body STM32.HRTimers is
    -- Set_PushPull_Mode --
    -----------------------
 
-   procedure Set_PushPull_Mode (This : in out HRTimer_X; Mode : Boolean) is
+   procedure Set_PushPull_Mode (This : in out HRTimer_Channel; Mode : Boolean) is
    begin
       This.TIMxCR.PSHPLL := Mode;
    end Set_PushPull_Mode;
@@ -783,7 +797,7 @@ package body STM32.HRTimers is
    -------------------------------------
 
    procedure Configure_Synchronization_Input
-     (This   : in out HRTimer_X;
+     (This   : in out HRTimer_Channel;
       Reset  : Boolean;
       Start  : Boolean)
    is
@@ -797,7 +811,7 @@ package body STM32.HRTimers is
    -------------------------------------------
 
    procedure Configure_DAC_Synchronization_Trigger
-     (This    : in out HRTimer_X;
+     (This    : in out HRTimer_Channel;
       Trigger : DAC_Synchronization_Trigger)
    is
    begin
@@ -809,7 +823,7 @@ package body STM32.HRTimers is
    --------------------------------
 
    procedure Configure_AutoDelayed_Mode
-     (This : in out HRTimer_X;
+     (This : in out HRTimer_Channel;
       Mode : CMP2_AutoDelayed_Mode)
    is
    begin
@@ -821,7 +835,7 @@ package body STM32.HRTimers is
    --------------------------------
 
    procedure Configure_AutoDelayed_Mode
-     (This : in out HRTimer_X;
+     (This : in out HRTimer_Channel;
       Mode : CMP4_AutoDelayed_Mode)
    is
    begin
@@ -833,7 +847,7 @@ package body STM32.HRTimers is
    ----------------------------------
 
    procedure Configure_Update_Gating_Mode
-     (This : in out HRTimer_X;
+     (This : in out HRTimer_Channel;
       Mode : Update_Gating_Mode)
    is
    begin
@@ -845,7 +859,7 @@ package body STM32.HRTimers is
    ----------------------------
 
    procedure Configure_Timer_Update
-     (This       : in out HRTimer_X;
+     (This       : in out HRTimer_Channel;
       Repetition : Boolean;
       Reset      : Boolean;
       Timer_A    : Boolean;
@@ -897,7 +911,7 @@ package body STM32.HRTimers is
    -------------------------
 
    procedure Set_HalfPeriod_Mode
-     (This : in out HRTimer_X;
+     (This : in out HRTimer_Channel;
       Mode : Boolean)
    is
    begin
@@ -908,7 +922,7 @@ package body STM32.HRTimers is
    -- Set_Period --
    ----------------
 
-   procedure Set_Period (This : in out HRTimer_X;  Value : UInt16) is
+   procedure Set_Period (This : in out HRTimer_Channel;  Value : UInt16) is
    begin
       This.PERxR.PERx := Value;
    end Set_Period;
@@ -917,17 +931,31 @@ package body STM32.HRTimers is
    -- Current_Period --
    --------------------
 
-   function Current_Period (This : HRTimer_X) return UInt16 is
+   function Current_Period (This : HRTimer_Channel) return UInt16 is
    begin
       return This.PERxR.PERx;
    end Current_Period;
+
+   ---------------
+   -- Configure --
+   ---------------
+
+   procedure Configure
+     (This      : in out HRTimer_Channel;
+      Prescaler : HRTimer_Prescaler;
+      Period    : UInt16)
+   is
+   begin
+      This.TIMxCR.CKPSCx := Prescaler'Enum_Rep;
+      This.PERxR.PERx := Period;
+   end Configure;
 
    ----------------------------------
    -- Compute_Prescaler_and_Period --
    ----------------------------------
 
    procedure Compute_Prescaler_And_Period
-     (This                : HRTimer_X;
+     (This                : HRTimer_Channel;
       Requested_Frequency : UInt32;
       Prescaler           : out HRTimer_Prescaler;
       Period              : out UInt32)
@@ -981,7 +1009,7 @@ package body STM32.HRTimers is
    --------------------------------
 
    procedure Set_Counter_Operating_Mode
-     (This : in out HRTimer_X;
+     (This : in out HRTimer_Channel;
       Mode : Counter_Operating_Mode)
    is
    begin
@@ -1002,7 +1030,7 @@ package body STM32.HRTimers is
    -- Set_Counter --
    -----------------
 
-   procedure Set_Counter (This : in out HRTimer_X;  Value : UInt16) is
+   procedure Set_Counter (This : in out HRTimer_Channel;  Value : UInt16) is
    begin
       This.CNTxR.CNTx := Value;
    end Set_Counter;
@@ -1011,7 +1039,7 @@ package body STM32.HRTimers is
    -- Current_Counter --
    ---------------------
 
-   function Current_Counter (This : HRTimer_X) return UInt16 is
+   function Current_Counter (This : HRTimer_Channel) return UInt16 is
    begin
       return This.CNTxR.CNTx;
    end Current_Counter;
@@ -1021,7 +1049,7 @@ package body STM32.HRTimers is
    ----------------------------
 
    procedure Set_Repetition_Counter
-     (This : in out HRTimer_X;  Value : UInt8) is
+     (This : in out HRTimer_Channel;  Value : UInt8) is
    begin
       This.REPxR.REPx := Value;
    end Set_Repetition_Counter;
@@ -1030,7 +1058,7 @@ package body STM32.HRTimers is
    -- Current_Repetition_Counter --
    --------------------------------
 
-   function Current_Repetition_Counter (This : HRTimer_X) return UInt8 is
+   function Current_Repetition_Counter (This : HRTimer_Channel) return UInt8 is
    begin
       return This.REPxR.REPx;
    end Current_Repetition_Counter;
@@ -1040,7 +1068,7 @@ package body STM32.HRTimers is
    ----------------------------------
 
    procedure Configure_Repetition_Counter
-     (This        : in out HRTimer_X;
+     (This        : in out HRTimer_Channel;
       Counter     : UInt8;
       Interrupt   : Boolean;
       DMA_Request : Boolean)
@@ -1056,7 +1084,7 @@ package body STM32.HRTimers is
    -----------------------
 
    procedure Set_Compare_Value
-     (This   : in out HRTimer_X;
+     (This   : in out HRTimer_Channel;
       Number : HRTimer_Compare_Number;
       Value  : in out UInt16)
    is
@@ -1086,7 +1114,7 @@ package body STM32.HRTimers is
    ------------------------
 
    function Read_Compare_Value
-     (This   : HRTimer_X;
+     (This   : HRTimer_Channel;
       Number : HRTimer_Compare_Number) return UInt16
    is
    begin
@@ -1107,7 +1135,7 @@ package body STM32.HRTimers is
    ------------------------
 
    function Read_Capture_Value
-     (This   : HRTimer_X;
+     (This   : HRTimer_Channel;
       Number : HRTimer_Capture_Number) return UInt16
    is
    begin
@@ -1124,8 +1152,8 @@ package body STM32.HRTimers is
    ----------------------
 
    procedure Enable_Interrupt
-     (This   : in out HRTimer_X;
-      Source : HRTimer_X_Interrupt)
+     (This   : in out HRTimer_Channel;
+      Source : HRTimer_Channel_Interrupt)
    is
    begin
       case Source is
@@ -1165,8 +1193,8 @@ package body STM32.HRTimers is
    ----------------------
 
    procedure Enable_Interrupt
-     (This    : in out HRTimer_X;
-      Sources : HRTimer_X_Interrupt_List)
+     (This    : in out HRTimer_Channel;
+      Sources : HRTimer_Channel_Interrupt_List)
    is
    begin
       for Source of Sources loop
@@ -1208,8 +1236,8 @@ package body STM32.HRTimers is
    -----------------------
 
    procedure Disable_Interrupt
-     (This   : in out HRTimer_X;
-      Source : HRTimer_X_Interrupt)
+     (This   : in out HRTimer_Channel;
+      Source : HRTimer_Channel_Interrupt)
    is
    begin
       case Source is
@@ -1249,8 +1277,8 @@ package body STM32.HRTimers is
    -----------------------
 
    function Interrupt_Enabled
-     (This   : HRTimer_X;
-      Source : HRTimer_X_Interrupt) return Boolean
+     (This   : HRTimer_Channel;
+      Source : HRTimer_Channel_Interrupt) return Boolean
    is
    begin
       case Source is
@@ -1290,8 +1318,8 @@ package body STM32.HRTimers is
    ----------------------
 
    function Interrupt_Status
-     (This   : HRTimer_X;
-      Source : HRTimer_X_Interrupt) return Boolean
+     (This   : HRTimer_Channel;
+      Source : HRTimer_Channel_Interrupt) return Boolean
    is
    begin
       case Source is
@@ -1331,8 +1359,8 @@ package body STM32.HRTimers is
    -----------------------------
 
    procedure Clear_Pending_Interrupt
-     (This   : in out HRTimer_X;
-      Source : HRTimer_X_Interrupt)
+     (This   : in out HRTimer_Channel;
+      Source : HRTimer_Channel_Interrupt)
    is
    begin
       case Source is
@@ -1372,8 +1400,8 @@ package body STM32.HRTimers is
    -----------------------
 
    procedure Enable_DMA_Source
-     (This   : in out HRTimer_X;
-      Source : HRTimer_X_DMA_Request)
+     (This   : in out HRTimer_Channel;
+      Source : HRTimer_Channel_DMA_Request)
    is
    begin
       case Source is
@@ -1413,8 +1441,8 @@ package body STM32.HRTimers is
    ------------------------
 
    procedure Disable_DMA_Source
-     (This   : in out HRTimer_X;
-      Source : HRTimer_X_DMA_Request)
+     (This   : in out HRTimer_Channel;
+      Source : HRTimer_Channel_DMA_Request)
    is
    begin
       case Source is
@@ -1454,8 +1482,8 @@ package body STM32.HRTimers is
    -----------------------
 
    function DMA_Source_Enabled
-     (This   : HRTimer_X;
-      Source : HRTimer_X_DMA_Request) return Boolean
+     (This   : HRTimer_Channel;
+      Source : HRTimer_Channel_DMA_Request) return Boolean
    is
    begin
       case Source is
@@ -1494,7 +1522,7 @@ package body STM32.HRTimers is
    --  Set_Deadtime --
    -------------------
 
-   procedure Set_Deadtime (This : in out HRTimer_X; Enable : Boolean) is
+   procedure Set_Deadtime (This : in out HRTimer_Channel; Enable : Boolean) is
    begin
       This.OUTxR.DTEN := Enable;
    end Set_Deadtime;
@@ -1503,7 +1531,7 @@ package body STM32.HRTimers is
    -- Read_Deadtime --
    -------------------
 
-   function Read_Deadtime (This : HRTimer_X) return Boolean is
+   function Read_Deadtime (This : HRTimer_Channel) return Boolean is
    begin
       return This.OUTxR.DTEN;
    end Read_Deadtime;
@@ -1513,7 +1541,7 @@ package body STM32.HRTimers is
    ------------------------
 
    procedure Configure_Deadtime
-     (This          : in out HRTimer_X;
+     (This          : in out HRTimer_Channel;
       Prescaler     : UInt3;
       Rising_Value  : UInt9;
       Rising_Sign   : Boolean;
@@ -1545,7 +1573,7 @@ package body STM32.HRTimers is
    ------------------------
 
    procedure Configure_Deadtime
-     (This          : in out HRTimer_X;
+     (This          : in out HRTimer_Channel;
       Rising_Value  : Float;
       Rising_Sign   : Boolean;
       Falling_Value : Float;
@@ -1609,7 +1637,7 @@ package body STM32.HRTimers is
    -----------------------
 
    procedure Set_Deadtime_Lock
-     (This : in out HRTimer_X; Lock : Deadtime_Lock) is
+     (This : in out HRTimer_Channel; Lock : Deadtime_Lock) is
    begin
       This.DTxR.DTRLKx := Lock.Rising_Value;
       This.DTxR.DTRSLKx := Lock.Rising_Sign;
@@ -1621,7 +1649,7 @@ package body STM32.HRTimers is
    -- Read_Deadtime_Lock --
    ------------------------
 
-   function Read_Deadtime_Lock (This : HRTimer_X) return Deadtime_Lock is
+   function Read_Deadtime_Lock (This : HRTimer_Channel) return Deadtime_Lock is
       Lock : Deadtime_Lock;
    begin
       Lock.Rising_Value := This.DTxR.DTRLKx;
@@ -1636,7 +1664,7 @@ package body STM32.HRTimers is
    ----------------------------
 
    procedure Configure_Output_Event
-     (This        : in out HRTimer_X;
+     (This        : in out HRTimer_Channel;
       Output      : Output_Number;
       Set_Event   : Output_Event;
       Reset_Event : Output_Event)
@@ -1657,7 +1685,7 @@ package body STM32.HRTimers is
    ------------------------------
 
    procedure Configure_External_Event
-     (This         : in out HRTimer_X;
+     (This         : in out HRTimer_Channel;
       Event_Number : External_Event_Number;
       Event_Latch  : External_Event_Latch;
       Event_Filter : External_Event_Blanking_Filter)
@@ -1702,7 +1730,7 @@ package body STM32.HRTimers is
    ----------------------
 
    procedure Set_Chopper_Mode
-     (This     : in out HRTimer_X;
+     (This     : in out HRTimer_Channel;
       Output_1 : Boolean;
       Output_2 : Boolean)
    is
@@ -1715,7 +1743,7 @@ package body STM32.HRTimers is
    -- Enabled_Chopper_Mode --
    --------------------------
 
-   function Enabled_Chopper_Mode (This : HRTimer_X) return Boolean is
+   function Enabled_Chopper_Mode (This : HRTimer_Channel) return Boolean is
    begin
       if (This.OUTxR.CHP1 or This.OUTxR.CHP2) then
          return True;
@@ -1728,7 +1756,7 @@ package body STM32.HRTimers is
    ----------------------------
 
    procedure Configure_Chopper_Mode
-     (This              : in out HRTimer_X;
+     (This              : in out HRTimer_Channel;
       Output_1          : Boolean;
       Output_2          : Boolean;
       Carrier_Frequency : Chopper_Carrier_Frequency;
@@ -1748,7 +1776,7 @@ package body STM32.HRTimers is
    ----------------------
 
    procedure Set_Fault_Source
-     (This   : in out HRTimer_X;
+     (This   : in out HRTimer_Channel;
       Source : HRTimer_Fault_Source;
       Enable : Boolean) is
    begin
@@ -1771,7 +1799,7 @@ package body STM32.HRTimers is
    --------------------------
 
    function Enabled_Fault_Source
-     (This : HRTimer_X;
+     (This : HRTimer_Channel;
       Source : HRTimer_Fault_Source) return Boolean is
    begin
       case Source is
@@ -1792,7 +1820,7 @@ package body STM32.HRTimers is
    -- Set_Fault_Source_Lock --
    ---------------------------
 
-   procedure Set_Fault_Source_Lock (This : in out HRTimer_X) is
+   procedure Set_Fault_Source_Lock (This : in out HRTimer_Channel) is
    begin
       This.FLTxR.FLTLCK := True;
    end Set_Fault_Source_Lock;
@@ -1801,7 +1829,7 @@ package body STM32.HRTimers is
    -- Enabled_Fault_Source_Lock --
    -------------------------------
 
-   function Enabled_Fault_Source_Lock (This : HRTimer_X) return Boolean is
+   function Enabled_Fault_Source_Lock (This : HRTimer_Channel) return Boolean is
    begin
       return This.FLTxR.FLTLCK;
    end Enabled_Fault_Source_Lock;
@@ -1985,7 +2013,7 @@ package body STM32.HRTimers is
    -------------------
 
    procedure Enable_Output
-     (This : HRTimer_X;
+     (This : HRTimer_Channel;
       Output_1 : Boolean;
       Output_2 : Boolean)
    is
@@ -2017,7 +2045,7 @@ package body STM32.HRTimers is
    --------------------
 
    procedure Disable_Output
-     (This : HRTimer_X;
+     (This : HRTimer_Channel;
       Output_1 : Boolean;
       Output_2 : Boolean)
    is
@@ -2049,7 +2077,7 @@ package body STM32.HRTimers is
    -------------------
 
    function Output_Status
-     (This : HRTimer_X) return Output_Status_List
+     (This : HRTimer_Channel) return Output_Status_List
    is
       Output : Output_Status_List;
    begin
@@ -2162,7 +2190,7 @@ package body STM32.HRTimers is
    -- No_Outputs_Enabled --
    ------------------------
 
-   function No_Outputs_Enabled (This : HRTimer_X) return Boolean is
+   function No_Outputs_Enabled (This : HRTimer_Channel) return Boolean is
    begin
       if This'Address = HRTIM_TIMA_Base then
          if (HRTimer_Common_Periph.OENR.TA1OEN or
@@ -2583,8 +2611,8 @@ package body STM32.HRTimers is
    --------------------------------
 
    procedure Set_Burst_DMA_Timer_Update
-     (Counter   : HRTimer_X;
-      Registers : Burst_DMA_TimerX_Update_List;
+     (Counter   : HRTimer_Channel;
+      Registers : Burst_DMA_Timer_Channel_Update_List;
       Value     : Boolean)
    is
    begin
