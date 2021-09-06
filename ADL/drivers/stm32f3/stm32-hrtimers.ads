@@ -425,16 +425,13 @@ package STM32.HRTimers is
    --  synchronization is sent (refer to Section 21.3.19 in RM0364: DAC triggers
    --  for connections details).
 
+   type Comparator_AutoDelayed_Mode is (CMP2, CMP4);
+
    type CMP2_AutoDelayed_Mode is
      (Always_Active,
       Active_After_Capture_1,
       Active_After_Capture_1_Compare_1,
       Active_After_Capture_1_Compare_3);
-
-   procedure Configure_AutoDelayed_Mode
-     (This : in out HRTimer_Channel;
-      Mode : CMP2_AutoDelayed_Mode)
-     with Pre => not Enabled (This);
 
    type CMP4_AutoDelayed_Mode is
      (Always_Active,
@@ -442,9 +439,20 @@ package STM32.HRTimers is
       Active_After_Capture_2_Compare_1,
       Active_After_Capture_2_Compare_3);
 
+   type Autodelayed_Mode_Descriptor
+     (CMP_Selector : Comparator_AutoDelayed_Mode := CMP2) is
+     record
+        case CMP_Selector is
+           when CMP2 =>
+              AutoDelay_1 : CMP2_AutoDelayed_Mode;
+           when CMP4 =>
+              AutoDelay_2 : CMP4_AutoDelayed_Mode;
+        end case;
+     end record with Size => 3;
+
    procedure Configure_AutoDelayed_Mode
      (This : in out HRTimer_Channel;
-      Mode : CMP4_AutoDelayed_Mode)
+      Mode : Autodelayed_Mode_Descriptor)
      with Pre => not Enabled (This);
 
    type Update_Gating_Mode is
@@ -730,11 +738,11 @@ package STM32.HRTimers is
    --  These events determine the set/reset crossbar of the outputs, so the
    --  output waveform is established.
 
-   type Output_Number is (Output_1, Output_2);
+   type HRTimer_Channel_Output is (Output_1, Output_2);
 
-   procedure Configure_Output_Event
+   procedure Configure_Channel_Output
      (This        : in out HRTimer_Channel;
-      Output      : Output_Number;
+      Output      : HRTimer_Channel_Output;
       Set_Event   : Output_Event;
       Reset_Event : Output_Event)
      with Pre => Set_Event /= Reset_Event;

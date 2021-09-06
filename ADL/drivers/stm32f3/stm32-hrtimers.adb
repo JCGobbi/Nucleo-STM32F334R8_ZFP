@@ -824,22 +824,15 @@ package body STM32.HRTimers is
 
    procedure Configure_AutoDelayed_Mode
      (This : in out HRTimer_Channel;
-      Mode : CMP2_AutoDelayed_Mode)
+      Mode : Autodelayed_Mode_Descriptor)
    is
    begin
-      This.TIMxCR.DELCMP.Arr (2) := Mode'Enum_Rep;
-   end Configure_AutoDelayed_Mode;
-
-   --------------------------------
-   -- Configure_AutoDelayed_Mode --
-   --------------------------------
-
-   procedure Configure_AutoDelayed_Mode
-     (This : in out HRTimer_Channel;
-      Mode : CMP4_AutoDelayed_Mode)
-   is
-   begin
-      This.TIMxCR.DELCMP.Arr (3) := Mode'Enum_Rep;
+      case Mode.CMP_Selector is
+         when CMP2 =>
+            This.TIMxCR.DELCMP.Arr (2) := Mode.AutoDelay_1'Enum_Rep;
+         when CMP4 =>
+            This.TIMxCR.DELCMP.Arr (3) := Mode.AutoDelay_2'Enum_Rep;
+      end case;
    end Configure_AutoDelayed_Mode;
 
    ----------------------------------
@@ -1659,13 +1652,13 @@ package body STM32.HRTimers is
       return Lock;
    end Read_Deadtime_Lock;
 
-   ----------------------------
-   -- Configure_Output_Event --
-   ----------------------------
+   ------------------------------
+   -- Configure_Channel_Output --
+   ------------------------------
 
-   procedure Configure_Output_Event
+   procedure Configure_Channel_Output
      (This        : in out HRTimer_Channel;
-      Output      : Output_Number;
+      Output      : HRTimer_Channel_Output;
       Set_Event   : Output_Event;
       Reset_Event : Output_Event)
    is
@@ -1678,7 +1671,7 @@ package body STM32.HRTimers is
             This.SETx2R := 2 ** Set_Event'Enum_Rep;
             This.RSTx2R := 2 ** Reset_Event'Enum_Rep;
       end case;
-   end Configure_Output_Event;
+   end Configure_Channel_Output;
 
    ------------------------------
    -- Configure_External_Event --
