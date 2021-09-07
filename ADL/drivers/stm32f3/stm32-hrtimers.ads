@@ -278,7 +278,11 @@ package STM32.HRTimers is
       Mode : Counter_Operating_Mode);
    --  The timer operates in single-shot mode and stops when it reaches the
    --  MPER value or operates in continuous (free-running) mode and rolls over
-   --  to zero when it reaches the MPER value. See pg. 636 in RM0364 rev. 4.
+   --  to zero when it reaches the MPER value. In single-shot mode it may be
+   --  not re-triggerable - a counter reset can be done only if the counter is
+   --  stoped (period elapsed), or re-triggerable - a counter reset is done
+   --  whatever the counter state (running or stopped).
+   --  See pg. 636 in RM0364 rev. 4.
 
    procedure Set_Counter (This : in out HRTimer_Master;  Value : UInt16)
      with Post => Current_Counter (This) = Value;
@@ -310,15 +314,15 @@ package STM32.HRTimers is
       Compare_4);
 
    procedure Set_Compare_Value
-     (This   : in out HRTimer_Master;
-      Number : HRTimer_Compare_Number;
-      Value  : in out UInt16)
-     with Post => Read_Compare_Value (This, Number) = Value;
+     (This    : in out HRTimer_Master;
+      Compare : HRTimer_Compare_Number;
+      Value   : in out UInt16)
+     with Post => Read_Compare_Value (This, Compare) = Value;
    --  Set the value for Compare registers 1 to 4.
 
    function Read_Compare_Value
-     (This   : HRTimer_Master;
-      Number : HRTimer_Compare_Number) return UInt16;
+     (This    : HRTimer_Master;
+      Compare : HRTimer_Compare_Number) return UInt16;
    --  Read the value for Compare registers 1 to 4.
 
    type HRTimer_Master_Interrupt is
@@ -448,7 +452,7 @@ package STM32.HRTimers is
            when CMP4 =>
               AutoDelay_2 : CMP4_AutoDelayed_Mode;
         end case;
-     end record with Size => 3;
+     end record with Size => 16;
 
    procedure Configure_AutoDelayed_Mode
      (This : in out HRTimer_Channel;
@@ -525,52 +529,189 @@ package STM32.HRTimers is
      (This : in out HRTimer_Channel;
       Mode : Counter_Operating_Mode);
    --  The timer operates in single-shot mode and stops when it reaches the
-   --  TIMxPER value or operates in continuous (free-running) mode and rolls over
-   --  to zero when it reaches the TIMxPER value. See pg. 636 in RM0364 rev. 4.
+   --  MPER value or operates in continuous (free-running) mode and rolls over
+   --  to zero when it reaches the MPER value. In single-shot mode it may be
+   --  not re-triggerable - a counter reset can be done only if the counter is
+   --  stoped (period elapsed), or re-triggerable - a counter reset is done
+   --  whatever the counter state (running or stopped).
+   --  See pg. 636 in RM0364 rev. 4.
 
    procedure Set_Counter (This : in out HRTimer_Channel;  Value : UInt16)
      with Post => Current_Counter (This) = Value;
 
    function Current_Counter (This : HRTimer_Channel) return UInt16;
 
-   procedure Set_Repetition_Counter
+   procedure Set_Counter_Repetition
      (This : in out HRTimer_Channel;  Value : UInt8)
-     with Post => Current_Repetition_Counter (This) = Value;
+     with Post => Current_Counter_Repetition (This) = Value;
    --  The repetition period value for the timer counter. It  holds either
    --  the content of the preload register or the content of the active
    --  register if preload is disabled.
 
-   function Current_Repetition_Counter (This : HRTimer_Channel) return UInt8;
+   function Current_Counter_Repetition (This : HRTimer_Channel) return UInt8;
 
-   procedure Configure_Repetition_Counter
+   procedure Configure_Counter_Repetition
      (This        : in out HRTimer_Channel;
       Counter     : UInt8;
       Interrupt   : Boolean;
       DMA_Request : Boolean);
    --  Set repetition counter with Interrupt and/or DMA requests.
 
+   type Counter_Reset_Event is
+     (Timer_Update,
+      Timer_Compare_2,
+      Timer_Compare_4,
+      Master_Timer_Period,
+      Master_Compare_1,
+      Master_Compare_2,
+      Master_Compare_3,
+      Master_Compare_4,
+      External_Event_1,
+      External_Event_2,
+      External_Event_3,
+      External_Event_4,
+      External_Event_5,
+      External_Event_6,
+      External_Event_7,
+      External_Event_8,
+      External_Event_9,
+      External_Event_10,
+      Option_20,
+      Option_21,
+      Option_22,
+      Option_23,
+      Option_24,
+      Option_25,
+      Option_26,
+      Option_27,
+      Option_28,
+      Option_29,
+      Option_30,
+      Option_31)
+     with Size => 32;
+   --  The HRTimer A to F are reset upon these events.
+   --  Option   HRTimer_A      HRTimer_B      HRTimer_C
+   --  20       Timer_B_CMP_1  Timer_A_CMP_1  Timer_A_CMP_1
+   --  21       Timer_B_CMP_2  Timer_A_CMP_2  Timer_A_CMP_2
+   --  22       Timer_B_CMP_4  Timer_A_CMP_4  Timer_A_CMP_4
+   --  23       Timer_C_CMP_1  Timer_C_CMP_1  Timer_B_CMP_1
+   --  24       Timer_C_CMP_2  Timer_C_CMP_2  Timer_B_CMP_2
+   --  25       Timer_C_CMP_4  Timer_C_CMP_4  Timer_B_CMP_4
+   --  26       Timer_D_CMP_1  Timer_D_CMP_1  Timer_D_CMP_1
+   --  27       Timer_D_CMP_2  Timer_D_CMP_2  Timer_D_CMP_2
+   --  28       Timer_D_CMP_4  Timer_D_CMP_4  Timer_D_CMP_4
+   --  29       Timer_E_CMP_1  Timer_E_CMP_1  Timer_E_CMP_1
+   --  30       Timer_E_CMP_2  Timer_E_CMP_2  Timer_E_CMP_2
+   --  31       Timer_E_CMP_4  Timer_E_CMP_4  Timer_E_CMP_4
+   --
+   --  Option   HRTimer_D      HRTimer_E
+   --  20       Timer_A_CMP_1  Timer_A_CMP_1
+   --  21       Timer_A_CMP_2  Timer_A_CMP_2
+   --  22       Timer_A_CMP_4  Timer_A_CMP_4
+   --  23       Timer_B_CMP_1  Timer_B_CMP_1
+   --  24       Timer_B_CMP_2  Timer_B_CMP_2
+   --  25       Timer_B_CMP_4  Timer_B_CMP_4
+   --  26       Timer_C_CMP_1  Timer_C_CMP_1
+   --  27       Timer_C_CMP_2  Timer_C_CMP_2
+   --  28       Timer_C_CMP_4  Timer_C_CMP_4
+   --  29       Timer_E_CMP_1  Timer_D_CMP_1
+   --  30       Timer_E_CMP_2  Timer_D_CMP_2
+   --  31       Timer_E_CMP_4  Timer_D_CMP_4
+
+   procedure Set_Counter_Reset_Event
+     (This   : in out HRTimer_Channel;
+      Event  : Counter_Reset_Event;
+      Enable : Boolean);
+
    type HRTimer_Capture_Compare_State is (Disable, Enable);
 
    procedure Set_Compare_Value
-     (This   : in out HRTimer_Channel;
-      Number : HRTimer_Compare_Number;
-      Value  : in out UInt16)
-     with Post => Read_Compare_Value (This, Number) = Value;
+     (This    : in out HRTimer_Channel;
+      Compare : HRTimer_Compare_Number;
+      Value   : in out UInt16)
+     with Post => Current_Compare_Value (This, Compare) = Value;
    --  Set the value for Compare registers 1 to 4.
 
-   function Read_Compare_Value
-     (This   : HRTimer_Channel;
-      Number : HRTimer_Compare_Number) return UInt16;
+   function Current_Compare_Value
+     (This    : HRTimer_Channel;
+      Compare : HRTimer_Compare_Number) return UInt16;
    --  Read the value for Compare registers 1 to 4.
 
    type HRTimer_Capture_Number is
      (Capture_1,
       Capture_2);
 
-   function Read_Capture_Value
+   function Current_Capture_Value
      (This   : HRTimer_Channel;
       Number : HRTimer_Capture_Number) return UInt16;
    --  Read the counter value when the capture event occurred.
+
+   type HRTimer_Capture_Event is
+     (Software,
+      Timer_Update,
+      External_Event_1,
+      External_Event_2,
+      External_Event_3,
+      External_Event_4,
+      External_Event_5,
+      External_Event_6,
+      External_Event_7,
+      External_Event_8,
+      External_Event_9,
+      External_Event_10,
+      Timer_A_Output_1_Set,
+      Timer_A_Output_1_Reset,
+      Timer_A_Compare_1,
+      Timer_A_Compare_2,
+      Timer_B_Output_1_Set,
+      Timer_B_Output_1_Reset,
+      Timer_B_Compare_1,
+      Timer_B_Compare_2,
+      Timer_C_Output_1_Set,
+      Timer_C_Output_1_Reset,
+      Timer_C_Compare_1,
+      Timer_C_Compare_2,
+      Timer_D_Output_1_Set,
+      Timer_D_Output_1_Reset,
+      Timer_D_Compare_1,
+      Timer_D_Compare_2,
+      Timer_E_Output_1_Set,
+      Timer_E_Output_1_Reset,
+      Timer_E_Compare_1,
+      Timer_E_Compare_2);
+   --  Events that trigger the counter.
+
+   procedure Set_Capture_Event
+     (This    : in out HRTimer_Channel;
+      Capture : HRTimer_Capture_Number;
+      Event   : HRTimer_Capture_Event;
+      Enable  : Boolean)
+     with Pre => (if This'Address = HRTIM_TIMA_Base then
+                    Event not in Timer_A_Output_1_Set |
+                                 Timer_A_Output_1_Reset |
+                                 Timer_A_Compare_1 |
+                                 Timer_A_Compare_2
+                  elsif This'Address = HRTIM_TIMB_Base then
+                    Event not in Timer_B_Output_1_Set |
+                                 Timer_B_Output_1_Reset |
+                                 Timer_B_Compare_1 |
+                                 Timer_B_Compare_2
+                  elsif This'Address = HRTIM_TIMC_Base then
+                    Event not in Timer_C_Output_1_Set |
+                                 Timer_C_Output_1_Reset |
+                                 Timer_C_Compare_1 |
+                                 Timer_C_Compare_2
+                  elsif This'Address = HRTIM_TIMD_Base then
+                    Event not in Timer_D_Output_1_Set |
+                                 Timer_D_Output_1_Reset |
+                                 Timer_D_Compare_1 |
+                                 Timer_D_Compare_2
+                  elsif This'Address = HRTIM_TIME_Base then
+                    Event not in Timer_E_Output_1_Set |
+                                 Timer_E_Output_1_Reset |
+                                 Timer_E_Compare_1 |
+                                 Timer_E_Compare_2);
+   --  Enable/disable the event that trigger the counter.
 
    type HRTimer_Channel_Interrupt is
      (Compare_1_Interrupt,
@@ -740,7 +881,7 @@ package STM32.HRTimers is
 
    type HRTimer_Channel_Output is (Output_1, Output_2);
 
-   procedure Configure_Channel_Output
+   procedure Configure_Channel_Output_Event
      (This        : in out HRTimer_Channel;
       Output      : HRTimer_Channel_Output;
       Set_Event   : Output_Event;
@@ -803,26 +944,6 @@ package STM32.HRTimers is
    --  analog watchdogs and general purpose timer trigger outputs).
    --  See chapter 21.3.7 at pg. 657 in RM0364 rev. 4.
 
-   type Reset_Counter_Event is
-     (Timer_X_Update,
-      Timer_X_Compare_2,
-      Timer_X_Compare_4,
-      Master_Timer_Period,
-      Master_Compare_1,
-      Master_Compare_2,
-      Master_Compare_3,
-      Master_Compare_4,
-      External_Event_1,
-      External_Event_2,
-      External_Event_3,
-      External_Event_4,
-      External_Event_5,
-      External_Event_6,
-      External_Event_7,
-      External_Event_8,
-      External_Event_9,
-      External_Event_10);
-
    type Chopper_Carrier_Frequency is
      (fHRTIM_Over_16, -- 9 MHz with fHRTIM = 144 MHz
       fHRTIM_Over_32,
@@ -877,21 +998,27 @@ package STM32.HRTimers is
    --  This bitfield cannot be modified when one of the CHPx bits is set.
 
    procedure Set_Chopper_Mode
-     (This     : in out HRTimer_Channel;
-      Output_1 : Boolean;
-      Output_2 : Boolean);
-   --  Enable/disable chopper mode for HRTimer outputs.
+     (This    : in out HRTimer_Channel;
+      Output1 : Boolean;
+      Output2 : Boolean)
+     with Post => Enabled_Chopper_Mode (This, Output_1) = Output1 and
+                  Enabled_Chopper_Mode (This, Output_2) = Output2;
+   --  Enable/disable chopper mode for HRTimer channel outputs.
 
-   function Enabled_Chopper_Mode (This : HRTimer_Channel) return Boolean;
+   function Enabled_Chopper_Mode
+     (This   : HRTimer_Channel;
+      Output : HRTimer_Channel_Output) return Boolean;
 
    procedure Configure_Chopper_Mode
      (This              : in out HRTimer_Channel;
-      Output_1          : Boolean;
-      Output_2          : Boolean;
+      Output1           : Boolean;
+      Output2           : Boolean;
       Carrier_Frequency : Chopper_Carrier_Frequency;
       Duty_Cycle        : Chopper_Duty_Cycle;
       Start_PulseWidth  : Chopper_Start_PulseWidth)
-     with Pre => not Enabled_Chopper_Mode (This);
+     with Pre => not Enabled (This) and
+                 (not Enabled_Chopper_Mode (This, Output_1) or
+                  not Enabled_Chopper_Mode (This, Output_2));
    --  A high-frequency carrier can be added on top of the timing unit output
    --  signals to drive isolation transformers. This is done in the output
    --  stage before the polarity insertion to enable chopper on outputs 1 and 2.
@@ -959,17 +1086,32 @@ package STM32.HRTimers is
 
    procedure Clear_Pending_Interrupt (Source : HRTimer_Common_Interrupt);
 
-   procedure Enable_Output
-     (This : HRTimer_Channel;
-      Output_1 : Boolean;
-      Output_2 : Boolean);
-   --  Enable the outputs 1 and/or 2 for any HRTimer A to E.
+   procedure Set_Channel_Output
+     (This   : HRTimer_Channel;
+      Output : HRTimer_Channel_Output;
+      Enable : Boolean)
+     with Post => (if Output = Output_1 then
+                     (if Enable then Output_Status (This)(1) = Enabled
+                      else Output_Status (This)(1) = Idle or
+                           Output_Status (This)(1) = Fault)
+                   elsif Output = Output_2 then
+                     (if Enable then Output_Status (This)(2) = Enabled
+                      else Output_Status (This)(2) = Idle or
+                           Output_Status (This)(2) = Fault));
+   --  Enable/disable the output 1 or 2 for any HRTimer A to E.
 
-   procedure Disable_Output
-     (This : HRTimer_Channel;
-      Output_1 : Boolean;
-      Output_2 : Boolean);
-   --  Disable the outputs 1 and/or 2 for any HRTimer A to E.
+   procedure Set_Channel_Outputs
+     (This   : HRTimer_Channel;
+      Enable : Boolean)
+    with Inline,
+         Post => Enable = not No_Outputs_Enabled (This);
+   --  Enable/disable the outputs 1 and 2 for any HRTimer A to E.
+
+   procedure Set_Channel_Outputs
+     (Channels : HRTimer_List;
+      Enable   : Boolean)
+     with Inline;
+   --  Enable/disable the outputs 1 and 2 for several HRTimer from A to E.
 
    type HRTimer_Channel_Output_Status is (Idle, Fault, Enabled);
 
@@ -1427,13 +1569,13 @@ private
       --  Timerx External Event Filtering Register 2
       EEFxR2    : aliased EEFAR2_Register;
       --  TimerA Reset Register
-      RSTxR     : aliased RSTAR_Register;
+      RSTxR     : HAL.UInt32;
       --  Timerx Chopper Register
       CHPxR     : aliased CHPAR_Register;
       --  Timerx Capture 2 Control Register
-      CPT1xCR   : aliased CPT1ACR_Register;
+      CPT1xCR   : HAL.UInt32;
       --  CPT2xCR
-      CPT2xCR   : aliased CPT2ACR_Register;
+      CPT2xCR   : HAL.UInt32;
       --  Timerx Output Register
       OUTxR     : aliased OUTAR_Register;
       --  Timerx Fault Register

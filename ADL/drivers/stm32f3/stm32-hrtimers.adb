@@ -428,9 +428,9 @@ package body STM32.HRTimers is
    -----------------------
 
    procedure Set_Compare_Value
-     (This   : in out HRTimer_Master;
-      Number : HRTimer_Compare_Number;
-      Value  : in out UInt16)
+     (This    : in out HRTimer_Master;
+      Compare : HRTimer_Compare_Number;
+      Value   : in out UInt16)
    is
       pragma Unreferenced (This);
 
@@ -445,7 +445,7 @@ package body STM32.HRTimers is
          Value := Min_Value;
       end if;
 
-      case Number is
+      case Compare is
          when Compare_1 =>
             HRTIM_Master_Periph.MCMP1R.MCMP1 := Value;
          when Compare_2 =>
@@ -462,12 +462,12 @@ package body STM32.HRTimers is
    ------------------------
 
    function Read_Compare_Value
-     (This   : HRTimer_Master;
-      Number : HRTimer_Compare_Number) return UInt16
+     (This    : HRTimer_Master;
+      Compare : HRTimer_Compare_Number) return UInt16
    is
       pragma Unreferenced (This);
    begin
-      case Number is
+      case Compare is
          when Compare_1 =>
             return HRTIM_Master_Periph.MCMP1R.MCMP1;
          when Compare_2 =>
@@ -1038,29 +1038,29 @@ package body STM32.HRTimers is
    end Current_Counter;
 
    ----------------------------
-   -- Set_Repetition_Counter --
+   -- Set_Counter_Repetition --
    ----------------------------
 
-   procedure Set_Repetition_Counter
-     (This : in out HRTimer_Channel;  Value : UInt8) is
+   procedure Set_Counter_Repetition
+     (This : in out HRTimer_Channel; Value : UInt8) is
    begin
       This.REPxR.REPx := Value;
-   end Set_Repetition_Counter;
+   end Set_Counter_Repetition;
 
    --------------------------------
-   -- Current_Repetition_Counter --
+   -- Current_Counter_Repetition --
    --------------------------------
 
-   function Current_Repetition_Counter (This : HRTimer_Channel) return UInt8 is
+   function Current_Counter_Repetition (This : HRTimer_Channel) return UInt8 is
    begin
       return This.REPxR.REPx;
-   end Current_Repetition_Counter;
+   end Current_Counter_Repetition;
 
    ----------------------------------
-   -- Configure_Repetition_Counter --
+   -- Configure_Counter_Repetition --
    ----------------------------------
 
-   procedure Configure_Repetition_Counter
+   procedure Configure_Counter_Repetition
      (This        : in out HRTimer_Channel;
       Counter     : UInt8;
       Interrupt   : Boolean;
@@ -1070,16 +1070,33 @@ package body STM32.HRTimers is
       This.REPxR.REPx := Counter;
       This.TIMxDIER.REPIE := Interrupt;
       This.TIMxDIER.REPDE := DMA_Request;
-   end Configure_Repetition_Counter;
+   end Configure_Counter_Repetition;
+
+   -----------------------------
+   -- Set_Counter_Reset_Event --
+   -----------------------------
+
+   procedure Set_Counter_Reset_Event
+     (This   : in out HRTimer_Channel;
+      Event  : Counter_Reset_Event;
+      Enable : Boolean)
+   is
+   begin
+      if Enable then
+         This.RSTxR := This.RSTxR or 2 ** Event'Enum_Rep;
+      else
+         This.RSTxR := This.RSTxR and not (2 ** Event'Enum_Rep);
+      end if;
+   end Set_Counter_Reset_Event;
 
    -----------------------
    -- Set_Compare_Value --
    -----------------------
 
    procedure Set_Compare_Value
-     (This   : in out HRTimer_Channel;
-      Number : HRTimer_Compare_Number;
-      Value  : in out UInt16)
+     (This    : in out HRTimer_Channel;
+      Compare : HRTimer_Compare_Number;
+      Value   : in out UInt16)
    is
       --  The minimum value for timer compare is 3 periods of fHRTIM clock,
       --  that is  0x60 if CKPSC[2:0] = 0, 0x30 if CKPSC[2:0] = 1, 0x18 if
@@ -1090,7 +1107,7 @@ package body STM32.HRTimers is
    begin
       Value := UInt16'Max (Value, Min_Value);
 
-      case Number is
+      case Compare is
          when Compare_1 =>
             This.CMP1xR.CMP1x := Value;
          when Compare_2 =>
@@ -1102,16 +1119,16 @@ package body STM32.HRTimers is
       end case;
    end Set_Compare_Value;
 
-   ------------------------
-   -- Read_Compare_Value --
-   ------------------------
+   ---------------------------
+   -- Current_Compare_Value --
+   ---------------------------
 
-   function Read_Compare_Value
-     (This   : HRTimer_Channel;
-      Number : HRTimer_Compare_Number) return UInt16
+   function Current_Compare_Value
+     (This    : HRTimer_Channel;
+      Compare : HRTimer_Compare_Number) return UInt16
    is
    begin
-      case Number is
+      case Compare is
          when Compare_1 =>
             return This.CMP1xR.CMP1x;
          when Compare_2 =>
@@ -1121,13 +1138,13 @@ package body STM32.HRTimers is
          when Compare_4 =>
             return This.CMP4xR.CMP4x;
       end case;
-   end Read_Compare_Value;
+   end Current_Compare_Value;
 
    ------------------------
-   -- Read_Capture_Value --
+   -- Current_Capture_Value --
    ------------------------
 
-   function Read_Capture_Value
+   function Current_Capture_Value
      (This   : HRTimer_Channel;
       Number : HRTimer_Capture_Number) return UInt16
    is
@@ -1138,7 +1155,34 @@ package body STM32.HRTimers is
          when Capture_2 =>
             return This.CPT2xR.CPT2x;
       end case;
-   end Read_Capture_Value;
+   end Current_Capture_Value;
+
+   -----------------------
+   -- Set_Capture_Event --
+   -----------------------
+
+   procedure Set_Capture_Event
+     (This    : in out HRTimer_Channel;
+      Capture : HRTimer_Capture_Number;
+      Event   : HRTimer_Capture_Event;
+      Enable  : Boolean)
+   is
+   begin
+      case Capture is
+         when Capture_1 =>
+            if Enable then
+               This.CPT1xCR := This.CPT1xCR or 2 ** Event'Enum_Rep;
+            else
+               This.CPT1xCR := This.CPT1xCR and not (2 ** Event'Enum_Rep);
+            end if;
+         when Capture_2 =>
+            if Enable then
+               This.CPT2xCR := This.CPT2xCR or 2 ** Event'Enum_Rep;
+            else
+               This.CPT2xCR := This.CPT2xCR and not (2 ** Event'Enum_Rep);
+            end if;
+      end case;
+   end Set_Capture_Event;
 
    ----------------------
    -- Enable_Interrupt --
@@ -1652,11 +1696,11 @@ package body STM32.HRTimers is
       return Lock;
    end Read_Deadtime_Lock;
 
-   ------------------------------
-   -- Configure_Channel_Output --
-   ------------------------------
+   ------------------------------------
+   -- Configure_Channel_Output_Event --
+   ------------------------------------
 
-   procedure Configure_Channel_Output
+   procedure Configure_Channel_Output_Event
      (This        : in out HRTimer_Channel;
       Output      : HRTimer_Channel_Output;
       Set_Event   : Output_Event;
@@ -1671,7 +1715,7 @@ package body STM32.HRTimers is
             This.SETx2R := 2 ** Set_Event'Enum_Rep;
             This.RSTx2R := 2 ** Reset_Event'Enum_Rep;
       end case;
-   end Configure_Channel_Output;
+   end Configure_Channel_Output_Event;
 
    ------------------------------
    -- Configure_External_Event --
@@ -1723,25 +1767,29 @@ package body STM32.HRTimers is
    ----------------------
 
    procedure Set_Chopper_Mode
-     (This     : in out HRTimer_Channel;
-      Output_1 : Boolean;
-      Output_2 : Boolean)
+     (This    : in out HRTimer_Channel;
+      Output1 : Boolean;
+      Output2 : Boolean)
    is
    begin
-      This.OUTxR.CHP1 := Output_1;
-      This.OUTxR.CHP2 := Output_2;
+      This.OUTxR.CHP1 := Output1;
+      This.OUTxR.CHP2 := Output2;
    end Set_Chopper_Mode;
 
    --------------------------
    -- Enabled_Chopper_Mode --
    --------------------------
 
-   function Enabled_Chopper_Mode (This : HRTimer_Channel) return Boolean is
+   function Enabled_Chopper_Mode
+     (This   : HRTimer_Channel;
+      Output : HRTimer_Channel_Output) return Boolean is
    begin
-      if (This.OUTxR.CHP1 or This.OUTxR.CHP2) then
-         return True;
-      end if;
-      return False;
+      case Output is
+         when Output_1 =>
+            return This.OUTxR.CHP1;
+         when Output_2 =>
+            return This.OUTxR.CHP2;
+      end case;
    end Enabled_Chopper_Mode;
 
    ----------------------------
@@ -1750,15 +1798,15 @@ package body STM32.HRTimers is
 
    procedure Configure_Chopper_Mode
      (This              : in out HRTimer_Channel;
-      Output_1          : Boolean;
-      Output_2          : Boolean;
+      Output1           : Boolean;
+      Output2           : Boolean;
       Carrier_Frequency : Chopper_Carrier_Frequency;
       Duty_Cycle        : Chopper_Duty_Cycle;
       Start_PulseWidth  : Chopper_Start_PulseWidth)
    is
    begin
-      This.OUTxR.CHP1 := Output_1;
-      This.OUTxR.CHP2 := Output_2;
+      This.OUTxR.CHP1 := Output1;
+      This.OUTxR.CHP2 := Output2;
       This.CHPxR.CHPFRQ := Carrier_Frequency'Enum_Rep;
       This.CHPxR.CHPDTY := Duty_Cycle'Enum_Rep;
       This.CHPxR.STRTPW := Start_PulseWidth'Enum_Rep;
@@ -2001,69 +2049,121 @@ package body STM32.HRTimers is
       end case;
    end Clear_Pending_Interrupt;
 
-   -------------------
-   -- Enable_Output --
-   -------------------
+   ------------------------
+   -- Set_Channel_Output --
+   ------------------------
 
-   procedure Enable_Output
-     (This : HRTimer_Channel;
-      Output_1 : Boolean;
-      Output_2 : Boolean)
+   procedure Set_Channel_Output
+     (This   : HRTimer_Channel;
+      Output : HRTimer_Channel_Output;
+      Enable : Boolean)
    is
    begin
       if This'Address = HRTIM_TIMA_Base then
-         HRTimer_Common_Periph.OENR.TA1OEN := Output_1;
-         HRTimer_Common_Periph.OENR.TA2OEN := Output_2;
+         case Output is
+            when Output_1 =>
+               HRTimer_Common_Periph.OENR.TA1OEN := Enable;
+            when Output_2 =>
+               HRTimer_Common_Periph.OENR.TA2OEN := Enable;
+         end case;
 
       elsif This'Address = HRTIM_TIMB_Base then
-         HRTimer_Common_Periph.OENR.TB1OEN := Output_1;
-         HRTimer_Common_Periph.OENR.TB2OEN := Output_2;
+         case Output is
+            when Output_1 =>
+               HRTimer_Common_Periph.OENR.TB1OEN := Enable;
+            when Output_2 =>
+               HRTimer_Common_Periph.OENR.TB2OEN := Enable;
+         end case;
 
       elsif This'Address = HRTIM_TIMC_Base then
-         HRTimer_Common_Periph.OENR.TC1OEN := Output_1;
-         HRTimer_Common_Periph.OENR.TC2OEN := Output_2;
+         case Output is
+            when Output_1 =>
+               HRTimer_Common_Periph.OENR.TC1OEN := Enable;
+            when Output_2 =>
+               HRTimer_Common_Periph.OENR.TC2OEN := Enable;
+         end case;
 
       elsif This'Address = HRTIM_TIMD_Base then
-         HRTimer_Common_Periph.OENR.TD1OEN := Output_1;
-         HRTimer_Common_Periph.OENR.TD2OEN := Output_2;
+         case Output is
+            when Output_1 =>
+               HRTimer_Common_Periph.OENR.TD1OEN := Enable;
+            when Output_2 =>
+               HRTimer_Common_Periph.OENR.TD2OEN := Enable;
+         end case;
 
       elsif This'Address = HRTIM_TIME_Base then
-         HRTimer_Common_Periph.OENR.TE1OEN := Output_1;
-         HRTimer_Common_Periph.OENR.TE2OEN := Output_2;
+         case Output is
+            when Output_1 =>
+               HRTimer_Common_Periph.OENR.TE1OEN := Enable;
+            when Output_2 =>
+               HRTimer_Common_Periph.OENR.TE2OEN := Enable;
+         end case;
       end if;
-   end Enable_Output;
+   end Set_Channel_Output;
 
-   --------------------
-   -- Disable_Output --
-   --------------------
+   -------------------------
+   -- Set_Channel_Outputs --
+   -------------------------
 
-   procedure Disable_Output
-     (This : HRTimer_Channel;
-      Output_1 : Boolean;
-      Output_2 : Boolean)
+   procedure Set_Channel_Outputs
+     (This   : HRTimer_Channel;
+      Enable : Boolean)
    is
    begin
       if This'Address = HRTIM_TIMA_Base then
-         HRTimer_Common_Periph.ODISR.TA1ODIS := Output_1;
-         HRTimer_Common_Periph.ODISR.TA2ODIS := Output_2;
+         HRTimer_Common_Periph.OENR.TA1OEN := Enable;
+         HRTimer_Common_Periph.OENR.TA2OEN := Enable;
 
       elsif This'Address = HRTIM_TIMB_Base then
-         HRTimer_Common_Periph.ODISR.TB1ODIS := Output_1;
-         HRTimer_Common_Periph.ODISR.TB2ODIS := Output_2;
+         HRTimer_Common_Periph.OENR.TB1OEN := Enable;
+         HRTimer_Common_Periph.OENR.TB2OEN := Enable;
 
       elsif This'Address = HRTIM_TIMC_Base then
-         HRTimer_Common_Periph.ODISR.TC1ODIS := Output_1;
-         HRTimer_Common_Periph.ODISR.TC2ODIS := Output_2;
+         HRTimer_Common_Periph.OENR.TC1OEN := Enable;
+         HRTimer_Common_Periph.OENR.TC2OEN := Enable;
 
       elsif This'Address = HRTIM_TIMD_Base then
-         HRTimer_Common_Periph.ODISR.TD1ODIS := Output_1;
-         HRTimer_Common_Periph.ODISR.TD2ODIS := Output_2;
+         HRTimer_Common_Periph.OENR.TD1OEN := Enable;
+         HRTimer_Common_Periph.OENR.TD2OEN := Enable;
 
       elsif This'Address = HRTIM_TIME_Base then
-         HRTimer_Common_Periph.ODISR.TE1ODIS := Output_1;
-         HRTimer_Common_Periph.ODISR.TE2ODIS := Output_2;
+         HRTimer_Common_Periph.OENR.TE1OEN := Enable;
+         HRTimer_Common_Periph.OENR.TE2OEN := Enable;
       end if;
-   end Disable_Output;
+   end Set_Channel_Outputs;
+
+   -------------------------
+   -- Set_Channel_Outputs --
+   -------------------------
+
+   procedure Set_Channel_Outputs
+     (Channels : HRTimer_List;
+      Enable   : Boolean)
+   is
+   begin
+      for Channel of Channels loop
+         if Channel = HRTimer_A then
+            HRTimer_Common_Periph.OENR.TA1OEN := Enable;
+            HRTimer_Common_Periph.OENR.TA2OEN := Enable;
+
+         elsif Channel = HRTimer_B  then
+            HRTimer_Common_Periph.OENR.TB1OEN := Enable;
+            HRTimer_Common_Periph.OENR.TB2OEN := Enable;
+
+         elsif Channel = HRTimer_C  then
+            HRTimer_Common_Periph.OENR.TC1OEN := Enable;
+            HRTimer_Common_Periph.OENR.TC2OEN := Enable;
+
+         elsif Channel = HRTimer_D  then
+            HRTimer_Common_Periph.OENR.TD1OEN := Enable;
+            HRTimer_Common_Periph.OENR.TD2OEN := Enable;
+
+         elsif Channel = HRTimer_E  then
+            HRTimer_Common_Periph.OENR.TE1OEN := Enable;
+            HRTimer_Common_Periph.OENR.TE2OEN := Enable;
+         end if;
+      end loop;
+   end Set_Channel_Outputs;
 
    -------------------
    -- Output_Status --
