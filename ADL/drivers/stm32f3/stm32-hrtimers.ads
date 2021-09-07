@@ -793,14 +793,14 @@ package STM32.HRTimers is
    procedure Set_Deadtime (This : in out HRTimer_Channel; Enable : Boolean)
      with Pre =>
        (if This'Address = HRTIM_TIMA_Base then
-          not HRTIM_Master_Periph.MCR.TACEN or No_Outputs_Enabled (This)) or
-       (if This'Address = HRTIM_TIMB_Base then
-          not HRTIM_Master_Periph.MCR.TBCEN or No_Outputs_Enabled (This)) or
-       (if This'Address = HRTIM_TIMC_Base then
-          not HRTIM_Master_Periph.MCR.TCCEN or No_Outputs_Enabled (This)) or
-       (if This'Address = HRTIM_TIMD_Base then
-          not HRTIM_Master_Periph.MCR.TDCEN or No_Outputs_Enabled (This)) or
-       (if This'Address = HRTIM_TIME_Base then
+          not HRTIM_Master_Periph.MCR.TACEN or No_Outputs_Enabled (This)
+       elsif This'Address = HRTIM_TIMB_Base then
+          not HRTIM_Master_Periph.MCR.TBCEN or No_Outputs_Enabled (This)
+       elsif This'Address = HRTIM_TIMC_Base then
+          not HRTIM_Master_Periph.MCR.TCCEN or No_Outputs_Enabled (This)
+       elsif This'Address = HRTIM_TIMD_Base then
+          not HRTIM_Master_Periph.MCR.TDCEN or No_Outputs_Enabled (This)
+       elsif This'Address = HRTIM_TIME_Base then
           not HRTIM_Master_Periph.MCR.TECEN or No_Outputs_Enabled (This)),
        Post => Read_Deadtime (This) = Enable;
    --  Enable or disable the deadtime. This parameter cannot be changed once
@@ -944,6 +944,18 @@ package STM32.HRTimers is
    --  analog watchdogs and general purpose timer trigger outputs).
    --  See chapter 21.3.7 at pg. 657 in RM0364 rev. 4.
 
+   procedure Set_Chopper_Mode
+     (This    : in out HRTimer_Channel;
+      Output1 : Boolean;
+      Output2 : Boolean)
+     with Post => Enabled_Chopper_Mode (This, Output_1) = Output1 and
+                  Enabled_Chopper_Mode (This, Output_2) = Output2;
+   --  Enable/disable chopper mode for HRTimer channel outputs.
+
+   function Enabled_Chopper_Mode
+     (This   : HRTimer_Channel;
+      Output : HRTimer_Channel_Output) return Boolean;
+
    type Chopper_Carrier_Frequency is
      (fHRTIM_Over_16, -- 9 MHz with fHRTIM = 144 MHz
       fHRTIM_Over_32,
@@ -997,18 +1009,6 @@ package STM32.HRTimers is
    --  t1STPW = tHRTIM x 16 x (STRPW[3:0]+1).
    --  This bitfield cannot be modified when one of the CHPx bits is set.
 
-   procedure Set_Chopper_Mode
-     (This    : in out HRTimer_Channel;
-      Output1 : Boolean;
-      Output2 : Boolean)
-     with Post => Enabled_Chopper_Mode (This, Output_1) = Output1 and
-                  Enabled_Chopper_Mode (This, Output_2) = Output2;
-   --  Enable/disable chopper mode for HRTimer channel outputs.
-
-   function Enabled_Chopper_Mode
-     (This   : HRTimer_Channel;
-      Output : HRTimer_Channel_Output) return Boolean;
-
    procedure Configure_Chopper_Mode
      (This              : in out HRTimer_Channel;
       Output1           : Boolean;
@@ -1023,6 +1023,77 @@ package STM32.HRTimers is
    --  signals to drive isolation transformers. This is done in the output
    --  stage before the polarity insertion to enable chopper on outputs 1 and 2.
    --  See chapter 21.3.14 at pg. 690 in RM0364 rev. 4.
+
+   type Burst_Mode_Idle_Output is
+     (No_Action,
+      Inactive,
+      Active);
+
+   procedure Set_Burst_Mode_Idle_Output
+     (This   : in out HRTimer_Channel;
+      Output : HRTimer_Channel_Output;
+      Mode   : Burst_Mode_Idle_Output)
+     with Pre => not Enabled (This) or
+                 (Enabled (This) and No_Outputs_Enabled (This));
+   --  The output is in idle state when requested by the burst mode controller.
+
+   procedure Set_Deadtime_Burst_Mode_Idle
+     (This   : in out HRTimer_Channel;
+      Output : HRTimer_Channel_Output;
+      Enable : Boolean)
+     with Pre => not Enabled (This);
+   --  Delay the idle mode entry by forcing a deadtime insertion before
+   --  switching the outputs to their idle state.  The deadtime value is set
+   --  by DTRx[8:0]. This setting only applies when entering the idle state
+   --  during a burst mode operation.
+
+   type Channel_Output_Polarity is (Active_High, Active_Low);
+
+   procedure Set_Channel_Output_Polarity
+     (This     : in out HRTimer_Channel;
+      Output   : HRTimer_Channel_Output;
+      Polarity : Channel_Output_Polarity)
+     with Pre => not Enabled (This),
+          Post => Current_Channel_Output_Polarity (This, Output) = Polarity;
+
+   function Current_Channel_Output_Polarity
+     (This     : HRTimer_Channel;
+      Output   : HRTimer_Channel_Output) return Channel_Output_Polarity;
+
+   type Delayed_Idle_Protection is
+     (Option_1,
+      Option_2,
+      Option_3,
+      Option_4,
+      Option_5,
+      Option_6,
+      Option_7,
+      Option_8,
+      Disabled);
+   --  Define the source and outputs on which the delayed protection schemes
+   --  are applied.
+   --  Option  HRTimer_A                      HRTimer_D
+   --          HRTimer_B                      HRTimer_E
+   --          HRTimer_D
+   --
+   --  1       Output_1_External_Event_6      Output_1_External_Event_8
+   --  2       Output_2_External_Event_6      Output_2_External_Event_8
+   --  3       Output_12_External_Event_6     Output_12External_Event_8
+   --  4       Balanced_Idle_External_Event_6 Balanced_Idle_External_Event_8
+   --  5       Output_1_External_Event_7      Output_1_External_Event_9
+   --  6       Output_2_External_Event_7      Output_2_External_Event_9
+   --  7       Output_12_External_Event_7     Output_12External_Event_9
+   --  8       Balanced_Idle_External_Event_7 Balanced_Idle_External_Event_9
+
+   procedure Set_Delayed_Idle_Protection
+     (This   : in out HRTimer_Channel;
+      Option : Delayed_Idle_Protection)
+     with Pre => not Enabled (This) and
+     (if Option /= Disabled then
+        Current_Delayed_Idle_Protection (This) = Disabled);
+
+   function Current_Delayed_Idle_Protection
+     (This : in out HRTimer_Channel) return Delayed_Idle_Protection;
 
    type HRTimer_Fault_Source is
      (Fault_1,

@@ -1812,6 +1812,129 @@ package body STM32.HRTimers is
       This.CHPxR.STRTPW := Start_PulseWidth'Enum_Rep;
    end Configure_Chopper_Mode;
 
+   ---------------------------
+   -- Set_Burst_Mode_Output --
+   ---------------------------
+
+   procedure Set_Burst_Mode_Idle_Output
+     (This   : in out HRTimer_Channel;
+      Output : HRTimer_Channel_Output;
+      Mode   : Burst_Mode_Idle_Output)
+   is
+   begin
+      case Output is
+         when Output_1 =>
+            case Mode is
+               when No_Action =>
+                  This.OUTxR.IDLEM1 := False;
+                  This.OUTxR.IDLES1 := False;
+               when Inactive =>
+                  This.OUTxR.IDLEM1 := True;
+                  This.OUTxR.IDLES1 := False;
+               when Active =>
+                  This.OUTxR.IDLEM1 := True;
+                  This.OUTxR.IDLES1 := True;
+            end case;
+         when Output_2 =>
+            case Mode is
+               when No_Action =>
+                  This.OUTxR.IDLEM2 := False;
+                  This.OUTxR.IDLES2 := False;
+               when Inactive =>
+                  This.OUTxR.IDLEM2 := True;
+                  This.OUTxR.IDLES2 := False;
+               when Active =>
+                  This.OUTxR.IDLEM2 := True;
+                  This.OUTxR.IDLES2 := True;
+            end case;
+      end case;
+   end Set_Burst_Mode_Idle_Output;
+
+   ----------------------------------
+   -- Set_Deadtime_Burst_Mode_Idle --
+   ----------------------------------
+
+   procedure Set_Deadtime_Burst_Mode_Idle
+     (This   : in out HRTimer_Channel;
+      Output : HRTimer_Channel_Output;
+      Enable : Boolean)
+   is
+   begin
+      case Output is
+         when Output_1 =>
+            This.OUTxR.DIDL1 := Enable;
+         when Output_2 =>
+            This.OUTxR.DIDL2 := Enable;
+      end case;
+   end Set_Deadtime_Burst_Mode_Idle;
+
+   ---------------------------------
+   -- Set_Channel_Output_Polarity --
+   ---------------------------------
+
+   procedure Set_Channel_Output_Polarity
+     (This     : in out HRTimer_Channel;
+      Output   : HRTimer_Channel_Output;
+      Polarity : Channel_Output_Polarity)
+   is
+   begin
+      case Output is
+         when Output_1 =>
+            This.OUTxR.POL1 := Polarity = Active_Low;
+         when Output_2 =>
+            This.OUTxR.POL2 := Polarity = Active_Low;
+      end case;
+   end Set_Channel_Output_Polarity;
+
+   -------------------------------------
+   -- Current_Channel_Output_Polarity --
+   -------------------------------------
+
+   function Current_Channel_Output_Polarity
+     (This     : HRTimer_Channel;
+      Output   : HRTimer_Channel_Output) return Channel_Output_Polarity
+   is
+   begin
+      case Output is
+         when Output_1 =>
+            return (if This.OUTxR.POL1 then Active_Low else Active_High);
+         when Output_2 =>
+            return (if This.OUTxR.POL2 then Active_Low else Active_High);
+      end case;
+   end Current_Channel_Output_Polarity;
+
+   ---------------------------------
+   -- Set_Delayed_Idle_Protection --
+   ---------------------------------
+
+   procedure Set_Delayed_Idle_Protection
+     (This   : in out HRTimer_Channel;
+      Option : Delayed_Idle_Protection)
+   is
+   begin
+      if Option = Disabled then
+         This.OUTxR.DLYPRTEN := False;
+      else
+         This.OUTxR.DLYPRT := UInt3 (Option'Enum_Rep);
+         This.OUTxR.DLYPRTEN := True;
+      end if;
+   end Set_Delayed_Idle_Protection;
+
+   -------------------------------------
+   -- Current_Delayed_Idle_Protection --
+   -------------------------------------
+
+   function Current_Delayed_Idle_Protection
+     (This : in out HRTimer_Channel) return Delayed_Idle_Protection
+   is
+   begin
+      if not This.OUTxR.DLYPRTEN then
+         return Disabled;
+      else
+         return Delayed_Idle_Protection'Val (UInt4 (This.OUTxR.DLYPRT));
+      end if;
+   end Current_Delayed_Idle_Protection;
+
    ----------------------
    -- Set_Fault_Source --
    ----------------------
