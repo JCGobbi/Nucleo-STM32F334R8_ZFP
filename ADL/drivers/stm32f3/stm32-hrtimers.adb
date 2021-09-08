@@ -835,18 +835,6 @@ package body STM32.HRTimers is
       end case;
    end Configure_AutoDelayed_Mode;
 
-   ----------------------------------
-   -- Configure_Update_Gating_Mode --
-   ----------------------------------
-
-   procedure Configure_Update_Gating_Mode
-     (This : in out HRTimer_Channel;
-      Mode : Update_Gating_Mode)
-   is
-   begin
-      This.TIMxCR.UPDGAT := Mode'Enum_Rep;
-   end Configure_Update_Gating_Mode;
-
    ----------------------
    -- Set_Timer_Update --
    ----------------------
@@ -876,6 +864,18 @@ package body STM32.HRTimers is
             This.TIMxCR.MSTU := Enable;
       end case;
    end Set_Timer_Update;
+
+   ----------------------------
+   -- Set_Update_Gating_Mode --
+   ----------------------------
+
+   procedure Set_Update_Gating_Mode
+     (This : in out HRTimer_Channel;
+      Mode : Update_Gating_Mode)
+   is
+   begin
+      This.TIMxCR.UPDGAT := Mode'Enum_Rep;
+   end Set_Update_Gating_Mode;
 
    -------------------------
    -- Set_HalfPeriod_Mode --
@@ -2511,10 +2511,10 @@ package body STM32.HRTimers is
 
    procedure Configure_Burst_Mode_Trigger
      (Triggers : Burst_Mode_Trigger_List;
-      Value    : Boolean)
+      Enable   : Boolean)
    is
    begin
-      if Value then
+      if Enable then
          for Trigger of Triggers loop
             HRTimer_Common_Periph.BMTRGR :=
               HRTimer_Common_Periph.BMTRGR or (2 ** Trigger'Enum_Rep);
@@ -2612,16 +2612,16 @@ package body STM32.HRTimers is
       end case;
    end Configure_External_Event;
 
-   ------------------------------------
-   -- Configure_External_Event_Clock --
-   ------------------------------------
+   ------------------------------
+   -- Set_External_Event_Clock --
+   ------------------------------
 
-   procedure Configure_External_Event_Clock
+   procedure Set_External_Event_Clock
      (Clock : External_Event_Sampling_Clock)
    is
    begin
       HRTimer_Common_Periph.EECR3.EEVSD := Clock'Enum_Rep;
-   end Configure_External_Event_Clock;
+   end Set_External_Event_Clock;
 
    ---------------------------
    -- Configure_ADC_Trigger --
@@ -2691,6 +2691,51 @@ package body STM32.HRTimers is
       HRTimer_Common_Periph.DLLCR.CALRTE := Calibration_Rate'Enum_Rep;
    end Configure_DLL_Calibration;
 
+   ---------------------
+   -- Set_Fault_Input --
+   ---------------------
+
+   procedure Set_Fault_Input
+     (Input  : HRTimer_Fault_Source;
+      Enable : Boolean)
+   is
+   begin
+      case Input is
+         when Fault_1 =>
+            HRTimer_Common_Periph.FLTINR1.FLT1E := Enable;
+         when Fault_2 =>
+            HRTimer_Common_Periph.FLTINR1.FLT2E := Enable;
+         when Fault_3 =>
+            HRTimer_Common_Periph.FLTINR1.FLT3E := Enable;
+         when Fault_4 =>
+            HRTimer_Common_Periph.FLTINR1.FLT4E := Enable;
+         when Fault_5 =>
+            HRTimer_Common_Periph.FLTINR2.FLT5E := Enable;
+      end case;
+   end Set_Fault_Input;
+
+   -------------------------
+   -- Enabled_Fault_Input --
+   -------------------------
+
+   function Enabled_Fault_Input
+     (Input : HRTimer_Fault_Source) return Boolean
+   is
+   begin
+      case Input is
+         when Fault_1 =>
+            return HRTimer_Common_Periph.FLTINR1.FLT1E;
+         when Fault_2 =>
+            return HRTimer_Common_Periph.FLTINR1.FLT2E;
+         when Fault_3 =>
+            return HRTimer_Common_Periph.FLTINR1.FLT3E;
+         when Fault_4 =>
+            return HRTimer_Common_Periph.FLTINR1.FLT4E;
+         when Fault_5 =>
+            return HRTimer_Common_Periph.FLTINR2.FLT5E;
+      end case;
+   end Enabled_Fault_Input;
+
    ---------------------------
    -- Configure_Fault_Input --
    ---------------------------
@@ -2731,6 +2776,15 @@ package body STM32.HRTimers is
             HRTimer_Common_Periph.FLTINR2.FLT5F := Filter'Enum_Rep;
       end case;
    end Configure_Fault_Input;
+
+   ---------------------------------
+   -- Configure_Fault_Input_Clock --
+   ---------------------------------
+
+   procedure Configure_Fault_Input_Clock (Clock : Fault_Input_Sampling_Clock) is
+   begin
+      HRTimer_Common_Periph.FLTINR2.FLTSD := Clock'Enum_Rep;
+   end Configure_Fault_Input_Clock;
 
    -----------------------------
    -- Enable_Fault_Input_Lock --
@@ -2774,15 +2828,6 @@ package body STM32.HRTimers is
       end case;
    end Enabled_Fault_Input_Lock;
 
-   ---------------------------------
-   -- Configure_Fault_Input_Clock --
-   ---------------------------------
-
-   procedure Configure_Fault_Input_Clock (Clock : Fault_Input_Sampling_Clock) is
-   begin
-      HRTimer_Common_Periph.FLTINR2.FLTSD := Clock'Enum_Rep;
-   end Configure_Fault_Input_Clock;
-
    --------------------------------
    -- Set_Burst_DMA_Timer_Update --
    --------------------------------
@@ -2790,11 +2835,11 @@ package body STM32.HRTimers is
    procedure Set_Burst_DMA_Timer_Update
      (Counter   : HRTimer_Master;
       Registers : Burst_DMA_Master_Update_List;
-      Value     : Boolean)
+      Enable    : Boolean)
    is
       pragma Unreferenced (Counter);
    begin
-      if Value then
+      if Enable then
          for Register of Registers loop
             HRTimer_Common_Periph.BDMUPR :=
               HRTimer_Common_Periph.BDMUPR or (2 ** Register'Enum_Rep);
@@ -2814,11 +2859,11 @@ package body STM32.HRTimers is
    procedure Set_Burst_DMA_Timer_Update
      (Counter   : HRTimer_Channel;
       Registers : Burst_DMA_Timer_Channel_Update_List;
-      Value     : Boolean)
+      Enable    : Boolean)
    is
    begin
       if Counter'Address = HRTIM_TIMA_Base then
-         if Value then
+         if Enable then
             for Register of Registers loop
                HRTimer_Common_Periph.BDTAUPR :=
                  HRTimer_Common_Periph.BDTAUPR or (2 ** Register'Enum_Rep);
@@ -2831,7 +2876,7 @@ package body STM32.HRTimers is
          end if;
 
       elsif Counter'Address = HRTIM_TIMB_Base then
-         if Value then
+         if Enable then
             for Register of Registers loop
                HRTimer_Common_Periph.BDTBUPR :=
                  HRTimer_Common_Periph.BDTBUPR or (2 ** Register'Enum_Rep);
@@ -2844,7 +2889,7 @@ package body STM32.HRTimers is
          end if;
 
       elsif Counter'Address = HRTIM_TIMC_Base then
-         if Value then
+         if Enable then
             for Register of Registers loop
                HRTimer_Common_Periph.BDTCUPR :=
                  HRTimer_Common_Periph.BDTCUPR or (2 ** Register'Enum_Rep);
@@ -2857,7 +2902,7 @@ package body STM32.HRTimers is
          end if;
 
       elsif Counter'Address = HRTIM_TIMD_Base then
-         if Value then
+         if Enable then
             for Register of Registers loop
                HRTimer_Common_Periph.BDTDUPR :=
                  HRTimer_Common_Periph.BDTDUPR or (2 ** Register'Enum_Rep);
@@ -2870,7 +2915,7 @@ package body STM32.HRTimers is
          end if;
 
       elsif Counter'Address = HRTIM_TIME_Base then
-         if Value then
+         if Enable then
             for Register of Registers loop
                HRTimer_Common_Periph.BDTEUPR :=
                  HRTimer_Common_Periph.BDTEUPR or (2 ** Register'Enum_Rep);

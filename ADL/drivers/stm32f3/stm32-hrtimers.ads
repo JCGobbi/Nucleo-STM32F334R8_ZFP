@@ -465,26 +465,6 @@ package STM32.HRTimers is
       Mode : AutoDelayed_Mode_Descriptor)
      with Pre => not Enabled (This);
 
-   type Update_Gating_Mode is
-     (Independent,
-      DMA_Burst_Complete,
-      DMA_Burst_Complete_Update_Event,
-      Rising_Edge_Input_1, --  TIM16_OC
-      Rising_Edge_Input_2, --  TIM17_OC
-      Rising_Edge_Input_3, --  TIM6_TRGO
-      Rising_Edge_Input_1_Update,
-      Rising_Edge_Input_2_Update,
-      Rising_Edge_Input_3_Update);
-
-   procedure Configure_Update_Gating_Mode
-     (This : in out HRTimer_Channel;
-      Mode : Update_Gating_Mode);
-   --  Define how the update occurs relatively to the burst DMA transaction
-   --  and the external update request on update enable inputs 1 to 3 (see
-   --  Table 91: Update enable inputs and sources in section 27.3.2 RM0364
-   --  rev 4). The update events, can be: MSTU, TEU, TDU, TCU, TBU, TAU, TxRSTU,
-   --  TxREPU.
-
    type HRTimer_Update_Event is
      (Repetition_Counter_Reset,
       Counter_Reset,
@@ -508,6 +488,26 @@ package STM32.HRTimers is
    --  HRTIM_REPx = 0, or the current counter reset or rolls-over to 0 after
    --  reaching the period value in continuous mode, or by any other timer
    --  update.
+
+   type Update_Gating_Mode is
+     (Independent,
+      DMA_Burst_Complete,
+      DMA_Burst_Complete_Update_Event,
+      Rising_Edge_Input_1, --  TIM16_OC
+      Rising_Edge_Input_2, --  TIM17_OC
+      Rising_Edge_Input_3, --  TIM6_TRGO
+      Rising_Edge_Input_1_Update,
+      Rising_Edge_Input_2_Update,
+      Rising_Edge_Input_3_Update);
+
+   procedure Set_Update_Gating_Mode
+     (This : in out HRTimer_Channel;
+      Mode : Update_Gating_Mode);
+   --  Define how the update occurs relatively to the burst DMA transaction
+   --  and the external update request on update enable inputs 1 to 3 (see
+   --  Table 91: Update enable inputs and sources in section 27.3.2 RM0364
+   --  rev 4). The update events, can be: MSTU, TEU, TDU, TCU, TBU, TAU, TxRSTU,
+   --  TxREPU.
 
    procedure Set_HalfPeriod_Mode
      (This : in out HRTimer_Channel;
@@ -1339,7 +1339,7 @@ package STM32.HRTimers is
 
    procedure Configure_Burst_Mode_Trigger
      (Triggers : Burst_Mode_Trigger_List;
-      Value    : Boolean);
+      Enable   : Boolean);
    --  Enable/disable one or several burst mode triggers.
 
    procedure Set_Burst_Mode_Compare (Value : UInt16)
@@ -1412,7 +1412,7 @@ package STM32.HRTimers is
       fHRTIM_Over_4,
       fHRTIM_Over_8);
 
-   procedure Configure_External_Event_Clock
+   procedure Set_External_Event_Clock
      (Clock : External_Event_Sampling_Clock);
    --  Set the division ratio between the timer clock frequency (fHRTIM) and
    --  the external event sampling clock (fEEVS) used by the digital filters.
@@ -1517,6 +1517,13 @@ package STM32.HRTimers is
    --  timing units. See pg. 709 from RM0364 rev 4 for the sequence of
    --  initialization.
 
+   procedure Set_Fault_Input
+     (Input  : HRTimer_Fault_Source;
+      Enable : Boolean);
+
+   function Enabled_Fault_Input
+     (Input : HRTimer_Fault_Source) return Boolean;
+
    type Fault_Input_Polarity is (Active_Low, Active_High);
 
    type Fault_Input_Source is (HRTIM_FLTx_Input, FLTx_Int_Signal);
@@ -1547,13 +1554,6 @@ package STM32.HRTimers is
       Filter   : Fault_Input_Filter)
      with Pre => not Enabled_Fault_Input_Lock (Input);
 
-   procedure Enable_Fault_Input_Lock (Input : HRTimer_Fault_Source)
-     with Post => Enabled_Fault_Input_Lock (Input);
-   --  Prevents the fault enable, polarity, source and filter to be modified.
-
-   function Enabled_Fault_Input_Lock
-     (Input : HRTimer_Fault_Source) return Boolean;
-
    type Fault_Input_Sampling_Clock is
      (fHRTIM,
       fHRTIM_Over_2,
@@ -1567,6 +1567,13 @@ package STM32.HRTimers is
    --  To simplify the bit-field access to the Burst DMA Timer Update registers,
    --  we remap them as 32-bit registers. This way we program several bits
    --  "oring" them in a 32-bit value, instead of accessing bit-by-bit.
+
+   procedure Enable_Fault_Input_Lock (Input : HRTimer_Fault_Source)
+     with Post => Enabled_Fault_Input_Lock (Input);
+   --  Prevents the fault enable, polarity, source and filter to be modified.
+
+   function Enabled_Fault_Input_Lock
+     (Input : HRTimer_Fault_Source) return Boolean;
 
    type Burst_DMA_Master_Update is
      (MCR_Register,
@@ -1586,7 +1593,7 @@ package STM32.HRTimers is
    procedure Set_Burst_DMA_Timer_Update
      (Counter   : HRTimer_Master;
       Registers : Burst_DMA_Master_Update_List;
-      Value     : Boolean);
+      Enable    : Boolean);
    --  Defines which master timer register is part of the list of registers
    --  to be updated by the Burst DMA.
 
@@ -1619,7 +1626,7 @@ package STM32.HRTimers is
    procedure Set_Burst_DMA_Timer_Update
      (Counter   : HRTimer_Channel;
       Registers : Burst_DMA_Timer_Channel_Update_List;
-      Value     : Boolean);
+      Enable    : Boolean);
    --  Defines which timer X register is part of the list of registers
    --  to be updated by the Burst DMA.
 
