@@ -469,9 +469,9 @@ package STM32.HRTimers is
      (Independent,
       DMA_Burst_Complete,
       DMA_Burst_Complete_Update_Event,
-      Rising_Edge_Input_1,
-      Rising_Edge_Input_2,
-      Rising_Edge_Input_3,
+      Rising_Edge_Input_1, --  TIM16_OC
+      Rising_Edge_Input_2, --  TIM17_OC
+      Rising_Edge_Input_3, --  TIM6_TRGO
       Rising_Edge_Input_1_Update,
       Rising_Edge_Input_2_Update,
       Rising_Edge_Input_3_Update);
@@ -481,19 +481,29 @@ package STM32.HRTimers is
       Mode : Update_Gating_Mode);
    --  Define how the update occurs relatively to the burst DMA transaction
    --  and the external update request on update enable inputs 1 to 3 (see
-   --  Table 91: Update enable inputs and sources). The update events, as
-   --  mentioned below, can be: MSTU, TEU, TDU, TCU, TBU, TAU, TxRSTU, TxREPU.
+   --  Table 91: Update enable inputs and sources in section 27.3.2 RM0364
+   --  rev 4). The update events, can be: MSTU, TEU, TDU, TCU, TBU, TAU, TxRSTU,
+   --  TxREPU.
 
-   procedure Configure_Timer_Update
-     (This       : in out HRTimer_Channel;
-      Repetition : Boolean;
-      Reset      : Boolean;
-      Timer_A    : Boolean;
-      Timer_B    : Boolean;
-      Timer_C    : Boolean;
-      Timer_D    : Boolean;
-      Timer_E    : Boolean;
-      Master     : Boolean);
+   type HRTimer_Update_Event is
+     (Repetition_Counter_Reset,
+      Counter_Reset,
+      TimerA_Update,
+      TimerB_Update,
+      TimerC_Update,
+      TimerD_Update,
+      TimerE_Update,
+      Master_Update);
+
+   procedure Set_Timer_Update
+     (This   : in out HRTimer_Channel;
+      Event  : HRTimer_Update_Event;
+      Enable : Boolean)
+     with Pre => (if This'Address = HRTIM_TIMA_Base then Event /= TimerA_Update
+                  elsif This'Address = HRTIM_TIMB_Base then Event /= TimerB_Update
+                  elsif This'Address = HRTIM_TIMC_Base then Event /= TimerC_Update
+                  elsif This'Address = HRTIM_TIMD_Base then Event /= TimerD_Update
+                  elsif This'Address = HRTIM_TIME_Base then Event /= TimerE_Update);
    --  Register update is triggered when the current counter rolls-over  and
    --  HRTIM_REPx = 0, or the current counter reset or rolls-over to 0 after
    --  reaching the period value in continuous mode, or by any other timer
@@ -1623,10 +1633,83 @@ private
    --  High Resolution Timer: Master
    type HRTimer_Master is new STM32_SVD.HRTIM.HRTIM_Master_Peripheral;
 
+   --  Timerx Control Register
+   type TIMxCR_Register is record
+      --  HRTIM Timer x Clock prescaler
+      CKPSCx         : TIMACR_CKPSCx_Field := 16#0#;
+      --  Continuous mode
+      CONT           : Boolean := False;
+      --  Re-triggerable mode
+      RETRIG         : Boolean := False;
+      --  Half mode enable
+      HALF           : Boolean := False;
+      --  Push-Pull mode enable
+      PSHPLL         : Boolean := False;
+      --  unspecified
+      Reserved_7_9   : HAL.UInt3 := 16#0#;
+      --  Synchronization Resets Timer x
+      SYNCRSTx       : Boolean := False;
+      --  Synchronization Starts Timer x
+      SYNCSTRTx      : Boolean := False;
+      --  Delayed CMP2 mode
+      DELCMP         : TIMACR_DELCMP_Field :=
+                        (As_Array => False, Val => 16#0#);
+      --  unspecified
+      Reserved_16_16 : HAL.Bit := 16#0#;
+      --  Timer x Repetition update
+      TxREPU         : Boolean := False;
+      --  Timerx reset update
+      TxRSTU         : Boolean := False;
+      --  TAU
+      TAU            : Boolean := False;
+      --  TBU
+      TBU            : Boolean := False;
+      --  TCU
+      TCU            : Boolean := False;
+      --  TDU
+      TDU            : Boolean := False;
+      --  TEU
+      TEU            : Boolean := False;
+      --  Master Timer update
+      MSTU           : Boolean := False;
+      --  AC Synchronization
+      DACSYNC        : TIMACR_DACSYNC_Field := 16#0#;
+      --  Preload enable
+      PREEN          : Boolean := False;
+      --  Update Gating
+      UPDGAT         : TIMACR_UPDGAT_Field := 16#0#;
+   end record
+     with Volatile_Full_Access, Object_Size => 32,
+          Bit_Order => System.Low_Order_First;
+
+   for TIMxCR_Register use record
+      CKPSCx         at 0 range 0 .. 2;
+      CONT           at 0 range 3 .. 3;
+      RETRIG         at 0 range 4 .. 4;
+      HALF           at 0 range 5 .. 5;
+      PSHPLL         at 0 range 6 .. 6;
+      Reserved_7_9   at 0 range 7 .. 9;
+      SYNCRSTx       at 0 range 10 .. 10;
+      SYNCSTRTx      at 0 range 11 .. 11;
+      DELCMP         at 0 range 12 .. 15;
+      Reserved_16_16 at 0 range 16 .. 16;
+      TxREPU         at 0 range 17 .. 17;
+      TxRSTU         at 0 range 18 .. 18;
+      TAU            at 0 range 19 .. 19;
+      TBU            at 0 range 20 .. 20;
+      TCU            at 0 range 21 .. 21;
+      TDU            at 0 range 22 .. 22;
+      TEU            at 0 range 23 .. 23;
+      MSTU           at 0 range 24 .. 24;
+      DACSYNC        at 0 range 25 .. 26;
+      PREEN          at 0 range 27 .. 27;
+      UPDGAT         at 0 range 28 .. 31;
+   end record;
+
    --  High Resolution Timer: TIMx
    type HRTimer_Channel is record
       --  Timerx Control Register
-      TIMxCR    : aliased TIMACR_Register;
+      TIMxCR    : aliased TIMxCR_Register;
       --  Timerx Interrupt Status Register
       TIMxISR   : aliased TIMAISR_Register;
       --  Timerx Interrupt Clear Register

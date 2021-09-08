@@ -847,57 +847,35 @@ package body STM32.HRTimers is
       This.TIMxCR.UPDGAT := Mode'Enum_Rep;
    end Configure_Update_Gating_Mode;
 
-   ----------------------------
-   -- Configure_Timer_Update --
-   ----------------------------
+   ----------------------
+   -- Set_Timer_Update --
+   ----------------------
 
-   procedure Configure_Timer_Update
-     (This       : in out HRTimer_Channel;
-      Repetition : Boolean;
-      Reset      : Boolean;
-      Timer_A    : Boolean;
-      Timer_B    : Boolean;
-      Timer_C    : Boolean;
-      Timer_D    : Boolean;
-      Timer_E    : Boolean;
-      Master     : Boolean)
+   procedure Set_Timer_Update
+     (This   : in out HRTimer_Channel;
+      Event  : HRTimer_Update_Event;
+      Enable : Boolean)
    is
    begin
-      This.TIMxCR.TxREPU := Repetition;
-      This.TIMxCR.TxRSTU := Reset;
-      This.TIMxCR.MSTU := Master;
-
-      if This'Address = HRTIM_TIMA_Base then
-         HRTIM_TIMA_Periph.TIMACR.TBU := Timer_B;
-         HRTIM_TIMA_Periph.TIMACR.TCU := Timer_C;
-         HRTIM_TIMA_Periph.TIMACR.TDU := Timer_D;
-         HRTIM_TIMA_Periph.TIMACR.TEU := Timer_E;
-
-      elsif This'Address = HRTIM_TIMB_Base then
-         HRTIM_TIMB_Periph.TIMBCR.TAU := Timer_A;
-         HRTIM_TIMB_Periph.TIMBCR.TCU := Timer_C;
-         HRTIM_TIMB_Periph.TIMBCR.TDU := Timer_D;
-         HRTIM_TIMB_Periph.TIMBCR.TEU := Timer_E;
-
-      elsif This'Address = HRTIM_TIMC_Base then
-         HRTIM_TIMC_Periph.TIMCCR.TAU := Timer_A;
-         HRTIM_TIMC_Periph.TIMCCR.TBU := Timer_B;
-         HRTIM_TIMC_Periph.TIMCCR.TDU := Timer_D;
-         HRTIM_TIMC_Periph.TIMCCR.TEU := Timer_E;
-
-      elsif This'Address = HRTIM_TIMD_Base then
-         HRTIM_TIMD_Periph.TIMDCR.TAU := Timer_A;
-         HRTIM_TIMD_Periph.TIMDCR.TBU := Timer_B;
-         HRTIM_TIMD_Periph.TIMDCR.TCU := Timer_C;
-         HRTIM_TIMD_Periph.TIMDCR.TEU := Timer_E;
-
-      elsif This'Address = HRTIM_TIME_Base then
-         HRTIM_TIME_Periph.TIMECR.TAU := Timer_A;
-         HRTIM_TIME_Periph.TIMECR.TBU := Timer_B;
-         HRTIM_TIME_Periph.TIMECR.TCU := Timer_C;
-         HRTIM_TIME_Periph.TIMECR.TDU := Timer_D;
-      end if;
-   end Configure_Timer_Update;
+      case Event is
+         when Repetition_Counter_Reset =>
+            This.TIMxCR.TxREPU := Enable;
+         when Counter_Reset =>
+            This.TIMxCR.TxRSTU := Enable;
+         when TimerA_Update =>
+            This.TIMxCR.TAU := Enable;
+         when TimerB_Update =>
+            This.TIMxCR.TBU := Enable;
+         when TimerC_Update =>
+            This.TIMxCR.TCU := Enable;
+         when TimerD_Update =>
+            This.TIMxCR.TDU := Enable;
+         when TimerE_Update =>
+            This.TIMxCR.TEU := Enable;
+         when Master_Update =>
+            This.TIMxCR.MSTU := Enable;
+      end case;
+   end Set_Timer_Update;
 
    -------------------------
    -- Set_HalfPeriod_Mode --
