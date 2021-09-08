@@ -443,20 +443,26 @@ package STM32.HRTimers is
       Active_After_Capture_2_Compare_1,
       Active_After_Capture_2_Compare_3);
 
-   type Autodelayed_Mode_Descriptor
-     (CMP_Selector : Comparator_AutoDelayed_Mode := CMP2) is
+   type AutoDelayed_Mode_Descriptor
+     (Selector : Comparator_AutoDelayed_Mode := CMP2) is
      record
-        case CMP_Selector is
+        case Selector is
            when CMP2 =>
               AutoDelay_1 : CMP2_AutoDelayed_Mode;
            when CMP4 =>
               AutoDelay_2 : CMP4_AutoDelayed_Mode;
         end case;
-     end record with Size => 16;
+     end record with Size => 3;
+
+   for AutoDelayed_Mode_Descriptor use record
+      Selector    at 0 range 2 .. 2;
+      AutoDelay_1 at 0 range 0 .. 1;
+      AutoDelay_2 at 0 range 0 .. 1;
+   end record;
 
    procedure Configure_AutoDelayed_Mode
      (This : in out HRTimer_Channel;
-      Mode : Autodelayed_Mode_Descriptor)
+      Mode : AutoDelayed_Mode_Descriptor)
      with Pre => not Enabled (This);
 
    type Update_Gating_Mode is
@@ -793,40 +799,48 @@ package STM32.HRTimers is
    procedure Set_Deadtime (This : in out HRTimer_Channel; Enable : Boolean)
      with Pre =>
        (if This'Address = HRTIM_TIMA_Base then
-          not HRTIM_Master_Periph.MCR.TACEN or No_Outputs_Enabled (This)
+          not Enabled (HRTimer_A) or No_Outputs_Enabled (This)
        elsif This'Address = HRTIM_TIMB_Base then
-          not HRTIM_Master_Periph.MCR.TBCEN or No_Outputs_Enabled (This)
+          not Enabled (HRTimer_B) or No_Outputs_Enabled (This)
        elsif This'Address = HRTIM_TIMC_Base then
-          not HRTIM_Master_Periph.MCR.TCCEN or No_Outputs_Enabled (This)
+          not Enabled (HRTimer_C) or No_Outputs_Enabled (This)
        elsif This'Address = HRTIM_TIMD_Base then
-          not HRTIM_Master_Periph.MCR.TDCEN or No_Outputs_Enabled (This)
+          not Enabled (HRTimer_D) or No_Outputs_Enabled (This)
        elsif This'Address = HRTIM_TIME_Base then
-          not HRTIM_Master_Periph.MCR.TECEN or No_Outputs_Enabled (This)),
-       Post => Read_Deadtime (This) = Enable;
+          not Enabled (HRTimer_E) or No_Outputs_Enabled (This)),
+       Post => Enabled_Deadtime (This) = Enable;
    --  Enable or disable the deadtime. This parameter cannot be changed once
    --  the timer is operating (TxEN bit set) or if its outputs are enabled
    --  and set/reset by another timer. See pg.761 in RM0364 rev. 4.
 
-   function Read_Deadtime (This : HRTimer_Channel) return Boolean;
+   function Enabled_Deadtime (This : HRTimer_Channel) return Boolean;
    --  Return True if the timer deadtime is enabled.
+
+   type HRTimer_Deadtime_Sign is (Positive_Sign, Negative_Sign);
 
    procedure Configure_Deadtime
      (This          : in out HRTimer_Channel;
       Prescaler     : UInt3;
       Rising_Value  : UInt9;
-      Rising_Sign   : Boolean;
+      Rising_Sign   : HRTimer_Deadtime_Sign := Positive_Sign;
       Falling_Value : UInt9;
-      Falling_Sign  : Boolean);
-   --  Set the signal and value for rising and falling deadtime.
+      Falling_Sign  : HRTimer_Deadtime_Sign := Positive_Sign);
+   --  Two deadtimes values can be defined in relationship with the rising edge
+   --  and the falling edge of the Output 1 reference waveform.
+   --  The sign determines whether the deadtime is positive or negative
+   --  (overlaping signals). See pg. 649 in RM0364 rev. 4.
    --  The deadtime cannot be used simultaneously with the push-pull mode.
 
    procedure Configure_Deadtime
      (This          : in out HRTimer_Channel;
       Rising_Value  : Float;
-      Rising_Sign   : Boolean;
+      Rising_Sign   : HRTimer_Deadtime_Sign := Positive_Sign;
       Falling_Value : Float;
-      Falling_Sign  : Boolean);
-   --  Set the signal and value (in seconds) for rising and falling deadtime.
+      Falling_Sign  : HRTimer_Deadtime_Sign := Positive_Sign);
+   --  Two deadtimes values can be defined in relationship with the rising edge
+   --  and the falling edge of the Output 1 reference waveform.
+   --  The sign determines whether the deadtime is positive or negative
+   --  (overlaping signals). See pg. 649 in RM0364 rev. 4.
    --  The deadtime cannot be used simultaneously with the push-pull mode.
 
    type Deadtime_Lock is record
@@ -1060,7 +1074,7 @@ package STM32.HRTimers is
      (This     : HRTimer_Channel;
       Output   : HRTimer_Channel_Output) return Channel_Output_Polarity;
 
-   type Delayed_Idle_Protection is
+   type Delayed_Idle_Protection_Enum is
      (Option_1,
       Option_2,
       Option_3,
@@ -1068,8 +1082,8 @@ package STM32.HRTimers is
       Option_5,
       Option_6,
       Option_7,
-      Option_8,
-      Disabled);
+      Option_8)
+     with Size => 3;
    --  Define the source and outputs on which the delayed protection schemes
    --  are applied.
    --  Option  HRTimer_A                      HRTimer_D
@@ -1085,12 +1099,22 @@ package STM32.HRTimers is
    --  7       Output_12_External_Event_7     Output_12External_Event_9
    --  8       Balanced_Idle_External_Event_7 Balanced_Idle_External_Event_9
 
+   type Delayed_Idle_Protection is record
+      Enabled : Boolean;
+      Value   : Delayed_Idle_Protection_Enum;
+   end record with Size => 4;
+
+   for Delayed_Idle_Protection use record
+      Enabled at 0 range 3 .. 3;
+      Value   at 0 range 0 .. 2;
+   end record;
+
    procedure Set_Delayed_Idle_Protection
      (This   : in out HRTimer_Channel;
       Option : Delayed_Idle_Protection)
      with Pre => not Enabled (This) and
-     (if Option /= Disabled then
-        Current_Delayed_Idle_Protection (This) = Disabled);
+     (if Option.Enabled then
+        Current_Delayed_Idle_Protection (This).Enabled);
 
    function Current_Delayed_Idle_Protection
      (This : in out HRTimer_Channel) return Delayed_Idle_Protection;

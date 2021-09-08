@@ -824,10 +824,10 @@ package body STM32.HRTimers is
 
    procedure Configure_AutoDelayed_Mode
      (This : in out HRTimer_Channel;
-      Mode : Autodelayed_Mode_Descriptor)
+      Mode : AutoDelayed_Mode_Descriptor)
    is
    begin
-      case Mode.CMP_Selector is
+      case Mode.Selector is
          when CMP2 =>
             This.TIMxCR.DELCMP.Arr (2) := Mode.AutoDelay_1'Enum_Rep;
          when CMP4 =>
@@ -1564,14 +1564,14 @@ package body STM32.HRTimers is
       This.OUTxR.DTEN := Enable;
    end Set_Deadtime;
 
-   -------------------
-   -- Read_Deadtime --
-   -------------------
+   ----------------------
+   -- Enabled_Deadtime --
+   ----------------------
 
-   function Read_Deadtime (This : HRTimer_Channel) return Boolean is
+   function Enabled_Deadtime (This : HRTimer_Channel) return Boolean is
    begin
       return This.OUTxR.DTEN;
-   end Read_Deadtime;
+   end Enabled_Deadtime;
 
    ------------------------
    -- Configure_Deadtime --
@@ -1581,9 +1581,9 @@ package body STM32.HRTimers is
      (This          : in out HRTimer_Channel;
       Prescaler     : UInt3;
       Rising_Value  : UInt9;
-      Rising_Sign   : Boolean;
+      Rising_Sign   : HRTimer_Deadtime_Sign := Positive_Sign;
       Falling_Value : UInt9;
-      Falling_Sign  : Boolean)
+      Falling_Sign  : HRTimer_Deadtime_Sign := Positive_Sign)
    is
    begin
       --  The deadtime (generator) time after the prescaler is defined by
@@ -1601,8 +1601,8 @@ package body STM32.HRTimers is
 
       --  The sign determines whether the deadtime is positive or negative
       --  (overlaping signals). See pg. 649 in RM0364 rev. 4.
-      This.DTxR.SDTRx := Rising_Sign;
-      This.DTxR.SDTFx := Falling_Sign;
+      This.DTxR.SDTRx := Rising_Sign = Negative_Sign;
+      This.DTxR.SDTFx := Falling_Sign = Negative_Sign;
    end Configure_Deadtime;
 
    ------------------------
@@ -1612,9 +1612,9 @@ package body STM32.HRTimers is
    procedure Configure_Deadtime
      (This          : in out HRTimer_Channel;
       Rising_Value  : Float;
-      Rising_Sign   : Boolean;
+      Rising_Sign   : HRTimer_Deadtime_Sign := Positive_Sign;
       Falling_Value : Float;
-      Falling_Sign  : Boolean)
+      Falling_Sign  : HRTimer_Deadtime_Sign := Positive_Sign)
    is
       Timer_Frequency : constant UInt32 :=
         STM32.Device.Get_Clock_Frequency (This);
@@ -1665,8 +1665,8 @@ package body STM32.HRTimers is
 
       --  The sign determines whether the deadtime is positive or negative
       --  (overlaping signals). See pg. 649 in RM0364 rev. 4.
-      This.DTxR.SDTRx := Rising_Sign;
-      This.DTxR.SDTFx := Falling_Sign;
+      This.DTxR.SDTRx := Rising_Sign = Negative_Sign;
+      This.DTxR.SDTFx := Falling_Sign = Negative_Sign;
    end Configure_Deadtime;
 
    -----------------------
@@ -1912,10 +1912,10 @@ package body STM32.HRTimers is
       Option : Delayed_Idle_Protection)
    is
    begin
-      if Option = Disabled then
+      if not Option.Enabled then
          This.OUTxR.DLYPRTEN := False;
       else
-         This.OUTxR.DLYPRT := UInt3 (Option'Enum_Rep);
+         This.OUTxR.DLYPRT := Option.Value'Enum_Rep;
          This.OUTxR.DLYPRTEN := True;
       end if;
    end Set_Delayed_Idle_Protection;
@@ -1927,12 +1927,11 @@ package body STM32.HRTimers is
    function Current_Delayed_Idle_Protection
      (This : in out HRTimer_Channel) return Delayed_Idle_Protection
    is
+      Protection : Delayed_Idle_Protection;
    begin
-      if not This.OUTxR.DLYPRTEN then
-         return Disabled;
-      else
-         return Delayed_Idle_Protection'Val (UInt4 (This.OUTxR.DLYPRT));
-      end if;
+      Protection.Enabled := This.OUTxR.DLYPRTEN;
+      Protection.Value := Delayed_Idle_Protection_Enum'Val (This.OUTxR.DLYPRT);
+      return Protection;
    end Current_Delayed_Idle_Protection;
 
    ----------------------
