@@ -850,9 +850,13 @@ package STM32.HRTimers is
      Falling_Sign  : Boolean;
    end record;
 
-   procedure Set_Deadtime_Lock
+   procedure Enable_Deadtime_Lock
      (This : in out HRTimer_Channel;
-      Lock : Deadtime_Lock);
+      Lock : Deadtime_Lock)
+     with Post => (if Lock.Rising_Value then Read_Deadtime_Lock (This).Rising_Value) and
+                  (if Lock.Rising_Sign then Read_Deadtime_Lock (This).Rising_Sign) and
+                  (if Lock.Falling_Value then Read_Deadtime_Lock (This).Falling_Value) and
+                  (if Lock.Falling_Sign then Read_Deadtime_Lock (This).Falling_Sign);
    --  Prevents the deadtime value and sign to be modified.
 
    function Read_Deadtime_Lock (This : HRTimer_Channel) return Deadtime_Lock;
@@ -1131,14 +1135,14 @@ package STM32.HRTimers is
       Source : HRTimer_Fault_Source;
       Enable : Boolean)
      with Pre => not Enabled_Fault_Source_Lock (This),
-       Post => Enabled_Fault_Source (This, Source) = Enable;
+          Post => Enabled_Fault_Source (This, Source) = Enable;
    --  Fault protection circuitry to disable the outputs in case of an
    --  abnormal operation. See chapter 21.3.15 pg. 691 in RM0364 ver. 4.
 
    function Enabled_Fault_Source
      (This : HRTimer_Channel; Source : HRTimer_Fault_Source) return Boolean;
 
-   procedure Set_Fault_Source_Lock
+   procedure Enable_Fault_Source_Lock
      (This : in out HRTimer_Channel)
      with Post => Enabled_Fault_Source_Lock (This);
    --  Prevents the fault value and sign to be modified.
@@ -1533,7 +1537,7 @@ package STM32.HRTimers is
       Filter   : Fault_Input_Filter)
      with Pre => not Enabled_Fault_Input_Lock (Input);
 
-   procedure Set_Fault_Input_Lock (Input : HRTimer_Fault_Source)
+   procedure Enable_Fault_Input_Lock (Input : HRTimer_Fault_Source)
      with Post => Enabled_Fault_Input_Lock (Input);
    --  Prevents the fault enable, polarity, source and filter to be modified.
 

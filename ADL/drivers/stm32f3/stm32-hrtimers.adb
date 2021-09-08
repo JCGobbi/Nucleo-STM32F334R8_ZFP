@@ -1669,18 +1669,26 @@ package body STM32.HRTimers is
       This.DTxR.SDTFx := Falling_Sign = Negative_Sign;
    end Configure_Deadtime;
 
-   -----------------------
-   -- Set_Deadtime_Lock --
-   -----------------------
+   --------------------------
+   -- Enable_Deadtime_Lock --
+   --------------------------
 
-   procedure Set_Deadtime_Lock
+   procedure Enable_Deadtime_Lock
      (This : in out HRTimer_Channel; Lock : Deadtime_Lock) is
    begin
-      This.DTxR.DTRLKx := Lock.Rising_Value;
-      This.DTxR.DTRSLKx := Lock.Rising_Sign;
-      This.DTxR.DTFLKx := Lock.Falling_Value;
-      This.DTxR.DTFSLKx := Lock.Falling_Sign;
-   end Set_Deadtime_Lock;
+      if not This.DTxR.DTRLKx then
+         This.DTxR.DTRLKx := Lock.Rising_Value;
+      end if;
+      if not This.DTxR.DTRSLKx then
+         This.DTxR.DTRSLKx := Lock.Rising_Sign;
+      end if;
+      if not This.DTxR.DTFLKx then
+         This.DTxR.DTFLKx := Lock.Falling_Value;
+      end if;
+      if not This.DTxR.DTFSLKx then
+         This.DTxR.DTFSLKx := Lock.Falling_Sign;
+      end if;
+   end Enable_Deadtime_Lock;
 
    ------------------------
    -- Read_Deadtime_Lock --
@@ -1979,14 +1987,14 @@ package body STM32.HRTimers is
       end case;
    end Enabled_Fault_Source;
 
-   ---------------------------
-   -- Set_Fault_Source_Lock --
-   ---------------------------
+   ------------------------------
+   -- Enable_Fault_Source_Lock --
+   ------------------------------
 
-   procedure Set_Fault_Source_Lock (This : in out HRTimer_Channel) is
+   procedure Enable_Fault_Source_Lock (This : in out HRTimer_Channel) is
    begin
       This.FLTxR.FLTLCK := True;
-   end Set_Fault_Source_Lock;
+   end Enable_Fault_Source_Lock;
 
    -------------------------------
    -- Enabled_Fault_Source_Lock --
@@ -2746,11 +2754,11 @@ package body STM32.HRTimers is
       end case;
    end Configure_Fault_Input;
 
-   --------------------------
-   -- Set_Fault_Input_Lock --
-   --------------------------
+   -----------------------------
+   -- Enable_Fault_Input_Lock --
+   -----------------------------
 
-   procedure Set_Fault_Input_Lock (Input : HRTimer_Fault_Source) is
+   procedure Enable_Fault_Input_Lock (Input : HRTimer_Fault_Source) is
    begin
       case Input is
          when Fault_1 =>
@@ -2764,7 +2772,7 @@ package body STM32.HRTimers is
          when Fault_5 =>
             HRTimer_Common_Periph.FLTINR2.FLT5LCK := True;
       end case;
-   end Set_Fault_Input_Lock;
+   end Enable_Fault_Input_Lock;
 
    ------------------------------
    -- Enabled_Fault_Input_Lock --
