@@ -19,93 +19,28 @@ package STM32.HRTimers is
 
    ----------------------------------------------------------------------------
 
-   type HRTimer is
-     (HRTimer_M, --  Master
-      HRTimer_A,
-      HRTimer_B,
-      HRTimer_C,
-      HRTimer_D,
-      HRTimer_E)
-     with Size => 6;
+   procedure Enable (This : HRTimer_Master)
+     with Post => Enabled (This);
 
-   for HRTimer use
-     (HRTimer_M => 2#000001#,
-      HRTimer_A => 2#000010#,
-      HRTimer_B => 2#000100#,
-      HRTimer_C => 2#001000#,
-      HRTimer_D => 2#010000#,
-      HRTimer_E => 2#100000#);
+   procedure Disable (This : HRTimer_Master)
+     with Post => (if This'Address = HRTIM_Master_Base then
+                      -- Test if HRTimer A to F has no outputs enabled.
+                      (if not (HRTIM_Common_Periph.OENR.TA1OEN or
+                               HRTIM_Common_Periph.OENR.TA2OEN) and
+                          not (HRTIM_Common_Periph.OENR.TB1OEN or
+                               HRTIM_Common_Periph.OENR.TB2OEN) and
+                          not (HRTIM_Common_Periph.OENR.TC1OEN or
+                               HRTIM_Common_Periph.OENR.TC2OEN) and
+                          not (HRTIM_Common_Periph.OENR.TD1OEN or
+                               HRTIM_Common_Periph.OENR.TD2OEN) and
+                          not (HRTIM_Common_Periph.OENR.TE1OEN or
+                               HRTIM_Common_Periph.OENR.TE2OEN)
+                       then
+                          not Enabled (This)
+                       else
+                          Enabled (This)));
 
-   procedure Enable (Counter : HRTimer)
-     with Post => Enabled (Counter);
-
-   procedure Disable (Counter : HRTimer)
-     with Post => (case Counter is
-                      when HRTimer_A =>
-                         -- Test if HRTimer A has no outputs enabled.
-                         (if not (HRTIM_Common_Periph.OENR.TA1OEN or
-                                  HRTIM_Common_Periph.OENR.TA2OEN)
-                          then
-                             not Enabled (Counter)
-                          else
-                             Enabled (Counter)),
-
-                      when HRTimer_B =>
-                         -- Test if HRTimer B has no outputs enabled.
-                         (if not (HRTIM_Common_Periph.OENR.TB1OEN or
-                                  HRTIM_Common_Periph.OENR.TB2OEN)
-                          then
-                             not Enabled (Counter)
-                          else
-                             Enabled (Counter)),
-
-                      when HRTimer_C =>
-                         -- Test if HRTimer C has no outputs enabled.
-                         (if not (HRTIM_Common_Periph.OENR.TC1OEN or
-                                  HRTIM_Common_Periph.OENR.TC2OEN)
-                          then
-                             not Enabled (Counter)
-                          else
-                             Enabled (Counter)),
-
-                      when HRTimer_D =>
-                         -- Test if HRTimer D has no outputs enabled.
-                         (if not (HRTIM_Common_Periph.OENR.TD1OEN or
-                                  HRTIM_Common_Periph.OENR.TD2OEN)
-                          then
-                             not Enabled (Counter)
-                          else
-                             Enabled (Counter)),
-
-                      when HRTimer_E =>
-                         -- Test if HRTimer E has no outputs enabled.
-                         (if not (HRTIM_Common_Periph.OENR.TE1OEN or
-                                  HRTIM_Common_Periph.OENR.TE2OEN)
-                          then
-                             not Enabled (Counter)
-                          else
-                             Enabled (Counter)),
-
-                      when HRTimer_M =>
-                         -- Test if HRTimer A to E has no outputs enabled.
-                         (if not (HRTIM_Common_Periph.OENR.TB1OEN or
-                                  HRTIM_Common_Periph.OENR.TB2OEN) and
-                             not (HRTIM_Common_Periph.OENR.TB1OEN or
-                                  HRTIM_Common_Periph.OENR.TB2OEN) and
-                             not (HRTIM_Common_Periph.OENR.TC1OEN or
-                                  HRTIM_Common_Periph.OENR.TC2OEN) and
-                             not (HRTIM_Common_Periph.OENR.TD1OEN or
-                                  HRTIM_Common_Periph.OENR.TD2OEN) and
-                             not (HRTIM_Common_Periph.OENR.TE1OEN or
-                                  HRTIM_Common_Periph.OENR.TE2OEN)
-                          then
-                             not Enabled (Counter)
-                          else
-                             Enabled (Counter)));
-
-   function Enabled (Counter : HRTimer) return Boolean;
-
-   function Enabled (Counter : HRTimer_Master) return Boolean;
+   function Enabled (This : HRTimer_Master) return Boolean;
 
    --  To enable/disable some/all counters simultaneously, it is necessary to
    --  create a new register with the counter enable 6-bit field TxCEN at the
@@ -128,6 +63,23 @@ package STM32.HRTimers is
    --  The TxCEN offset from HRTIM_Master_Base = 16#40017400# is 16#00#.
    Counter_Enable_Field : aliased Counter_Enable_Register
      with Import, Volatile, Address => HRTIM_Master_Base;
+
+   type HRTimer is
+     (HRTimer_M, --  Master
+      HRTimer_A,
+      HRTimer_B,
+      HRTimer_C,
+      HRTimer_D,
+      HRTimer_E)
+     with Size => 6;
+
+   for HRTimer use
+     (HRTimer_M => 2#000001#,
+      HRTimer_A => 2#000010#,
+      HRTimer_B => 2#000100#,
+      HRTimer_C => 2#001000#,
+      HRTimer_D => 2#010000#,
+      HRTimer_E => 2#100000#);
 
    type HRTimer_List is array (Positive range <>) of HRTimer;
 
@@ -395,9 +347,58 @@ package STM32.HRTimers is
 
    ----------------------------------------------------------------------------
 
+   procedure Enable (This : HRTimer_Channel)
+     with Post => Enabled (This);
+
+   procedure Disable (This : HRTimer_Channel)
+     with Post => (if This'Address = HRTIM_TIMA_Base then
+                      -- Test if HRTimer A has no outputs enabled.
+                      (if not (HRTIM_Common_Periph.OENR.TA1OEN or
+                               HRTIM_Common_Periph.OENR.TA2OEN)
+                       then
+                          not Enabled (This)
+                       else
+                          Enabled (This))
+
+                   elsif This'Address = HRTIM_TIMB_Base then
+                      -- Test if HRTimer B has no outputs enabled.
+                      (if not (HRTIM_Common_Periph.OENR.TB1OEN or
+                               HRTIM_Common_Periph.OENR.TB2OEN)
+                       then
+                          not Enabled (This)
+                       else
+                          Enabled (This))
+
+                   elsif This'Address = HRTIM_TIMC_Base then
+                      -- Test if HRTimer C has no outputs enabled.
+                      (if not (HRTIM_Common_Periph.OENR.TC1OEN or
+                               HRTIM_Common_Periph.OENR.TC2OEN)
+                       then
+                          not Enabled (This)
+                       else
+                          Enabled (This))
+
+                   elsif This'Address = HRTIM_TIMD_Base then
+                      -- Test if HRTimer D has no outputs enabled.
+                      (if not (HRTIM_Common_Periph.OENR.TD1OEN or
+                               HRTIM_Common_Periph.OENR.TD2OEN)
+                       then
+                          not Enabled (This)
+                       else
+                          Enabled (This))
+
+                   elsif This'Address = HRTIM_TIME_Base then
+                      -- Test if HRTimer E has no outputs enabled.
+                      (if not (HRTIM_Common_Periph.OENR.TE1OEN or
+                               HRTIM_Common_Periph.OENR.TE2OEN)
+                       then
+                          not Enabled (This)
+                       else
+                          Enabled (This)));
+
    function Enabled (This : HRTimer_Channel) return Boolean;
 
-   procedure Set_Preload_Enable
+   procedure Set_Register_Preload
      (This   : in out HRTimer_Channel;
       Enable : Boolean);
    --  Enables the registers preload mechanism and defines whether the write
@@ -409,7 +410,11 @@ package STM32.HRTimers is
       Prescaler   : HRTimer_Prescaler)
      with Pre => not Enabled (This),
        Post => Current_Prescaler (This) = Prescaler;
-   --  The actual prescaler value is (2 ** Prescaler).
+   --  The actual prescaler value is (2 ** Prescaler). For clock prescaling ratios
+   --  below 32 (CKPSC[2:0] < 5), the least significant bits of the counter and
+   --  capture registers are not significant. The least significant bits cannot
+   --  be written (counter register only) and return 0 when read.
+   --  See Timer clock and prescaler at pg 632 RM0364 rev 4.
 
    function Current_Prescaler (This : HRTimer_Channel) return HRTimer_Prescaler;
 
@@ -443,7 +448,7 @@ package STM32.HRTimers is
       Active_After_Capture_2_Compare_1,
       Active_After_Capture_2_Compare_3);
 
-   type AutoDelayed_Mode_Descriptor
+   type CMP_AutoDelayed_Mode_Descriptor
      (Selector : Comparator_AutoDelayed_Mode := CMP2) is
      record
         case Selector is
@@ -454,15 +459,15 @@ package STM32.HRTimers is
         end case;
      end record with Size => 3;
 
-   for AutoDelayed_Mode_Descriptor use record
+   for CMP_AutoDelayed_Mode_Descriptor use record
       Selector    at 0 range 2 .. 2;
       AutoDelay_1 at 0 range 0 .. 1;
       AutoDelay_2 at 0 range 0 .. 1;
    end record;
 
-   procedure Configure_AutoDelayed_Mode
+   procedure Configure_Comparator_AutoDelayed_Mode
      (This : in out HRTimer_Channel;
-      Mode : AutoDelayed_Mode_Descriptor)
+      Mode : CMP_AutoDelayed_Mode_Descriptor)
      with Pre => not Enabled (This);
 
    type HRTimer_Update_Event is
@@ -809,15 +814,15 @@ package STM32.HRTimers is
    procedure Set_Deadtime (This : in out HRTimer_Channel; Enable : Boolean)
      with Pre =>
        (if This'Address = HRTIM_TIMA_Base then
-          not Enabled (HRTimer_A) or No_Outputs_Enabled (This)
+          not Enabled (This) or No_Outputs_Enabled (This)
        elsif This'Address = HRTIM_TIMB_Base then
-          not Enabled (HRTimer_B) or No_Outputs_Enabled (This)
+          not Enabled (This) or No_Outputs_Enabled (This)
        elsif This'Address = HRTIM_TIMC_Base then
-          not Enabled (HRTimer_C) or No_Outputs_Enabled (This)
+          not Enabled (This) or No_Outputs_Enabled (This)
        elsif This'Address = HRTIM_TIMD_Base then
-          not Enabled (HRTimer_D) or No_Outputs_Enabled (This)
+          not Enabled (This) or No_Outputs_Enabled (This)
        elsif This'Address = HRTIM_TIME_Base then
-          not Enabled (HRTimer_E) or No_Outputs_Enabled (This)),
+          not Enabled (This) or No_Outputs_Enabled (This)),
        Post => Enabled_Deadtime (This) = Enable;
    --  Enable or disable the deadtime. This parameter cannot be changed once
    --  the timer is operating (TxEN bit set) or if its outputs are enabled
@@ -1355,9 +1360,10 @@ package STM32.HRTimers is
    --  BMPRESC[3:0] = 0000).
 
    procedure Set_Burst_Mode_Period (Value : UInt16);
-   --  Defines the burst mode repetition period. This register holds either the
-   --  content of the preload register or the content of the active register if
-   --  preload is disabled.
+   --  Defines the burst mode repetition periode (corresponding to the sum of
+   --  the idle and run periods). This register holds either the content of the
+   --  preload register or the content of the active register if preload is
+   --  disabled.
 
    type External_Event_Source is
      (EExSrc1,

@@ -13,120 +13,48 @@ package body STM32.HRTimers is
    -- Enable --
    ------------
 
-   procedure Enable (Counter : HRTimer) is
+   procedure Enable (This : HRTimer_Master) is
    begin
-      case Counter is
-         when HRTimer_A =>
-            HRTIM_Master_Periph.MCR.TACEN := True;
-         when HRTimer_B =>
-            HRTIM_Master_Periph.MCR.TBCEN := True;
-         when HRTimer_C =>
-            HRTIM_Master_Periph.MCR.TCCEN := True;
-         when HRTimer_D =>
-            HRTIM_Master_Periph.MCR.TDCEN := True;
-         when HRTimer_E =>
-            HRTIM_Master_Periph.MCR.TECEN := True;
-         when HRTimer_M => -- Master
-            HRTIM_Master_Periph.MCR.MCEN := True;
-      end case;
+      if This'Address = HRTIM_Master_Base then
+         HRTIM_Master_Periph.MCR.MCEN := True;
+      end if;
    end Enable;
 
    -------------
    -- Disable --
    -------------
 
-   procedure Disable (Counter : HRTimer) is
+   procedure Disable (This : HRTimer_Master) is
    begin
-      case Counter is
-         when HRTimer_A =>
-            --  Test if HRTimer A has no outputs enabled.
-            if not (HRTimer_Common_Periph.OENR.TA1OEN or
-                      HRTimer_Common_Periph.OENR.TA2OEN)
-            then
-               HRTIM_Master_Periph.MCR.TACEN := False;
-            end if;
-
-         when HRTimer_B =>
-            --  Test if HRTimer B has no outputs enabled.
-            if not (HRTimer_Common_Periph.OENR.TB1OEN or
-                      HRTimer_Common_Periph.OENR.TB2OEN)
-            then
-               HRTIM_Master_Periph.MCR.TBCEN := False;
-            end if;
-
-         when HRTimer_C =>
-            --  Test if HRTimer C has no outputs enabled.
-            if not (HRTimer_Common_Periph.OENR.TC1OEN or
-                      HRTimer_Common_Periph.OENR.TC2OEN)
-            then
-               HRTIM_Master_Periph.MCR.TCCEN := False;
-            end if;
-
-         when HRTimer_D =>
-            --  Test if HRTimer D has no outputs enabled.
-            if not (HRTimer_Common_Periph.OENR.TD1OEN or
-                      HRTimer_Common_Periph.OENR.TD2OEN)
-            then
-               HRTIM_Master_Periph.MCR.TDCEN := False;
-            end if;
-
-         when HRTimer_E =>
-            --  Test if HRTimer E has no outputs enabled.
-            if not (HRTimer_Common_Periph.OENR.TE1OEN or
-                      HRTimer_Common_Periph.OENR.TE2OEN)
-            then
-               HRTIM_Master_Periph.MCR.TECEN := False;
-            end if;
-
-         when HRTimer_M => -- Master
-            --  Test if HRTimer A to E has no outputs enabled
-            if not (HRTimer_Common_Periph.OENR.TA1OEN or
-              HRTimer_Common_Periph.OENR.TA2OEN) and
-              not (HRTimer_Common_Periph.OENR.TB1OEN or
-              HRTimer_Common_Periph.OENR.TB2OEN) and
-              not (HRTimer_Common_Periph.OENR.TC1OEN or
-              HRTimer_Common_Periph.OENR.TC2OEN) and
-              not (HRTimer_Common_Periph.OENR.TD1OEN or
-              HRTimer_Common_Periph.OENR.TD2OEN) and
-              not (HRTimer_Common_Periph.OENR.TE1OEN or
-              HRTimer_Common_Periph.OENR.TE2OEN)
-            then
-               HRTIM_Master_Periph.MCR.MCEN := False;
-            end if;
-      end case;
+      if This'Address = HRTIM_Master_Base then
+         --  Test if HRTimer A to F has no outputs enabled
+         if not (HRTimer_Common_Periph.OENR.TA1OEN or
+           HRTimer_Common_Periph.OENR.TA2OEN) and
+           not (HRTimer_Common_Periph.OENR.TB1OEN or
+           HRTimer_Common_Periph.OENR.TB2OEN) and
+           not (HRTimer_Common_Periph.OENR.TC1OEN or
+           HRTimer_Common_Periph.OENR.TC2OEN) and
+           not (HRTimer_Common_Periph.OENR.TD1OEN or
+           HRTimer_Common_Periph.OENR.TD2OEN) and
+           not (HRTimer_Common_Periph.OENR.TE1OEN or
+           HRTimer_Common_Periph.OENR.TE2OEN)
+         then
+            HRTIM_Master_Periph.MCR.MCEN := False;
+         end if;
+      end if;
    end Disable;
 
    -------------
    -- Enabled --
    -------------
 
-   function Enabled (Counter : HRTimer) return Boolean is
-   begin
-      case Counter is
-         when HRTimer_A =>
-            return HRTIM_Master_Periph.MCR.TACEN;
-         when HRTimer_B =>
-            return HRTIM_Master_Periph.MCR.TBCEN;
-         when HRTimer_C =>
-            return HRTIM_Master_Periph.MCR.TCCEN;
-         when HRTimer_D =>
-            return HRTIM_Master_Periph.MCR.TDCEN;
-         when HRTimer_E =>
-            return HRTIM_Master_Periph.MCR.TECEN;
-         when HRTimer_M => -- Master
-            return HRTIM_Master_Periph.MCR.MCEN;
-      end case;
-   end Enabled;
-
-   -------------
-   -- Enabled --
-   -------------
-
-   function Enabled (Counter : HRTimer_Master) return Boolean
+   function Enabled (This : HRTimer_Master) return Boolean
    is
-      pragma Unreferenced (Counter);
    begin
-      return HRTIM_Master_Periph.MCR.MCEN;
+      if This'Address = HRTIM_Master_Base then
+         return HRTIM_Master_Periph.MCR.MCEN;
+      end if;
+      return False;
    end Enabled;
 
    ------------
@@ -730,6 +658,73 @@ package body STM32.HRTimers is
 
    ----------------------------------------------------------------------------
 
+   ------------
+   -- Enable --
+   ------------
+
+   procedure Enable (This : HRTimer_Channel) is
+   begin
+      if This'Address = HRTIM_TIMA_Base then
+         HRTIM_Master_Periph.MCR.TACEN := True;
+      elsif This'Address = HRTIM_TIMB_Base then
+         HRTIM_Master_Periph.MCR.TBCEN := True;
+      elsif This'Address = HRTIM_TIMC_Base then
+         HRTIM_Master_Periph.MCR.TCCEN := True;
+      elsif This'Address = HRTIM_TIMD_Base then
+         HRTIM_Master_Periph.MCR.TDCEN := True;
+      elsif This'Address = HRTIM_TIME_Base then
+         HRTIM_Master_Periph.MCR.TECEN := True;
+      end if;
+   end Enable;
+
+   -------------
+   -- Disable --
+   -------------
+
+   procedure Disable (This : HRTimer_Channel) is
+   begin
+      if This'Address = HRTIM_TIMA_Base then
+         --  Test if HRTimer A has no outputs enabled.
+         if not (HRTimer_Common_Periph.OENR.TA1OEN or
+                 HRTimer_Common_Periph.OENR.TA2OEN)
+         then
+            HRTIM_Master_Periph.MCR.TACEN := False;
+         end if;
+
+      elsif This'Address = HRTIM_TIMB_Base then
+         --  Test if HRTimer B has no outputs enabled.
+         if not (HRTimer_Common_Periph.OENR.TB1OEN or
+                 HRTimer_Common_Periph.OENR.TB2OEN)
+         then
+            HRTIM_Master_Periph.MCR.TBCEN := False;
+         end if;
+
+      elsif This'Address = HRTIM_TIMC_Base then
+         --  Test if HRTimer C has no outputs enabled.
+         if not (HRTimer_Common_Periph.OENR.TC1OEN or
+                 HRTimer_Common_Periph.OENR.TC2OEN)
+         then
+            HRTIM_Master_Periph.MCR.TCCEN := False;
+         end if;
+
+      elsif This'Address = HRTIM_TIMD_Base then
+         --  Test if HRTimer D has no outputs enabled.
+         if not (HRTimer_Common_Periph.OENR.TD1OEN or
+                 HRTimer_Common_Periph.OENR.TD2OEN)
+         then
+            HRTIM_Master_Periph.MCR.TDCEN := False;
+         end if;
+
+      elsif This'Address = HRTIM_TIME_Base then
+         --  Test if HRTimer E has no outputs enabled.
+         if not (HRTimer_Common_Periph.OENR.TE1OEN or
+                 HRTimer_Common_Periph.OENR.TE2OEN)
+         then
+            HRTIM_Master_Periph.MCR.TECEN := False;
+         end if;
+      end if;
+   end Disable;
+
    -------------
    -- Enabled --
    -------------
@@ -750,17 +745,17 @@ package body STM32.HRTimers is
       return False;
    end Enabled;
 
-   ------------------------
-   -- Set_Preload_Enable --
-   ------------------------
+   -----------------------------
+   -- Set_Register_Preloade --
+   -----------------------------
 
-   procedure Set_Preload_Enable
+   procedure Set_Register_Preload
      (This   : in out HRTimer_Channel;
       Enable : Boolean)
    is
    begin
       This.TIMxCR.PREEN := Enable;
-   end Set_Preload_Enable;
+   end Set_Register_Preload;
 
    -------------------------
    -- Configure_Prescaler --
@@ -818,13 +813,13 @@ package body STM32.HRTimers is
       This.TIMxCR.DACSYNC := Trigger'Enum_Rep;
    end Configure_DAC_Synchronization_Trigger;
 
-   --------------------------------
-   -- Configure_AutoDelayed_Mode --
-   --------------------------------
+   -------------------------------------------
+   -- Configure_Comparator_AutoDelayed_Mode --
+   -------------------------------------------
 
-   procedure Configure_AutoDelayed_Mode
+   procedure Configure_Comparator_AutoDelayed_Mode
      (This : in out HRTimer_Channel;
-      Mode : AutoDelayed_Mode_Descriptor)
+      Mode : CMP_AutoDelayed_Mode_Descriptor)
    is
    begin
       case Mode.Selector is
@@ -833,7 +828,7 @@ package body STM32.HRTimers is
          when CMP4 =>
             This.TIMxCR.DELCMP.Arr (3) := Mode.AutoDelay_2'Enum_Rep;
       end case;
-   end Configure_AutoDelayed_Mode;
+   end Configure_Comparator_AutoDelayed_Mode;
 
    ----------------------
    -- Set_Timer_Update --
