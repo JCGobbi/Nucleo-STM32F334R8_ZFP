@@ -57,7 +57,7 @@ with STM32.ADC;      use STM32.ADC;
 --  with STM32.I2C;      use STM32.I2C;
 --  with STM32.RTC;      use STM32.RTC;
 with STM32.Timers;   use STM32.Timers;
---  with STM32.HRTimers; use STM32.HRTimers;
+with STM32.HRTimers; use STM32.HRTimers;
 --  with STM32.OPAMP;    use STM32.OPAMP;
 --  with STM32.COMP;     use STM32.COMP;
 
@@ -72,11 +72,11 @@ package STM32.Device is
    -- GPIO --
    ----------
 
-   procedure Enable_Clock (This : aliased in out GPIO_Port);
+   procedure Enable_Clock (This : aliased GPIO_Port);
    procedure Enable_Clock (Point : GPIO_Point);
    procedure Enable_Clock (Points : GPIO_Points);
 
-   procedure Reset (This : aliased in out GPIO_Port)
+   procedure Reset (This : aliased GPIO_Port)
      with Inline;
    procedure Reset (Point : GPIO_Point)
      with Inline;
@@ -249,7 +249,7 @@ package STM32.Device is
      (ADC_2'Access, Channel => VRef_OpAmp_2_Channel);
    --  see RM pg 224, section 13.3.11
 
-   procedure Enable_Clock (This : aliased in out Analog_To_Digital_Converter);
+   procedure Enable_Clock (This : aliased Analog_To_Digital_Converter);
 
    procedure Reset_All_ADC_Units;
 
@@ -266,11 +266,11 @@ package STM32.Device is
    --  DAC_Channel_2_IO : GPIO_Point renames PA5;
    --
    --  procedure Enable_Clock
-   --    (This : aliased in out Digital_To_Analog_Converter)
+   --    (This : aliased Digital_To_Analog_Converter)
    --    with Inline;
    --
    --  procedure Reset
-   --    (This : aliased in out Digital_To_Analog_Converter)
+   --    (This : aliased Digital_To_Analog_Converter)
    --    with Inline;
 
    ---------
@@ -279,11 +279,11 @@ package STM32.Device is
 
    --  CRC_Unit : CRC_32 with Import, Volatile, Address => CRC_Base;
 
-   --  procedure Enable_Clock (This : in out CRC_32) with Inline;
+   --  procedure Enable_Clock (This : CRC_32) with Inline;
 
-   --  procedure Disable_Clock (This : in out CRC_32) with Inline;
+   --  procedure Disable_Clock (This : CRC_32) with Inline;
 
-   --  procedure Reset (This : in out CRC_32);
+   --  procedure Reset (This : CRC_32);
 
    ---------
    -- DMA --
@@ -292,8 +292,8 @@ package STM32.Device is
    --  DMA_1 : aliased DMA_Controller
    --    with Import, Volatile, Address => DMA_Base;
    --
-   --  procedure Enable_Clock (This : aliased in out DMA_Controller);
-   --  procedure Reset (This : aliased in out DMA_Controller);
+   --  procedure Enable_Clock (This : aliased DMA_Controller);
+   --  procedure Reset (This : aliased DMA_Controller);
 
    -----------
    -- USART --
@@ -310,9 +310,9 @@ package STM32.Device is
    --  USART_2 : aliased USART (Internal_USART_2'Access);
    --  USART_3 : aliased USART (Internal_USART_3'Access);
 
-   --  procedure Enable_Clock (This : aliased in out USART);
+   --  procedure Enable_Clock (This : aliased USART);
 
-   --  procedure Reset (This : aliased in out USART);
+   --  procedure Reset (This : aliased USART);
 
    ---------
    -- I2C --
@@ -347,7 +347,7 @@ package STM32.Device is
    --  SPI_1_DMA : aliased SPI_Port_DMA (Internal_SPI_1'Access);
 
    --  procedure Enable_Clock (This : SPI_Port'Class);
-   --  procedure Reset (This : in out SPI_Port'Class);
+   --  procedure Reset (This : SPI_Port'Class);
 
    ---------
    -- RTC --
@@ -370,12 +370,12 @@ package STM32.Device is
    Timer_16 : aliased Timer with Import, Volatile, Address => TIM16_Base;
    Timer_17 : aliased Timer with Import, Volatile, Address => TIM17_Base;
 
-   procedure Enable_Clock (This : in out Timer);
+   procedure Enable_Clock (This : Timer);
 
-   procedure Reset (This : in out Timer);
+   procedure Reset (This : Timer);
 
    procedure Set_Clock_Source
-     (This   : in out Timer;
+     (This   : Timer;
       Source : Timer_Clock_Source)
      with pre => (if This'Address = TIM1_Base then
                     STM32_SVD.RCC.RCC_Periph.CR.PLLON = True and
@@ -390,34 +390,41 @@ package STM32.Device is
    -- HRTimer --
    -------------
 
-   --  HRTimer_M : aliased HRTimer_Master
-   --    with Import, Volatile, Address => HRTIM_Master_Base;
+   HRTimer_M : aliased HRTimer_Master
+     with Import, Volatile, Address => HRTIM_Master_Base;
 
-   --  HRTimer_A : aliased HRTimer_Channel
-   --    with Import, Volatile, Address => HRTIM_TIMA_Base;
-   --  HRTimer_B : aliased HRTimer_Channel
-   --    with Import, Volatile, Address => HRTIM_TIMB_Base;
-   --  HRTimer_C : aliased HRTimer_Channel
-   --    with Import, Volatile, Address => HRTIM_TIMC_Base;
-   --  HRTimer_D : aliased HRTimer_Channel
-   --    with Import, Volatile, Address => HRTIM_TIMD_Base;
-   --  HRTimer_E : aliased HRTimer_Channel
-   --    with Import, Volatile, Address => HRTIM_TIME_Base;
+   HRTimer_A : aliased HRTimer_Channel
+     with Import, Volatile, Address => HRTIM_TIMA_Base;
+   HRTimer_B : aliased HRTimer_Channel
+     with Import, Volatile, Address => HRTIM_TIMB_Base;
+   HRTimer_C : aliased HRTimer_Channel
+     with Import, Volatile, Address => HRTIM_TIMC_Base;
+   HRTimer_D : aliased HRTimer_Channel
+     with Import, Volatile, Address => HRTIM_TIMD_Base;
+   HRTimer_E : aliased HRTimer_Channel
+     with Import, Volatile, Address => HRTIM_TIME_Base;
 
-   --  procedure Enable_Clock (This : in out HRTimer_Master);
+   procedure Enable_Clock (This : HRTimer_Master);
 
-   --  procedure Reset (This : in out HRTimer_Master);
+   procedure Enable_Clock (This : HRTimer_Channel);
 
-   --  procedure Set_Clock_Source
-   --    (This   : in out HRTimer_Master;
-   --     Source : Timer_Clock_Source)
-   --    with pre => (if This'Address = HRTIM_Master_Base then
-   --                   STM32_SVD.RCC.RCC_Periph.CR.PLLON = True and
-   --                   STM32_SVD.RCC.RCC_Periph.CFGR.PPRE.Arr (2) <= 2#100#);
-   --  --  Set the clock for HRTIM1 to PLLCLK = 144 MHz or PCLK2 = 72 MHz.
+   procedure Reset (This : HRTimer_Master);
 
-   --  function Get_Clock_Frequency (This : HRTimer_Channel) return UInt32;
-   --  --  Returns the HRTIM1 input frequency in Hz.
+   procedure Reset (This : HRTimer_Channel);
+
+   procedure Set_Clock_Source
+     (This   : HRTimer_Master;
+      Source : Timer_Clock_Source)
+     with pre => (if This'Address = HRTIM_Master_Base then
+                    STM32_SVD.RCC.RCC_Periph.CR.PLLON = True and
+                    STM32_SVD.RCC.RCC_Periph.CFGR.PPRE.Arr (2) <= 2#100#);
+   --  Set the clock for HRTIM1 to PLLCLK = 144 MHz or PCLK2 = 72 MHz.
+
+   function Get_Clock_Frequency (This : HRTimer_Master) return UInt32;
+   --  Returns the timer input frequency in Hz.
+
+   function Get_Clock_Frequency (This : HRTimer_Channel) return UInt32;
+   --  Returns the HRTIM1 input frequency in Hz.
 
    ----------------
    -- Comparator --
