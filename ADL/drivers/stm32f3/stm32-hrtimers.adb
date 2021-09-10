@@ -351,6 +351,22 @@ package body STM32.HRTimers is
       This.MDIER.MREPDE := DMA_Request;
    end Configure_Repetition_Counter;
 
+   ---------------
+   -- Configure --
+   ---------------
+
+   procedure Configure
+     (This        : in out HRTimer_Master;
+      Prescaler   : HRTimer_Prescaler;
+      Period      : UInt16;
+      Repetitions : UInt8)
+   is
+   begin
+      This.MCR.CKPSC := Prescaler'Enum_Rep;
+      This.MPER.MPER := Period;
+      This.MREP.MREP := Repetitions;
+   end Configure;
+
    -----------------------
    -- Set_Compare_Value --
    -----------------------
@@ -1011,39 +1027,55 @@ package body STM32.HRTimers is
    end Current_Counter;
 
    ----------------------------
-   -- Set_Counter_Repetition --
+   -- Set_Repetition_Counter --
    ----------------------------
 
-   procedure Set_Counter_Repetition
+   procedure Set_Repetition_Counter
      (This : in out HRTimer_Channel; Value : UInt8) is
    begin
       This.REPxR.REPx := Value;
-   end Set_Counter_Repetition;
+   end Set_Repetition_Counter;
 
    --------------------------------
-   -- Current_Counter_Repetition --
+   -- Current_Repetition_Counter --
    --------------------------------
 
-   function Current_Counter_Repetition (This : HRTimer_Channel) return UInt8 is
+   function Current_Repetition_Counter (This : HRTimer_Channel) return UInt8 is
    begin
       return This.REPxR.REPx;
-   end Current_Counter_Repetition;
+   end Current_Repetition_Counter;
 
    ----------------------------------
-   -- Configure_Counter_Repetition --
+   -- Configure_Repetition_Counter --
    ----------------------------------
 
-   procedure Configure_Counter_Repetition
+   procedure Configure_Repetition_Counter
      (This        : in out HRTimer_Channel;
-      Counter     : UInt8;
+      Repetitions : UInt8;
       Interrupt   : Boolean;
       DMA_Request : Boolean)
    is
    begin
-      This.REPxR.REPx := Counter;
+      This.REPxR.REPx := Repetitions;
       This.TIMxDIER.REPIE := Interrupt;
       This.TIMxDIER.REPDE := DMA_Request;
-   end Configure_Counter_Repetition;
+   end Configure_Repetition_Counter;
+
+   ---------------
+   -- Configure --
+   ---------------
+
+   procedure Configure
+     (This        : in out HRTimer_Channel;
+      Prescaler   : HRTimer_Prescaler;
+      Period      : UInt16;
+      Repetitions : UInt8)
+   is
+   begin
+      This.TIMxCR.CKPSCx := Prescaler'Enum_Rep;
+      This.PERxR.PERx := Period;
+      This.REPxR.REPx := Repetitions;
+   end Configure;
 
    -----------------------------
    -- Set_Counter_Reset_Event --
@@ -1069,26 +1101,25 @@ package body STM32.HRTimers is
    procedure Set_Compare_Value
      (This    : in out HRTimer_Channel;
       Compare : HRTimer_Compare_Number;
-      Value   : in out UInt16)
+      Value   : UInt16)
    is
       --  The minimum value for timer compare is 3 periods of fHRTIM clock,
       --  that is  0x60 if CKPSC[2:0] = 0, 0x30 if CKPSC[2:0] = 1, 0x18 if
       --  CKPSC[2:0] = 2,... See chapter 21.5.8 at pg. 724 in RM0364 rev. 4.
       Prescaler : constant UInt3 := This.TIMxCR.CKPSCx;
-      Pre_Value : constant UInt16 := UInt16 (2 ** Natural (Prescaler));
-      Min_Value : constant UInt16 := 16#60# / Pre_Value;
+      Presc_Value : constant UInt16 := UInt16 (2 ** Natural (Prescaler));
+      Min_Value : constant UInt16 := 16#60# / Presc_Value;
+      Final_Value : constant UInt16 := UInt16'Max (Value, Min_Value);
    begin
-      Value := UInt16'Max (Value, Min_Value);
-
       case Compare is
          when Compare_1 =>
-            This.CMP1xR.CMP1x := Value;
+            This.CMP1xR.CMP1x := Final_Value;
          when Compare_2 =>
-            This.CMP2xR.CMP2x := Value;
+            This.CMP2xR.CMP2x := Final_Value;
          when Compare_3 =>
-            This.CMP3xR.CMP3x := Value;
+            This.CMP3xR.CMP3x := Final_Value;
          when Compare_4 =>
-            This.CMP4xR.CMP4x := Value;
+            This.CMP4xR.CMP4x := Final_Value;
       end case;
    end Set_Compare_Value;
 
@@ -1861,9 +1892,9 @@ package body STM32.HRTimers is
    begin
       case Output is
          when Output_1 =>
-            This.OUTxR.POL1 := Polarity = Active_Low;
+            This.OUTxR.POL1 := Polarity = Low;
          when Output_2 =>
-            This.OUTxR.POL2 := Polarity = Active_Low;
+            This.OUTxR.POL2 := Polarity = Low;
       end case;
    end Set_Channel_Output_Polarity;
 
@@ -1878,11 +1909,117 @@ package body STM32.HRTimers is
    begin
       case Output is
          when Output_1 =>
-            return (if This.OUTxR.POL1 then Active_Low else Active_High);
+            return (if This.OUTxR.POL1 then Low else High);
          when Output_2 =>
-            return (if This.OUTxR.POL2 then Active_Low else Active_High);
+            return (if This.OUTxR.POL2 then Low else High);
       end case;
    end Current_Channel_Output_Polarity;
+
+   ------------------------------
+   -- Configure_Channel_Output --
+   ------------------------------
+
+   procedure Configure_Channel_Output
+     (This       : in out HRTimer_Channel;
+      State      : HRTimer_State;
+      Compare    : HRTimer_Compare_Number;
+      Pulse      : UInt16;
+      Polarity   : Channel_Output_Polarity;
+      Idle_State : Boolean)
+   is
+      Event : Output_Event;
+   begin
+      case Compare is
+         when Compare_1 =>
+            Event := Timer_X_Compare_1;
+         when Compare_2 =>
+            Event := Timer_X_Compare_2;
+         when Compare_3 =>
+            Event := Timer_X_Compare_3;
+         when Compare_4 =>
+            Event := Timer_X_Compare_4;
+      end case;
+
+      --  Disable the timer before configuration
+      Disable (This);
+      --  Choose compare channel and program its value
+      Set_Compare_Value (This, Compare, Pulse);
+      --  Timer counter operating in continuous mode
+      Set_Counter_Operating_Mode (This, Continuous);
+      --  Output 1 set on timer period and reset on compare event
+      Configure_Channel_Output_Event
+        (This,
+         Output => Output_1,
+         Set_Event => Timer_X_Period,
+         Reset_Event => Event);
+      --  Choose output 1 polarity
+      This.OUTxR.POL1 := Polarity = Low;
+      --  Choose enable/disable the output 1
+      HRTimer_Common_Periph.OENR.TA1OEN := not Idle_State;
+      --  Choose enable timer channel or not
+      if State = Enable then
+         Enable (This);
+      end if;
+   end Configure_Channel_Output;
+
+   ------------------------------
+   -- Configure_Channel_Output --
+   ------------------------------
+
+   procedure Configure_Channel_Output
+     (This                     : in out HRTimer_Channel;
+      State                    : HRTimer_State;
+      Compare                  : HRTimer_Compare_Number;
+      Pulse                    : UInt16;
+      Polarity                 : Channel_Output_Polarity;
+      Idle_State               : Boolean;
+      Complementary_Polarity   : Channel_Output_Polarity;
+      Complementary_Idle_State : Boolean)
+   is
+      Event : Output_Event;
+   begin
+      case Compare is
+         when Compare_1 =>
+            Event := Timer_X_Compare_1;
+         when Compare_2 =>
+            Event := Timer_X_Compare_2;
+         when Compare_3 =>
+            Event := Timer_X_Compare_3;
+         when Compare_4 =>
+            Event := Timer_X_Compare_4;
+      end case;
+
+      --  Disable the timer before configuration
+      Disable (This);
+      --  Choose compare channel and program its value
+      Set_Compare_Value (This, Compare, Pulse);
+      --  Timer counter operating in continuous mode
+      Set_Counter_Operating_Mode (This, Continuous);
+      --  Output 1 set on timer period and reset on compare event
+      Configure_Channel_Output_Event
+        (This,
+         Output => Output_1,
+         Set_Event => Timer_X_Period,
+         Reset_Event => Event);
+      --  Choose output 1 polarity
+      This.OUTxR.POL1 := Polarity = Low;
+      --  Choose enable/disable the output 1
+      HRTimer_Common_Periph.OENR.TA1OEN := not Idle_State;
+      --  Output 2 set on timer period and reset on compare event
+      Configure_Channel_Output_Event
+        (This,
+         Output => Output_2,
+         Set_Event => Timer_X_Period,
+         Reset_Event => Event);
+      --  Choose output 2 polarity
+      This.OUTxR.POL2 := Complementary_Polarity = Low;
+      --  Choose enable/disable the output 2
+      HRTimer_Common_Periph.OENR.TA2OEN := not Complementary_Idle_State;
+      --  Choose enable timer channel or not
+      if State = Enable then
+         Enable (This);
+      end if;
+   end Configure_Channel_Output;
 
    ---------------------------------
    -- Set_Delayed_Idle_Protection --

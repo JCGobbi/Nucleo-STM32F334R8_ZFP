@@ -218,7 +218,9 @@ package STM32.HRTimers is
      (This      : in out HRTimer_Master;
       Prescaler : HRTimer_Prescaler;
       Period    : UInt16)
-     with Pre => not Enabled (This);
+     with Pre => not Enabled (This),
+          Post => Current_Prescaler (This) = Prescaler and
+                  Current_Period (This) = Period;
 
    type Counter_Operating_Mode is
      (SingleShot_NonRetriggerable,
@@ -258,6 +260,16 @@ package STM32.HRTimers is
       DMA_Request : Boolean);
    --  Defines the repetition period and whether the master timer starts
    --  Interrupt and/or DMA requests at the end of repetition.
+
+   procedure Configure
+     (This        : in out HRTimer_Master;
+      Prescaler   : HRTimer_Prescaler;
+      Period      : UInt16;
+      Repetitions : UInt8)
+     with Pre => not Enabled (This),
+          Post => Current_Prescaler (This) = Prescaler and
+                  Current_Period (This) = Period and
+                  Current_Repetition_Counter (This) = Repetitions;
 
    type HRTimer_Compare_Number is
      (Compare_1,
@@ -530,7 +542,9 @@ package STM32.HRTimers is
      (This      : in out HRTimer_Channel;
       Prescaler : HRTimer_Prescaler;
       Period    : UInt16)
-     with Pre => not Enabled (This);
+     with Pre => not Enabled (This),
+          Post => Current_Prescaler (This) = Prescaler and
+                  Current_Period (This) = Period;
 
    procedure Compute_Prescaler_And_Period
      (This                : HRTimer_Channel;
@@ -562,21 +576,32 @@ package STM32.HRTimers is
 
    function Current_Counter (This : HRTimer_Channel) return UInt16;
 
-   procedure Set_Counter_Repetition
+   procedure Set_Repetition_Counter
      (This : in out HRTimer_Channel;  Value : UInt8)
-     with Post => Current_Counter_Repetition (This) = Value;
+     with Post => Current_Repetition_Counter (This) = Value;
    --  The repetition period value for the timer counter. It  holds either
    --  the content of the preload register or the content of the active
    --  register if preload is disabled.
 
-   function Current_Counter_Repetition (This : HRTimer_Channel) return UInt8;
+   function Current_Repetition_Counter (This : HRTimer_Channel) return UInt8;
 
-   procedure Configure_Counter_Repetition
+   procedure Configure_Repetition_Counter
      (This        : in out HRTimer_Channel;
-      Counter     : UInt8;
+      Repetitions : UInt8;
       Interrupt   : Boolean;
-      DMA_Request : Boolean);
+      DMA_Request : Boolean)
+     with Post => Current_Repetition_Counter (This) = Repetitions;
    --  Set repetition counter with Interrupt and/or DMA requests.
+
+   procedure Configure
+     (This        : in out HRTimer_Channel;
+      Prescaler   : HRTimer_Prescaler;
+      Period      : UInt16;
+      Repetitions : UInt8)
+     with Pre => not Enabled (This),
+          Post => Current_Prescaler (This) = Prescaler and
+                  Current_Period (This) = Period and
+                  Current_Repetition_Counter (This) = Repetitions;
 
    type Counter_Reset_Event is
      (Timer_Update,
@@ -649,7 +674,7 @@ package STM32.HRTimers is
    procedure Set_Compare_Value
      (This    : in out HRTimer_Channel;
       Compare : HRTimer_Compare_Number;
-      Value   : in out UInt16)
+      Value   : UInt16)
      with Post => Current_Compare_Value (This, Compare) = Value;
    --  Set the value for Compare registers 1 to 4.
 
@@ -1080,7 +1105,9 @@ package STM32.HRTimers is
    --  by DTRx[8:0]. This setting only applies when entering the idle state
    --  during a burst mode operation.
 
-   type Channel_Output_Polarity is (Active_High, Active_Low);
+   type HRTimer_State is (Disable, Enable);
+
+   type Channel_Output_Polarity is (High, Low);
 
    procedure Set_Channel_Output_Polarity
      (This     : in out HRTimer_Channel;
@@ -1092,6 +1119,24 @@ package STM32.HRTimers is
    function Current_Channel_Output_Polarity
      (This     : HRTimer_Channel;
       Output   : HRTimer_Channel_Output) return Channel_Output_Polarity;
+
+   procedure Configure_Channel_Output
+     (This       : in out HRTimer_Channel;
+      State      : HRTimer_State;
+      Compare    : HRTimer_Compare_Number;
+      Pulse      : UInt16;
+      Polarity   : Channel_Output_Polarity;
+      Idle_State : Boolean);
+
+   procedure Configure_Channel_Output
+     (This                     : in out HRTimer_Channel;
+      State                    : HRTimer_State;
+      Compare                  : HRTimer_Compare_Number;
+      Pulse                    : UInt16;
+      Polarity                 : Channel_Output_Polarity;
+      Idle_State               : Boolean;
+      Complementary_Polarity   : Channel_Output_Polarity;
+      Complementary_Idle_State : Boolean);
 
    type Delayed_Idle_Protection_Enum is
      (Option_1,
