@@ -168,10 +168,9 @@ package body STM32.HRTimers is
    -- Current_Prescaler --
    -----------------------
 
-   function Current_Prescaler (This : HRTimer_Master)
-                               return HRTimer_Prescaler is
+   function Current_Prescaler (This : HRTimer_Master) return UInt16 is
    begin
-      return HRTimer_Prescaler'Val (This.MCR.CKPSC);
+      return HRTimer_Prescaler_Value (HRTimer_Prescaler'Val (This.MCR.CKPSC));
    end Current_Prescaler;
 
    -------------------------------------
@@ -789,9 +788,9 @@ package body STM32.HRTimers is
    -- Current_Prescaler --
    -----------------------
 
-   function Current_Prescaler (This : HRTimer_Channel) return HRTimer_Prescaler is
+   function Current_Prescaler (This : HRTimer_Channel) return UInt16 is
    begin
-      return HRTimer_Prescaler'Val (This.TIMxCR.CKPSCx);
+      return HRTimer_Prescaler_Value (HRTimer_Prescaler'Val (This.TIMxCR.CKPSCx));
    end Current_Prescaler;
 
    -----------------------
@@ -1921,9 +1920,41 @@ package body STM32.HRTimers is
 
    procedure Configure_Channel_Output
      (This       : in out HRTimer_Channel;
+      Mode       : Counter_Operating_Mode;
+      State      : HRTimer_State;
+      Output     : HRTimer_Channel_Output;
+      Polarity   : Channel_Output_Polarity;
+      Idle_State : Boolean)
+   is
+   begin
+      --  Disable the timer before configuration
+      Disable (This);
+
+      --  Timer counter operating in continuous mode
+      Set_Counter_Operating_Mode (This, Mode);
+
+      --  Choose enable/disable the output 1
+      Set_Channel_Output (This, Output, not Idle_State);
+      --  Choose output polarity
+      Set_Channel_Output_Polarity (This, Output, Polarity);
+
+      --  Choose enable timer channel or not
+      if State = Enable then
+         Enable (This);
+      end if;
+   end Configure_Channel_Output;
+
+   ------------------------------
+   -- Configure_Channel_Output --
+   ------------------------------
+
+   procedure Configure_Channel_Output
+     (This       : in out HRTimer_Channel;
+      Mode       : Counter_Operating_Mode;
       State      : HRTimer_State;
       Compare    : HRTimer_Compare_Number;
       Pulse      : UInt16;
+      Output     : HRTimer_Channel_Output;
       Polarity   : Channel_Output_Polarity;
       Idle_State : Boolean)
    is
@@ -1945,17 +1976,56 @@ package body STM32.HRTimers is
       --  Choose compare channel and program its value
       Set_Compare_Value (This, Compare, Pulse);
       --  Timer counter operating in continuous mode
-      Set_Counter_Operating_Mode (This, Continuous);
-      --  Output 1 set on timer period and reset on compare event
+      Set_Counter_Operating_Mode (This, Mode);
+
+      --  Output set on timer period and reset on compare event
       Configure_Channel_Output_Event
         (This,
-         Output => Output_1,
-         Set_Event => Timer_X_Period,
+         Output      => Output,
+         Set_Event   => Timer_X_Period,
          Reset_Event => Event);
-      --  Choose output 1 polarity
-      This.OUTxR.POL1 := Polarity = Low;
+
       --  Choose enable/disable the output 1
-      HRTimer_Common_Periph.OENR.TA1OEN := not Idle_State;
+      Set_Channel_Output (This, Output, not Idle_State);
+
+      --  Choose output polarity
+      Set_Channel_Output_Polarity (This, Output, Polarity);
+
+      if State = Enable then
+         Enable (This);
+      end if;
+   end Configure_Channel_Output;
+
+   ------------------------------
+   -- Configure_Channel_Output --
+   ------------------------------
+
+   procedure Configure_Channel_Output
+     (This                     : in out HRTimer_Channel;
+      Mode                     : Counter_Operating_Mode;
+      State                    : HRTimer_State;
+      Polarity                 : Channel_Output_Polarity;
+      Idle_State               : Boolean;
+      Complementary_Polarity   : Channel_Output_Polarity;
+      Complementary_Idle_State : Boolean)
+   is
+   begin
+      --  Disable the timer before configuration
+      Disable (This);
+
+      --  Timer counter operating in continuous mode
+      Set_Counter_Operating_Mode (This, Mode);
+
+      --  Choose enable/disable the output 1
+      Set_Channel_Output (This, Output_1, not Idle_State);
+      --  Choose output 1 polarity
+      Set_Channel_Output_Polarity (This, Output_1, Polarity);
+
+      --  Choose enable/disable the output 2
+      Set_Channel_Output (This, Output_2, not Complementary_Idle_State);
+      --  Choose output 2 polarity
+      Set_Channel_Output_Polarity (This, Output_2, Complementary_Polarity);
+
       --  Choose enable timer channel or not
       if State = Enable then
          Enable (This);
@@ -1968,6 +2038,7 @@ package body STM32.HRTimers is
 
    procedure Configure_Channel_Output
      (This                     : in out HRTimer_Channel;
+      Mode                     : Counter_Operating_Mode;
       State                    : HRTimer_State;
       Compare                  : HRTimer_Compare_Number;
       Pulse                    : UInt16;
@@ -1994,27 +2065,30 @@ package body STM32.HRTimers is
       --  Choose compare channel and program its value
       Set_Compare_Value (This, Compare, Pulse);
       --  Timer counter operating in continuous mode
-      Set_Counter_Operating_Mode (This, Continuous);
+      Set_Counter_Operating_Mode (This, Mode);
+
       --  Output 1 set on timer period and reset on compare event
       Configure_Channel_Output_Event
         (This,
          Output => Output_1,
          Set_Event => Timer_X_Period,
          Reset_Event => Event);
-      --  Choose output 1 polarity
-      This.OUTxR.POL1 := Polarity = Low;
       --  Choose enable/disable the output 1
-      HRTimer_Common_Periph.OENR.TA1OEN := not Idle_State;
+      Set_Channel_Output (This, Output_1, not Idle_State);
+      --  Choose output 1 polarity
+      Set_Channel_Output_Polarity (This, Output_1, Polarity);
+
       --  Output 2 set on timer period and reset on compare event
       Configure_Channel_Output_Event
         (This,
          Output => Output_2,
          Set_Event => Timer_X_Period,
          Reset_Event => Event);
-      --  Choose output 2 polarity
-      This.OUTxR.POL2 := Complementary_Polarity = Low;
       --  Choose enable/disable the output 2
-      HRTimer_Common_Periph.OENR.TA2OEN := not Complementary_Idle_State;
+      Set_Channel_Output (This, Output_2, not Complementary_Idle_State);
+      --  Choose output 2 polarity
+      Set_Channel_Output_Polarity (This, Output_2, Complementary_Polarity);
+
       --  Choose enable timer channel or not
       if State = Enable then
          Enable (This);
@@ -2518,6 +2592,55 @@ package body STM32.HRTimers is
 
       return Output;
    end Output_Status;
+
+   ----------------------------
+   -- Channel_Output_Enabled --
+   ----------------------------
+
+   function Channel_Output_Enabled
+     (This   : HRTimer_Channel;
+      Output : HRTimer_Channel_Output) return Boolean
+   is
+   begin
+      if This'Address = HRTIM_TIMA_Base then
+         case Output is
+            when Output_1 =>
+               return HRTimer_Common_Periph.OENR.TA1OEN;
+            when Output_2 =>
+               return HRTimer_Common_Periph.OENR.TA2OEN;
+         end case;
+      elsif This'Address = HRTIM_TIMB_Base then
+         case Output is
+            when Output_1 =>
+               return HRTimer_Common_Periph.OENR.TB1OEN;
+            when Output_2 =>
+               return HRTimer_Common_Periph.OENR.TB2OEN;
+         end case;
+      elsif This'Address = HRTIM_TIMC_Base then
+         case Output is
+            when Output_1 =>
+               return HRTimer_Common_Periph.OENR.TC1OEN;
+            when Output_2 =>
+               return HRTimer_Common_Periph.OENR.TC2OEN;
+         end case;
+      elsif This'Address = HRTIM_TIMD_Base then
+         case Output is
+            when Output_1 =>
+               return HRTimer_Common_Periph.OENR.TD1OEN;
+            when Output_2 =>
+               return HRTimer_Common_Periph.OENR.TD2OEN;
+         end case;
+      elsif This'Address = HRTIM_TIME_Base then
+         case Output is
+            when Output_1 =>
+               return HRTimer_Common_Periph.OENR.TE1OEN;
+            when Output_2 =>
+               return HRTimer_Common_Periph.OENR.TE2OEN;
+         end case;
+      else
+         return False;
+      end if;
+   end Channel_Output_Enabled;
 
    ------------------------
    -- No_Outputs_Enabled --

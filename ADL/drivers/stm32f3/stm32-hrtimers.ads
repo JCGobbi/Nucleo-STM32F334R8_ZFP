@@ -108,15 +108,18 @@ package STM32.HRTimers is
       Div_128)
      with Size => 3;
 
+   type HRTimer_Prescaler_Array is array (HRTimer_Prescaler) of UInt16;
+   HRTimer_Prescaler_Value : HRTimer_Prescaler_Array := (1, 2, 4, 8, 16, 32, 64, 128);
+
    procedure Configure_Prescaler
      (This        : in out HRTimer_Master;
       Prescaler   : HRTimer_Prescaler)
      with Pre => not Enabled (This),
-     Post => Current_Prescaler (This) = Prescaler;
+     Post => Current_Prescaler (This) = HRTimer_Prescaler_Value (Prescaler);
    --  The actual prescaler value is (2 ** Prescaler). The counter clock
    --  equivalent frequency (fCOUNTER) is equal to fHRCK / 2 ** CKPSC[2:0].
 
-   function Current_Prescaler (This : HRTimer_Master) return HRTimer_Prescaler;
+   function Current_Prescaler (This : HRTimer_Master) return UInt16;
 
    type Synchronization_Input_Source is
      (Disabled,
@@ -190,7 +193,7 @@ package STM32.HRTimers is
       Repetition : Boolean;
       Burst_DMA  : Burst_DMA_Update_Mode)
      with Pre => HRTIM_Master_Periph.MCR.BRSTDMA = 2#00# or
-                   HRTIM_Master_Periph.MCR.BRSTDMA = 2#01#;
+                 HRTIM_Master_Periph.MCR.BRSTDMA = 2#01#;
    --  Defines whether an update occurs when the master timer repetition period
    --  is completed (either due to roll-over or reset events) and if it starts
    --  Interrupt and/or DMA requests.
@@ -219,7 +222,7 @@ package STM32.HRTimers is
       Prescaler : HRTimer_Prescaler;
       Period    : UInt16)
      with Pre => not Enabled (This),
-          Post => Current_Prescaler (This) = Prescaler and
+          Post => Current_Prescaler (This) = HRTimer_Prescaler_Value (Prescaler) and
                   Current_Period (This) = Period;
 
    type Counter_Operating_Mode is
@@ -267,7 +270,7 @@ package STM32.HRTimers is
       Period      : UInt16;
       Repetitions : UInt8)
      with Pre => not Enabled (This),
-          Post => Current_Prescaler (This) = Prescaler and
+          Post => Current_Prescaler (This) = HRTimer_Prescaler_Value (Prescaler) and
                   Current_Period (This) = Period and
                   Current_Repetition_Counter (This) = Repetitions;
 
@@ -421,14 +424,14 @@ package STM32.HRTimers is
      (This        : in out HRTimer_Channel;
       Prescaler   : HRTimer_Prescaler)
      with Pre => not Enabled (This),
-       Post => Current_Prescaler (This) = Prescaler;
+       Post => Current_Prescaler (This) = HRTimer_Prescaler_Value (Prescaler);
    --  The actual prescaler value is (2 ** Prescaler). For clock prescaling ratios
    --  below 32 (CKPSC[2:0] < 5), the least significant bits of the counter and
    --  capture registers are not significant. The least significant bits cannot
    --  be written (counter register only) and return 0 when read.
    --  See Timer clock and prescaler at pg 632 RM0364 rev 4.
 
-   function Current_Prescaler (This : HRTimer_Channel) return HRTimer_Prescaler;
+   function Current_Prescaler (This : HRTimer_Channel) return UInt16;
 
    procedure Set_PushPull_Mode (This : in out HRTimer_Channel; Mode : Boolean)
      with Pre => not Enabled (This);
@@ -543,7 +546,7 @@ package STM32.HRTimers is
       Prescaler : HRTimer_Prescaler;
       Period    : UInt16)
      with Pre => not Enabled (This),
-          Post => Current_Prescaler (This) = Prescaler and
+          Post => Current_Prescaler (This) = HRTimer_Prescaler_Value (Prescaler) and
                   Current_Period (This) = Period;
 
    procedure Compute_Prescaler_And_Period
@@ -579,9 +582,12 @@ package STM32.HRTimers is
    procedure Set_Repetition_Counter
      (This : in out HRTimer_Channel;  Value : UInt8)
      with Post => Current_Repetition_Counter (This) = Value;
-   --  The repetition period value for the timer counter. It  holds either
-   --  the content of the preload register or the content of the active
-   --  register if preload is disabled.
+   --  The repetition counter is initialized with the content of the HRTIM_REPxR
+   --  register when the timer is enabled (TXCEN bit set). Once the timer has
+   --  been enabled, any time the counter is cleared, either due to a reset
+   --  event or due to a counter roll-over, the repetition counter is decreased.
+   --  When it reaches zero, a REP interrupt or a DMA request is issued if
+   --  enabled (REPIE and REPDE bits in the HRTIM_DIER register).
 
    function Current_Repetition_Counter (This : HRTimer_Channel) return UInt8;
 
@@ -591,7 +597,12 @@ package STM32.HRTimers is
       Interrupt   : Boolean;
       DMA_Request : Boolean)
      with Post => Current_Repetition_Counter (This) = Repetitions;
-   --  Set repetition counter with Interrupt and/or DMA requests.
+   --  The repetition counter is initialized with the content of the HRTIM_REPxR
+   --  register when the timer is enabled (TXCEN bit set). Once the timer has
+   --  been enabled, any time the counter is cleared, either due to a reset
+   --  event or due to a counter roll-over, the repetition counter is decreased.
+   --  When it reaches zero, a REP interrupt or a DMA request is issued if
+   --  enabled (REPIE and REPDE bits in the HRTIM_DIER register).
 
    procedure Configure
      (This        : in out HRTimer_Channel;
@@ -599,7 +610,7 @@ package STM32.HRTimers is
       Period      : UInt16;
       Repetitions : UInt8)
      with Pre => not Enabled (This),
-          Post => Current_Prescaler (This) = Prescaler and
+          Post => Current_Prescaler (This) = HRTimer_Prescaler_Value (Prescaler) and
                   Current_Period (This) = Period and
                   Current_Repetition_Counter (This) = Repetitions;
 
@@ -1122,14 +1133,47 @@ package STM32.HRTimers is
 
    procedure Configure_Channel_Output
      (This       : in out HRTimer_Channel;
+      Mode       : Counter_Operating_Mode;
+      State      : HRTimer_State;
+      Output     : HRTimer_Channel_Output;
+      Polarity   : Channel_Output_Polarity;
+      Idle_State : Boolean);
+   --  Configure parameters for one channel output. If the output set/reset
+   --  events are already programmed, then the output state may be enabled,
+   --  otherwise it must be disabled, the set/reset events are programmed and
+   --  then the output is enabled. If any compare channel is used for set/reset
+   --  event, it must be programmed too.
+
+   procedure Configure_Channel_Output
+     (This       : in out HRTimer_Channel;
+      Mode       : Counter_Operating_Mode;
       State      : HRTimer_State;
       Compare    : HRTimer_Compare_Number;
       Pulse      : UInt16;
+      Output     : HRTimer_Channel_Output;
       Polarity   : Channel_Output_Polarity;
       Idle_State : Boolean);
+   --  Configure all parameters for one channel output with set/reset events
+   --  already programmed (set on timer period and reset on compare value).
+   --  The output state may be enabled or disabled.
 
    procedure Configure_Channel_Output
      (This                     : in out HRTimer_Channel;
+      Mode                     : Counter_Operating_Mode;
+      State                    : HRTimer_State;
+      Polarity                 : Channel_Output_Polarity;
+      Idle_State               : Boolean;
+      Complementary_Polarity   : Channel_Output_Polarity;
+      Complementary_Idle_State : Boolean);
+   --  Configure parameters for channel outputs. If the outputs set/reset
+   --  events are already programmed, then the output state may be enabled,
+   --  otherwise it must be disabled, the set/reset events are programmed and
+   --  then the output is enabled. If any compare channel is used for set/reset
+   --  event, it must be programmed too.
+
+   procedure Configure_Channel_Output
+     (This                     : in out HRTimer_Channel;
+      Mode                     : Counter_Operating_Mode;
       State                    : HRTimer_State;
       Compare                  : HRTimer_Compare_Number;
       Pulse                    : UInt16;
@@ -1137,6 +1181,9 @@ package STM32.HRTimers is
       Idle_State               : Boolean;
       Complementary_Polarity   : Channel_Output_Polarity;
       Complementary_Idle_State : Boolean);
+   --  Configure all parameters for channel outputs with set/reset events
+   --  already programmed (set on timer period and reset on compare value).
+   --  The output state may be enabled or disabled.
 
    type Delayed_Idle_Protection_Enum is
      (Option_1,
@@ -1278,6 +1325,10 @@ package STM32.HRTimers is
      array (Positive range 1 .. 2) of HRTimer_Channel_Output_Status;
 
    function Output_Status (This : HRTimer_Channel) return Output_Status_List;
+
+   function Channel_Output_Enabled
+     (This   : HRTimer_Channel;
+      Output : HRTimer_Channel_Output) return Boolean;
 
    function No_Outputs_Enabled (This : HRTimer_Channel) return Boolean;
    --  Indicates whether the outputs are disabled for all timer.
