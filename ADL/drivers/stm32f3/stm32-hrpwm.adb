@@ -72,6 +72,7 @@ package body STM32.HRPWM is
    procedure Attach_HRPWM_Channel
      (This      : in out HRPWM_Modulator;
       Generator : not null access HRTimer_Channel;
+      Compare   : HRTimer_Compare_Number;
       Point     : GPIO_Point;
       PWM_AF    : GPIO_Alternate_Function;
       Polarity  : Channel_Output_Polarity := High;
@@ -79,6 +80,7 @@ package body STM32.HRPWM is
    is
    begin
       This.Generator := Generator;
+      This.Compare := Compare;
 
       Enable_Clock (Point);
 
@@ -88,13 +90,13 @@ package body STM32.HRPWM is
         (This.Generator.all,
          Mode       => Continuous,
          State      => Disable,
-         Compare    => Compare_1,
+         Compare    => This.Compare,
          Pulse      => 0,
          Output     => Output_1,
          Polarity   => Polarity,
          Idle_State => True);
 
-      Set_Compare_Value (This.Generator.all, Compare_1, UInt16 (0));
+      Set_Compare_Value (This.Generator.all, This.Compare, UInt16 (0));
 
       Disable (This.Generator.all);
    end Attach_HRPWM_Channel;
@@ -106,6 +108,7 @@ package body STM32.HRPWM is
    procedure Attach_HRPWM_Channel
      (This                     : in out HRPWM_Modulator;
       Generator                : not null access HRTimer_Channel;
+      Compare                  : HRTimer_Compare_Number;
       Point                    : GPIO_Point;
       Complementary_Point      : GPIO_Point;
       PWM_AF                   : GPIO_Alternate_Function;
@@ -117,6 +120,7 @@ package body STM32.HRPWM is
    is
    begin
       This.Generator := Generator;
+      This.Compare := Compare;
 
       Enable_Clock (Point);
       Enable_Clock (Complementary_Point);
@@ -128,14 +132,14 @@ package body STM32.HRPWM is
         (This.Generator.all,
          Mode                     => Continuous,
          State                    => Disable,
-         Compare                  => Compare_1,
+         Compare                  => This.Compare,
          Pulse                    => 0,
          Polarity                 => Polarity,
          Idle_State               => Idle_State,
          Complementary_Polarity   => Complementary_Polarity,
          Complementary_Idle_State => Complementary_Idle_State);
 
-      Set_Compare_Value (This.Generator.all, Compare_1, UInt16 (0));
+      Set_Compare_Value (This.Generator.all, This.Compare, UInt16 (0));
 
       Disable (This.Generator.all);
    end Attach_HRPWM_Channel;
@@ -234,6 +238,37 @@ package body STM32.HRPWM is
           AF_Speed       => AF_Speed));
    end Configure_PWM_GPIO;
 
+   --------------------
+   -- Set_Duty_Cycle --
+   --------------------
+
+   procedure Set_Duty_Cycle
+     (This    : in out HRPWM_Modulator;
+      Value   : Percentage)
+   is
+      Pulse : UInt16;
+   begin
+      This.Duty_Cycle := Value;
+
+      if Value = 0 then
+         Set_Compare_Value (This.Generator.all, This.Compare, UInt16'(0));
+      else
+         --  for a Value of 0, the computation of Pulse wraps around, so we
+         --  only compute it when not zero
+         Pulse := (Current_Period (This.Generator.all) + 1) * UInt16 (Value) / 100 - 1;
+         Set_Compare_Value (This.Generator.all, This.Compare, Pulse);
+      end if;
+   end Set_Duty_Cycle;
+
+   ------------------------
+   -- Current_Duty_Cycle --
+   ------------------------
+
+   function Current_Duty_Cycle (This : HRPWM_Modulator) return Percentage is
+   begin
+      return This.Duty_Cycle;
+   end Current_Duty_Cycle;
+
    -----------------------------
    -- Microseconds_Per_Period --
    -----------------------------
@@ -257,59 +292,26 @@ package body STM32.HRPWM is
       return Result;
    end Microseconds_Per_Period;
 
-   --------------------
-   -- Set_Duty_Cycle --
-   --------------------
-
-   procedure Set_Duty_Cycle
-     (This    : in out HRPWM_Modulator;
-      Compare : HRTimer_Compare_Number;
-      Value   : Percentage)
-   is
-      Pulse : UInt16;
-   begin
-      This.Duty_Cycle := Value;
-
-      if Value = 0 then
-         Set_Compare_Value (This.Generator.all, Compare, UInt16'(0));
-      else
-         --  for a Value of 0, the computation of Pulse wraps around, so we
-         --  only compute it when not zero
-         Pulse := (Current_Period (This.Generator.all) + 1) * UInt16 (Value) / 100 - 1;
-         Set_Compare_Value (This.Generator.all, Compare, Pulse);
-      end if;
-   end Set_Duty_Cycle;
-
    -------------------
    -- Set_Duty_Time --
    -------------------
 
    procedure Set_Duty_Time
-     (This    : in out HRPWM_Modulator;
-      Compare : HRTimer_Compare_Number;
-      Value   : Microseconds)
+     (This  : in out HRPWM_Modulator;
+      Value : Microseconds)
    is
       Pulse         : UInt16;
       Period        : constant UInt32 := UInt32 (Current_Period (This.Generator.all)) + 1;
       uS_Per_Period : constant UInt32 := Microseconds_Per_Period (This);
    begin
       if Value = 0 then
-         Set_Compare_Value (This.Generator.all, Compare, UInt16'(0));
+         Set_Compare_Value (This.Generator.all, This.Compare, UInt16'(0));
       else
          --  for a Value of 0, the computation of Pulse wraps around, so we
          --  only compute it when not zero
          Pulse := UInt16 ((Period * Value) / uS_Per_Period) - 1;
-         Set_Compare_Value (This.Generator.all, Compare, Pulse);
+         Set_Compare_Value (This.Generator.all, This.Compare, Pulse);
       end if;
    end Set_Duty_Time;
-
-   ------------------------
-   -- Current_Duty_Cycle --
-   ------------------------
-
-   function Current_Duty_Cycle (This : HRPWM_Modulator) return Percentage is
-   begin
-      return This.Duty_Cycle;
-   end Current_Duty_Cycle;
 
 end STM32.HRPWM;

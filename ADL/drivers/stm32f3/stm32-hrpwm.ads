@@ -82,6 +82,7 @@ package STM32.HRPWM is
    procedure Attach_HRPWM_Channel
      (This      : in out HRPWM_Modulator;
       Generator : not null access HRTimer_Channel;
+      Compare   : HRTimer_Compare_Number;
       Point     : GPIO_Point;
       PWM_AF    : GPIO_Alternate_Function;
       Polarity  : Channel_Output_Polarity := High;
@@ -98,6 +99,7 @@ package STM32.HRPWM is
    procedure Attach_HRPWM_Channel
      (This                     : in out HRPWM_Modulator;
       Generator                : not null access HRTimer_Channel;
+      Compare                  : HRTimer_Compare_Number;
       Point                    : GPIO_Point;
       Complementary_Point      : GPIO_Point;
       PWM_AF                   : GPIO_Alternate_Function;
@@ -134,11 +136,20 @@ package STM32.HRPWM is
    function Complementary_Output_Enabled
      (This : HRPWM_Modulator) return Boolean;
 
+   procedure Set_Polarity
+     (This     : in HRPWM_Modulator;
+      Polarity : in Channel_Output_Polarity);
+   --  Set the polarity of the output of This modulator.
+
+   procedure Set_Complementary_Polarity
+     (This     : in HRPWM_Modulator;
+      Polarity : in Channel_Output_Polarity);
+   --  Set the polarity of the complimentary output of This modulator.
+
    subtype Percentage is Integer range 0 .. 100;
 
    procedure Set_Duty_Cycle
      (This    : in out HRPWM_Modulator;
-      Compare : HRTimer_Compare_Number;
       Value   : Percentage)
      with
        Inline,
@@ -151,17 +162,6 @@ package STM32.HRPWM is
 
    subtype Microseconds is UInt32;
 
-   procedure Set_Duty_Time
-     (This    : in out HRPWM_Modulator;
-      Compare : HRTimer_Compare_Number;
-      Value   : Microseconds)
-     with
-       Inline,
-       Pre => (Value <= Microseconds_Per_Period (This)
-               or else raise Invalid_Request with "duty time too high");
-   --  Set the pulse width such that the PWM output is active for the specified
-   --  number of microseconds.
-
    function Microseconds_Per_Period (This : HRPWM_Modulator) return Microseconds
      with Inline;
    --  Essentially 1_000_000 / PWM Frequency
@@ -170,15 +170,15 @@ package STM32.HRPWM is
    --  result will be 33. This can be useful to compute the values passed to
    --  Set_Duty_Time.
 
-   procedure Set_Polarity
-     (This     : in HRPWM_Modulator;
-      Polarity : in Channel_Output_Polarity);
-   --  Set the polarity of the output of This modulator.
-
-   procedure Set_Complementary_Polarity
-     (This     : in HRPWM_Modulator;
-      Polarity : in Channel_Output_Polarity);
-   --  Set the polarity of the complimentary output of This modulator.
+   procedure Set_Duty_Time
+     (This    : in out HRPWM_Modulator;
+      Value   : Microseconds)
+     with
+       Inline,
+       Pre => (Value <= Microseconds_Per_Period (This)
+               or else raise Invalid_Request with "duty time too high");
+   --  Set the pulse width such that the PWM output is active for the specified
+   --  number of microseconds.
 
    Invalid_Request : exception;
    --  Raised when the requested frequency is too high or too low for the given
