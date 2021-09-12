@@ -1962,13 +1962,13 @@ package body STM32.HRTimers is
    begin
       case Compare is
          when Compare_1 =>
-            Event := Timer_X_Compare_1;
+            Event := Timer_Compare_1;
          when Compare_2 =>
-            Event := Timer_X_Compare_2;
+            Event := Timer_Compare_2;
          when Compare_3 =>
-            Event := Timer_X_Compare_3;
+            Event := Timer_Compare_3;
          when Compare_4 =>
-            Event := Timer_X_Compare_4;
+            Event := Timer_Compare_4;
       end case;
 
       --  Disable the timer before configuration
@@ -1982,7 +1982,7 @@ package body STM32.HRTimers is
       Configure_Channel_Output_Event
         (This,
          Output      => Output,
-         Set_Event   => Timer_X_Period,
+         Set_Event   => Timer_Period,
          Reset_Event => Event);
 
       --  Choose enable/disable the output 1
@@ -2051,13 +2051,13 @@ package body STM32.HRTimers is
    begin
       case Compare is
          when Compare_1 =>
-            Event := Timer_X_Compare_1;
+            Event := Timer_Compare_1;
          when Compare_2 =>
-            Event := Timer_X_Compare_2;
+            Event := Timer_Compare_2;
          when Compare_3 =>
-            Event := Timer_X_Compare_3;
+            Event := Timer_Compare_3;
          when Compare_4 =>
-            Event := Timer_X_Compare_4;
+            Event := Timer_Compare_4;
       end case;
 
       --  Disable the timer before configuration
@@ -2071,7 +2071,7 @@ package body STM32.HRTimers is
       Configure_Channel_Output_Event
         (This,
          Output => Output_1,
-         Set_Event => Timer_X_Period,
+         Set_Event => Timer_Period,
          Reset_Event => Event);
       --  Choose enable/disable the output 1
       Set_Channel_Output (This, Output_1, not Idle_State);
@@ -2082,8 +2082,8 @@ package body STM32.HRTimers is
       Configure_Channel_Output_Event
         (This,
          Output => Output_2,
-         Set_Event => Timer_X_Period,
-         Reset_Event => Event);
+         Set_Event => Event,
+         Reset_Event => Timer_Period);
       --  Choose enable/disable the output 2
       Set_Channel_Output (This, Output_2, not Complementary_Idle_State);
       --  Choose output 2 polarity

@@ -117,6 +117,10 @@ package STM32.HRTimers is
      Post => Current_Prescaler (This) = HRTimer_Prescaler_Value (Prescaler);
    --  The actual prescaler value is (2 ** Prescaler). The counter clock
    --  equivalent frequency (fCOUNTER) is equal to fHRCK / 2 ** CKPSC[2:0].
+   --  It is mandatory to have the same prescaling factors for all timers
+   --  sharing resources (for instance master timer and Timer A must have
+   --  identical CKPSC[2:0] values if master timer is controlling HRTIM_CHA1 or
+   --  HRTIM_CHA2 outputs).
 
    function Current_Prescaler (This : HRTimer_Master) return UInt16;
 
@@ -429,6 +433,10 @@ package STM32.HRTimers is
    --  capture registers are not significant. The least significant bits cannot
    --  be written (counter register only) and return 0 when read.
    --  See Timer clock and prescaler at pg 632 RM0364 rev 4.
+   --  It is mandatory to have the same prescaling factors for all timers
+   --  sharing resources (for instance master timer and Timer A must have
+   --  identical CKPSC[2:0] values if master timer is controlling HRTIM_CHA1 or
+   --  HRTIM_CHA2 outputs).
 
    function Current_Prescaler (This : HRTimer_Channel) return UInt16;
 
@@ -921,11 +929,11 @@ package STM32.HRTimers is
    type Output_Event is
      (Software_Trigger,
       Timer_A_Resynchronization,
-      Timer_X_Period,
-      Timer_X_Compare_1,
-      Timer_X_Compare_2,
-      Timer_X_Compare_3,
-      Timer_X_Compare_4,
+      Timer_Period,
+      Timer_Compare_1,
+      Timer_Compare_2,
+      Timer_Compare_3,
+      Timer_Compare_4,
       Master_Period,
       Master_Compare_1,
       Master_Compare_2,
@@ -1188,8 +1196,9 @@ package STM32.HRTimers is
       Complementary_Polarity   : Channel_Output_Polarity;
       Complementary_Idle_State : Boolean);
    --  Configure all parameters for channel outputs with set/reset events
-   --  already programmed (set on timer period and reset on compare value).
-   --  The output state may be enabled or disabled.
+   --  already programmed (set on timer period and reset on compare value for
+   --  Output_1 and vice-versa for Output_2), so the outputs are in opposite
+   --  phases. The outputs state may be enabled or disabled.
 
    type Delayed_Idle_Protection_Enum is
      (Option_1,
