@@ -2244,6 +2244,31 @@ package body STM32.HRTimers is
       end case;
    end Set_Register_Update;
 
+   -------------------------
+   -- Set_Register_Update --
+   -------------------------
+
+   procedure Set_Register_Update
+     (Counters : HRTimer_List;
+      Update   : HRTimer_Register_Update)
+   is
+      Value : UInt6 := 2#000000#;
+   begin
+      for Counter of Counters loop
+         Value := Value or Counter'Enum_Rep;
+      end loop;
+      case Update is
+         when Imediate =>
+            Counter_Update_Reset_Field.TxSWU := Value;
+         when Enable =>
+            Counter_Update_Reset_Field.TxRST :=
+              Counter_Update_Reset_Field.TxRST or Value;
+         when Disable =>
+            Counter_Update_Reset_Field.TxRST :=
+              Counter_Update_Reset_Field.TxRST and not Value;
+      end case;
+   end Set_Register_Update;
+
    ---------------------------
    -- Enable_Software_Reset --
    ---------------------------
@@ -2264,6 +2289,22 @@ package body STM32.HRTimers is
          when HRTimer_E =>
             HRTimer_Common_Periph.CR2.TERST := True;
       end case;
+   end Enable_Software_Reset;
+
+   ---------------------------
+   -- Enable_Software_Reset --
+   ---------------------------
+
+   procedure Enable_Software_Reset
+     (Counters : HRTimer_List)
+   is
+      Value : UInt6 := 2#000000#;
+   begin
+      for Counter of Counters loop
+         Value := Value or Counter'Enum_Rep;
+      end loop;
+
+      Counter_Update_Reset_Field.TxRST := Value;
    end Enable_Software_Reset;
 
    ----------------------

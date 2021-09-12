@@ -44,12 +44,12 @@ package STM32.HRTimers is
 
    --  To enable/disable some/all counters simultaneously, it is necessary to
    --  create a new register with the counter enable 6-bit field TxCEN at the
-   --  HRTIM_Master_Base address.
+   --  HRTIM_Master_Periph HRTIM_MCR address.
 
    type Counter_Enable_Register is record
-       Reserved0 : UInt10;
-       TxCEN     : UInt6;
-       Reserved1 : UInt16;
+       Reserved0 : HAL.UInt10 := 16#0#;
+       TxCEN     : HAL.UInt6 := 16#0#;
+       Reserved1 : HAL.UInt16 := 16#0#;
    end record
      with Volatile, Object_Size => 32,
           Bit_Order => System.Low_Order_First;
@@ -60,9 +60,8 @@ package STM32.HRTimers is
       Reserved1 at 16#0# range  0 .. 15;
    end record;
 
-   --  The TxCEN offset from HRTIM_Master_Base = 16#40017400# is 16#00#.
    Counter_Enable_Field : aliased Counter_Enable_Register
-     with Import, Volatile, Address => HRTIM_Master_Base;
+     with Import, Volatile, Address => HRTIM_Master_Periph.MCR'Address;
 
    type HRTimer is
      (HRTimer_M, --  Master
@@ -1275,12 +1274,47 @@ package STM32.HRTimers is
      (Counter : HRTimer;
       Update  : HRTimer_Register_Update);
    --  The updates are enabled or temporarily disabled to allow the software to
-   --  write multiple registers that have to be simultaneously taken into account.
-   --  Also forces an immediate transfer from the preload to the active register in
-   --  the timer and any pending update request is canceled.
+   --  write multiple registers that have to be simultaneously taken into
+   --  account. Also forces an immediate transfer from the preload to the
+   --  active register in the timer and any pending update request is canceled.
 
    procedure Enable_Software_Reset (Counter : HRTimer);
    --  Forces a timer reset.
+
+   --  To update registers/reset for some/all counters simultaneously, it is
+   --  necessary to create a new register with the counter update/reset 6-bit
+   --  field TxSWU/TxRST at the HRTIM_Common_Periph HRTIM_CR2 address.
+
+   type Counter_Update_Reset_Register is record
+      Reserved0 : HAL.UInt18 := 16#0#;
+      TxRST     : HAL.UInt6 := 16#0#;
+      Reserved1 : HAL.UInt2 := 16#0#;
+      TxSWU     : HAL.UInt6 := 16#0#;
+   end record
+     with Volatile, Object_Size => 32,
+          Bit_Order => System.Low_Order_First;
+
+   for Counter_Update_Reset_Register use record
+      Reserved0 at 16#0# range 14 .. 31;
+      TxRST     at 16#0# range  8 .. 13;
+      Reserved1 at 16#0# range  6 ..  7;
+      TxSWU     at 16#0# range  0 ..  5;
+   end record;
+
+   Counter_Update_Reset_Field : aliased Counter_Update_Reset_Register
+     with Import, Volatile, Address => HRTIM_Common_Periph.CR2'Address;
+
+   procedure Set_Register_Update
+     (Counters : HRTimer_List;
+      Update   : HRTimer_Register_Update);
+   --  Updates some/all timers simultaneously.
+   --  The updates are enabled or temporarily disabled to allow the software to
+   --  write multiple registers that have to be simultaneously taken into
+   --  account. Also forces an immediate transfer from the preload to the
+   --  active register in the timer and any pending update request is canceled.
+
+   procedure Enable_Software_Reset (Counters : HRTimer_List);
+   --  Forces a timer reset for some/all timers simultaneously.
 
    type HRTimer_Common_Interrupt is
      (Fault_1_Interrupt,
