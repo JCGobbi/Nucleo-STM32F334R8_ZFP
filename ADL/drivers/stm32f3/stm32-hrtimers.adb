@@ -2195,6 +2195,77 @@ package body STM32.HRTimers is
 
    ----------------------------------------------------------------------------
 
+   -------------------------
+   -- Set_Register_Update --
+   -------------------------
+
+   procedure Set_Register_Update
+     (Counter : HRTimer;
+      Update  : HRTimer_Register_Update)
+   is
+   begin
+      case Counter is
+         when HRTimer_M =>
+            if Update = Imediate then
+               HRTimer_Common_Periph.CR2.MSWU := True;
+            else
+               HRTimer_Common_Periph.CR1.MUDIS := Update = Disable;
+            end if;
+         when HRTimer_A =>
+            if Update = Imediate then
+               HRTimer_Common_Periph.CR2.TASWU := True;
+            else
+               HRTimer_Common_Periph.CR1.TAUDIS := Update = Disable;
+            end if;
+         when HRTimer_B =>
+            if Update = Imediate then
+               HRTimer_Common_Periph.CR2.TBSWU := True;
+            else
+               HRTimer_Common_Periph.CR1.TBUDIS := Update = Disable;
+            end if;
+         when HRTimer_C =>
+            if Update = Imediate then
+               HRTimer_Common_Periph.CR2.TCSWU := True;
+            else
+               HRTimer_Common_Periph.CR1.TCUDIS := Update = Disable;
+            end if;
+         when HRTimer_D =>
+            if Update = Imediate then
+               HRTimer_Common_Periph.CR2.TDSWU := True;
+            else
+               HRTimer_Common_Periph.CR1.TDUDIS := Update = Disable;
+            end if;
+         when HRTimer_E =>
+            if Update = Imediate then
+               HRTimer_Common_Periph.CR2.TESWU := True;
+            else
+               HRTimer_Common_Periph.CR1.TEUDIS := Update = Disable;
+            end if;
+      end case;
+   end Set_Register_Update;
+
+   ---------------------------
+   -- Enable_Software_Reset --
+   ---------------------------
+
+   procedure Enable_Software_Reset (Counter : HRTimer) is
+   begin
+      case Counter is
+         when HRTimer_M =>
+            HRTimer_Common_Periph.CR2.MRST := True;
+         when HRTimer_A =>
+            HRTimer_Common_Periph.CR2.TARST := True;
+         when HRTimer_B =>
+            HRTimer_Common_Periph.CR2.TBRST := True;
+         when HRTimer_C =>
+            HRTimer_Common_Periph.CR2.TCRST := True;
+         when HRTimer_D =>
+            HRTimer_Common_Periph.CR2.TDRST := True;
+         when HRTimer_E =>
+            HRTimer_Common_Periph.CR2.TERST := True;
+      end case;
+   end Enable_Software_Reset;
+
    ----------------------
    -- Enable_Interrupt --
    ----------------------
