@@ -102,9 +102,9 @@ package body STM32.HRPWM is
       Disable (This.Generator.all);
    end Attach_HRPWM_Channel;
 
-   ------------------------
-   -- Attach_PWM_Channel --
-   ------------------------
+   --------------------------
+   -- Attach_HRPWM_Channel --
+   --------------------------
 
    procedure Attach_HRPWM_Channel
      (This                     : in out HRPWM_Modulator;

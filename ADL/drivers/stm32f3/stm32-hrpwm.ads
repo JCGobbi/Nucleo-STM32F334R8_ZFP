@@ -90,9 +90,8 @@ package STM32.HRPWM is
       AF_Speed   : Pin_Output_Speeds := Speed_100MHz)
      with Post => not Output_Enabled (This) and
                   Current_Duty_Cycle (This) = 0;
-   --  Initializes the channel on the timer associated with This modulator,
-   --  and the corresponding GPIO port/pin pair, for PWM output with only the
-   --  Output_1.
+   --  Initializes the timer associated with This modulator, and the
+   --  corresponding GPIO port/pin pair, for PWM output with only the Output_1.
 
    procedure Attach_HRPWM_Channel
      (This                     : in out HRPWM_Modulator;
@@ -109,8 +108,8 @@ package STM32.HRPWM is
      with Post => not Output_Enabled (This) and
                   not Complementary_Output_Enabled (This) and
                   Current_Duty_Cycle (This) = 0;
-   --  Initializes the channel on the timer associated with This modulator, and
-   --  the corresponding GPIO port/pin pairs, for PWM output with complementary
+   --  Initializes the timer associated with This modulator, and the
+   --  corresponding GPIO port/pin pairs, for PWM output with complementary
    --  output included.
 
    procedure Enable_Output (This : in out HRPWM_Modulator)
