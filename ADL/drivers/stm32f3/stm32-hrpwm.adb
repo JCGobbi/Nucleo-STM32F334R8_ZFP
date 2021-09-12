@@ -70,13 +70,14 @@ package body STM32.HRPWM is
    --------------------------
 
    procedure Attach_HRPWM_Channel
-     (This      : in out HRPWM_Modulator;
-      Generator : not null access HRTimer_Channel;
-      Compare   : HRTimer_Compare_Number;
-      Point     : GPIO_Point;
-      PWM_AF    : GPIO_Alternate_Function;
-      Polarity  : Channel_Output_Polarity := High;
-      AF_Speed  : Pin_Output_Speeds := Speed_100MHz)
+     (This       : in out HRPWM_Modulator;
+      Generator  : not null access HRTimer_Channel;
+      Compare    : HRTimer_Compare_Number;
+      Point      : GPIO_Point;
+      PWM_AF     : GPIO_Alternate_Function;
+      Polarity   : Channel_Output_Polarity := High;
+      Idle_State : Boolean;
+      AF_Speed   : Pin_Output_Speeds := Speed_100MHz)
    is
    begin
       This.Generator := Generator;
@@ -94,7 +95,7 @@ package body STM32.HRPWM is
          Pulse      => 0,
          Output     => Output_1,
          Polarity   => Polarity,
-         Idle_State => True);
+         Idle_State => Idle_State);
 
       Set_Compare_Value (This.Generator.all, This.Compare, UInt16 (0));
 
