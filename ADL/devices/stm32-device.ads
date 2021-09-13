@@ -42,10 +42,10 @@
 --  This file provides declarations for devices on the STM32F334x8 MCUs
 --  manufactured by ST Microelectronics.  For example, an STM32F334R8.
 
---  with System.Storage_Elements; use System.Storage_Elements;
 with System;         use System;
 
 with STM32_SVD.RCC;  use STM32_SVD;
+--  with STM32_SVD.SYSCFG; --  Enable for COMP and OPAMP
 
 with STM32.GPIO;     use STM32.GPIO;
 with STM32.ADC;      use STM32.ADC;
@@ -430,28 +430,23 @@ package STM32.Device is
    -- Comparator --
    ----------------
 
-   --  SYSCFG_Base : Integer_Address := To_Integer (SYSCFG_COMP_OPAMP_Base);
-   --
-   --  Comp_2_Base : constant System.Address :=
-   --    System'To_Address (SYSCFG_Base + 16#00000020#);
-   --  Comp_4_Base : constant System.Address :=
-   --    System'To_Address (SYSCFG_Base + 16#00000028#);
-   --  Comp_6_Base : constant System.Address :=
-   --    System'To_Address (SYSCFG_Base + 16#00000030#);
-   --
-   --  Comp_2 : aliased Comparator with Import, Volatile, Address => Comp_2_Base;
-   --  Comp_4 : aliased Comparator with Import, Volatile, Address => Comp_4_Base;
-   --  Comp_6 : aliased Comparator with Import, Volatile, Address => Comp_6_Base;
+   --  Comp_2 : aliased Comparator
+   --    with Import, Volatile,
+   --    Address => STM32_SVD.SYSCFG.SYSCFG_COMP_OPAMP_Periph.COMP2_CSR'Address;
+   --  Comp_4 : aliased Comparator
+   --    with Import, Volatile,
+   --    Address => STM32_SVD.SYSCFG.SYSCFG_COMP_OPAMP_Periph.COMP4_CSR'Address;
+   --  Comp_6 : aliased Comparator
+   --    with Import, Volatile,
+   --    Address => STM32_SVD.SYSCFG.SYSCFG_COMP_OPAMP_Periph.COMP6_CSR'Address;
 
    -----------
    -- OpAmp --
    -----------
 
-   --  Opamp_2_Base : constant System.Address :=
-   --    System'To_Address (SYSCFG_Base + 16#0000003C#);
-   --
    --  Opamp_2 : aliased Operational_Amplifier
-   --    with Import, Volatile, Address => Opamp_2_Base;
+   --    with Import, Volatile,
+   --    Address => STM32_SVD.SYSCFG.SYSCFG_COMP_OPAMP_Periph.OPAMP2_CSR'Address;
 
    -----------------------------
    -- Reset and Clock Control --
