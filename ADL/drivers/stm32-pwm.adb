@@ -328,7 +328,7 @@ package body STM32.PWM is
       Prescalar : constant UInt16 := Current_Prescaler (This.Generator.all) + 1;
    begin
 
-      Platform_Frequency := Get_Clock_Source (This.Generator.all);
+      Platform_Frequency := Get_Clock_Frequency (This.Generator.all);
 
       Counter_Frequency := (Platform_Frequency / UInt32 (Prescalar)) / Period;
 

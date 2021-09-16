@@ -1764,7 +1764,7 @@ package body STM32.Timers is
    procedure Configure_Deadtime (This : in out Timer; Time : Float)
    is
       Timer_Frequency : constant UInt32 :=
-        STM32.Device.Get_Clock_Source (This);
+        STM32.Device.Get_Clock_Frequency (This);
       --  The clock frequency of this timer.
 
       Clock_Divisor : constant Float :=
