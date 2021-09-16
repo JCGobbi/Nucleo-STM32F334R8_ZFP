@@ -57,7 +57,7 @@ with STM32.ADC;      use STM32.ADC;
 --  with STM32.I2C;      use STM32.I2C;
 --  with STM32.RTC;      use STM32.RTC;
 with STM32.Timers;   use STM32.Timers;
-with STM32.HRTimers; use STM32.HRTimers;
+--  with STM32.HRTimers; use STM32.HRTimers;
 --  with STM32.OPAMP;    use STM32.OPAMP;
 --  with STM32.COMP;     use STM32.COMP;
 
@@ -390,41 +390,41 @@ package STM32.Device is
    -- HRTimer --
    -------------
 
-   HRTimer_M : aliased HRTimer_Master
-     with Import, Volatile, Address => HRTIM_Master_Base;
-
-   HRTimer_A : aliased HRTimer_Channel
-     with Import, Volatile, Address => HRTIM_TIMA_Base;
-   HRTimer_B : aliased HRTimer_Channel
-     with Import, Volatile, Address => HRTIM_TIMB_Base;
-   HRTimer_C : aliased HRTimer_Channel
-     with Import, Volatile, Address => HRTIM_TIMC_Base;
-   HRTimer_D : aliased HRTimer_Channel
-     with Import, Volatile, Address => HRTIM_TIMD_Base;
-   HRTimer_E : aliased HRTimer_Channel
-     with Import, Volatile, Address => HRTIM_TIME_Base;
-
-   procedure Enable_Clock (This : HRTimer_Master);
-
-   procedure Enable_Clock (This : HRTimer_Channel);
-
-   procedure Reset (This : HRTimer_Master);
-
-   procedure Reset (This : HRTimer_Channel);
-
-   procedure Set_Clock_Source
-     (This   : HRTimer_Master;
-      Source : Timer_Clock_Source)
-     with pre => (if This'Address = HRTIM_Master_Base then
-                    STM32_SVD.RCC.RCC_Periph.CR.PLLON = True and
-                    STM32_SVD.RCC.RCC_Periph.CFGR.PPRE.Arr (2) <= 2#100#);
-   --  Set the clock for HRTIM1 to PLLCLK = 144 MHz or PCLK2 = 72 MHz.
-
-   function Get_Clock_Frequency (This : HRTimer_Master) return UInt32;
-   --  Returns the timer input frequency in Hz.
-
-   function Get_Clock_Frequency (This : HRTimer_Channel) return UInt32;
-   --  Returns the HRTIM1 input frequency in Hz.
+   --  HRTimer_M : aliased HRTimer_Master
+   --    with Import, Volatile, Address => HRTIM_Master_Base;
+   --
+   --  HRTimer_A : aliased HRTimer_Channel
+   --    with Import, Volatile, Address => HRTIM_TIMA_Base;
+   --  HRTimer_B : aliased HRTimer_Channel
+   --    with Import, Volatile, Address => HRTIM_TIMB_Base;
+   --  HRTimer_C : aliased HRTimer_Channel
+   --    with Import, Volatile, Address => HRTIM_TIMC_Base;
+   --  HRTimer_D : aliased HRTimer_Channel
+   --    with Import, Volatile, Address => HRTIM_TIMD_Base;
+   --  HRTimer_E : aliased HRTimer_Channel
+   --    with Import, Volatile, Address => HRTIM_TIME_Base;
+   --
+   --  procedure Enable_Clock (This : HRTimer_Master);
+   --
+   --  procedure Enable_Clock (This : HRTimer_Channel);
+   --
+   --  procedure Reset (This : HRTimer_Master);
+   --
+   --  procedure Reset (This : HRTimer_Channel);
+   --
+   --  procedure Set_Clock_Source
+   --    (This   : HRTimer_Master;
+   --     Source : Timer_Clock_Source)
+   --    with pre => (if This'Address = HRTIM_Master_Base then
+   --                   STM32_SVD.RCC.RCC_Periph.CR.PLLON = True and
+   --                   STM32_SVD.RCC.RCC_Periph.CFGR.PPRE.Arr (2) <= 2#100#);
+   --  --  Set the clock for HRTIM1 to PLLCLK = 144 MHz or PCLK2 = 72 MHz.
+   --
+   --  function Get_Clock_Frequency (This : HRTimer_Master) return UInt32;
+   --  --  Returns the timer input frequency in Hz.
+   --
+   --  function Get_Clock_Frequency (This : HRTimer_Channel) return UInt32;
+   --  --  Returns the HRTIM1 input frequency in Hz.
 
    ----------------
    -- Comparator --
