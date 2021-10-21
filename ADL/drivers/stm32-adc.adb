@@ -351,6 +351,7 @@ package body STM32.ADC is
    procedure Enable_VRef_TemperatureSensor_Connection is
    begin
       ADC_Common_Periph.CCR.VREFEN := True;
+      ADC_Common_Periph.CCR.TSEN := True;
       Delay_Until (Clock + Temperature_Sensor_Stabilization);
    end Enable_VRef_TemperatureSensor_Connection;
 
@@ -359,7 +360,7 @@ package body STM32.ADC is
    --------------------------------------
 
    function VRef_TemperatureSensor_Enabled return Boolean is
-      (ADC_Common_Periph.CCR.VREFEN);
+      (ADC_Common_Periph.CCR.VREFEN and ADC_Common_Periph.CCR.TSEN);
 
    ----------------------------------
    -- Regular_Conversions_Expected --
