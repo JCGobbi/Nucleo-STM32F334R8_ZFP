@@ -215,16 +215,15 @@ package body STM32.ADC is
 
    procedure Configure_Common_Properties
      (Mode           : Multi_ADC_Mode_Selections;
-      Prescalar      : ADC_Prescalars;
+      Clock_Mode     : ADC_Clock_Mode;
       DMA_Mode       : Dual_ADC_DMA_Modes;
       Sampling_Delay : Sampling_Delay_Selections)
    is
    begin
-      ADC_Common_Periph.CCR.DUAL    := Multi_ADC_Mode_Selections'Enum_Rep (Mode);
-      ADC_Common_Periph.CCR.DELAY_k :=
-        Sampling_Delay_Selections'Enum_Rep (Sampling_Delay);
-      ADC_Common_Periph.CCR.MDMA    := Dual_ADC_DMA_Modes'Enum_Rep (DMA_Mode);
-      ADC_Common_Periph.CCR.CKMODE  := ADC_Prescalars'Enum_Rep (Prescalar);
+      ADC_Common_Periph.CCR.DUAL    := Mode'Enum_Rep;
+      ADC_Common_Periph.CCR.DELAY_k := Sampling_Delay'Enum_Rep;
+      ADC_Common_Periph.CCR.MDMA    := DMA_Mode'Enum_Rep;
+      ADC_Common_Periph.CCR.CKMODE  := Clock_Mode'Enum_Rep;
    end Configure_Common_Properties;
 
    -----------------------------------
@@ -384,7 +383,7 @@ package body STM32.ADC is
 
    function Scan_Mode_Enabled (This : Analog_To_Digital_Converter)
                                return Boolean
-     is (This.SQR1.L > UInt4 (1));
+     is (This.SQR1.L /= UInt4 (0));
 
    -------------------------------
    -- Configure_Regular_Channel --

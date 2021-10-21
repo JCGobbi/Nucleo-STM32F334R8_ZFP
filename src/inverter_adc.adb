@@ -40,7 +40,7 @@ package body Inverter_ADC is
 
       Configure_Common_Properties
         (Mode           => Independent,
-         Prescalar      => PCLK2_Div_2,
+         Clock_Mode     => PCLK2_Div_2,
          DMA_Mode       => Disabled,
          Sampling_Delay => Sampling_Delay_5_Cycles);  --  arbitrary
 
