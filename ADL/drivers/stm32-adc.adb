@@ -554,7 +554,88 @@ package body STM32.ADC is
      return Boolean
    is
       (This.CFGR.AWD1EN or This.CFGR.JAWD1EN);
-   --  per the RM table 66, section 13.3.7, pg 391
+
+   ------------------------------
+   -- Watchdog_Enable_Channels --
+   ------------------------------
+   procedure Watchdog_Enable_Channels
+     (This     : in out Analog_To_Digital_Converter;
+      Watchdog : Analog_Window_Watchdog;
+      Channels : Analog_Input_Channels;
+      Low      : Watchdog_Threshold;
+      High     : Watchdog_Threshold)
+   is
+   begin
+      case Watchdog is
+         when Watchdog_2 =>
+            This.TR2.HT2 := UInt8 (High);
+            This.TR2.LT2 := UInt8 (Low);
+            for Channel of Channels loop
+               This.AWD2CR.AWD2CH := This.AWD2CR.AWD2CH or (2 ** Natural (Channel));
+            end loop;
+         when Watchdog_3 =>
+            This.TR3.HT3 := UInt8 (High);
+            This.TR3.LT3 := UInt8 (Low);
+            for Channel of Channels loop
+               This.AWD3CR.AWD3CH := This.AWD3CR.AWD3CH or (2 ** Natural (Channel));
+            end loop;
+      end case;
+   end Watchdog_Enable_Channels;
+
+   -------------------------------
+   -- Watchdog_Disable_Channels --
+   -------------------------------
+   procedure Watchdog_Disable_Channels
+     (This     : in out Analog_To_Digital_Converter;
+      Watchdog : Analog_Window_Watchdog;
+      Channels : Analog_Input_Channels)
+   is
+   begin
+      case Watchdog is
+         when Watchdog_2 =>
+            for Channel of Channels loop
+               This.AWD2CR.AWD2CH := This.AWD2CR.AWD2CH and not (2 ** Natural (Channel));
+            end loop;
+         when Watchdog_3 =>
+            for Channel of Channels loop
+               This.AWD3CR.AWD3CH := This.AWD3CR.AWD3CH and not (2 ** Natural (Channel));
+            end loop;
+      end case;
+   end Watchdog_Disable_Channels;
+
+   ----------------------
+   -- Watchdog_Disable --
+   ----------------------
+
+   procedure Watchdog_Disable
+     (This     : in out Analog_To_Digital_Converter;
+      Watchdog : Analog_Window_Watchdog)
+   is
+   begin
+      case Watchdog is
+         when Watchdog_2 =>
+            This.AWD2CR.AWD2CH := 16#000#;
+         when Watchdog_3 =>
+            This.AWD3CR.AWD3CH := 16#000#;
+      end case;
+   end Watchdog_Disable;
+
+   ----------------------
+   -- Watchdog_Enabled --
+   ----------------------
+
+   function Watchdog_Enabled
+     (This     : Analog_To_Digital_Converter;
+      Watchdog : Analog_Window_Watchdog) return Boolean
+   is
+   begin
+      case Watchdog is
+         when Watchdog_2 =>
+            return This.AWD2CR.AWD2CH /= 16#000#;
+         when Watchdog_3 =>
+            return This.AWD3CR.AWD3CH /= 16#000#;
+      end case;
+   end Watchdog_Enabled;
 
    -------------------------------
    -- Enable_Discontinuous_Mode --
