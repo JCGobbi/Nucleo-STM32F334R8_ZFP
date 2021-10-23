@@ -64,9 +64,10 @@ package body STM32.ADC is
      with Inline;
 
    procedure Set_Injected_Channel_Offset
-     (This   : in out Analog_To_Digital_Converter;
-      Rank   : Injected_Channel_Rank;
-      Offset : Injected_Data_Offset)
+     (This    : in out Analog_To_Digital_Converter;
+      Channel : Analog_Input_Channel;
+      Rank    : Injected_Channel_Rank;
+      Offset  : Injected_Data_Offset)
      with Inline;
 
    ------------
@@ -108,75 +109,6 @@ package body STM32.ADC is
    function Disabled (This : Analog_To_Digital_Converter) return Boolean is
      (This.CR.ADEN = False);
 
-   ----------------------
-   -- Conversion_Value --
-   ----------------------
-
-   function Conversion_Value
-     (This : Analog_To_Digital_Converter)
-      return UInt16
-   is
-   begin
-      return This.DR.RDATA;
-   end Conversion_Value;
-
-   ---------------------------
-   -- Data_Register_Address --
-   ---------------------------
-
-   function Data_Register_Address
-     (This : Analog_To_Digital_Converter)
-      return System.Address
-   is
-      (This.DR'Address);
-
-   -------------------------------
-   -- Injected_Conversion_Value --
-   -------------------------------
-
-   function Injected_Conversion_Value
-     (This : Analog_To_Digital_Converter;
-      Rank : Injected_Channel_Rank)
-      return UInt16
-   is
-   begin
-      case Rank is
-         when 1 =>
-            return This.JDR1.JDATA1;
-         when 2 =>
-            return This.JDR2.JDATA2;
-         when 3 =>
-            return This.JDR3.JDATA3;
-         when 4 =>
-            return This.JDR4.JDATA4;
-      end case;
-   end Injected_Conversion_Value;
-
-   --------------------------------
-   -- Multimode_Conversion_Value --
-   --------------------------------
-
-   function Multimode_Conversion_Value (Value : CDR_Data)
-     return UInt16 is
-   begin
-      case Value is
-         when Master =>
-            return ADC_Common_Periph.CDR.RDATA_MST;
-         when Slave =>
-            return ADC_Common_Periph.CDR.RDATA_SLV;
-      end case;
-   end Multimode_Conversion_Value;
-
-   --------------------------------
-   -- Multimode_Conversion_Value --
-   --------------------------------
-
-   function Multimode_Conversion_Value return UInt32 is
-   begin
-      return Shift_Left (UInt32 (ADC_Common_Periph.CDR.RDATA_MST), 16) or
-               UInt32 (ADC_Common_Periph.CDR.RDATA_SLV);
-   end Multimode_Conversion_Value;
-
    --------------------
    -- Configure_Unit --
    --------------------
@@ -208,23 +140,6 @@ package body STM32.ADC is
      (This : Analog_To_Digital_Converter)
       return Data_Alignment
    is ((if This.CFGR.ALIGN then Left_Aligned else Right_Aligned));
-
-   ---------------------------------
-   -- Configure_Common_Properties --
-   ---------------------------------
-
-   procedure Configure_Common_Properties
-     (Mode           : Multi_ADC_Mode_Selections;
-      Clock_Mode     : ADC_Clock_Mode;
-      DMA_Mode       : Dual_ADC_DMA_Modes;
-      Sampling_Delay : Sampling_Delay_Selections)
-   is
-   begin
-      ADC_Common_Periph.CCR.DUAL    := Mode'Enum_Rep;
-      ADC_Common_Periph.CCR.DELAY_k := Sampling_Delay'Enum_Rep;
-      ADC_Common_Periph.CCR.MDMA    := DMA_Mode'Enum_Rep;
-      ADC_Common_Periph.CCR.CKMODE  := Clock_Mode'Enum_Rep;
-   end Configure_Common_Properties;
 
    -----------------------------------
    -- Configure_Regular_Conversions --
@@ -271,6 +186,22 @@ package body STM32.ADC is
 
       This.SQR1.L := UInt4 (Conversions'Length - 1);  -- biased rep
    end Configure_Regular_Conversions;
+
+   ----------------------------------
+   -- Regular_Conversions_Expected --
+   ----------------------------------
+
+   function Regular_Conversions_Expected (This : Analog_To_Digital_Converter)
+     return Natural is
+     (Natural (This.SQR1.L) + 1);
+
+   -----------------------
+   -- Scan_Mode_Enabled --
+   -----------------------
+
+   function Scan_Mode_Enabled (This : Analog_To_Digital_Converter)
+                               return Boolean
+     is (This.SQR1.L /= UInt4 (0));
 
    ------------------------------------
    -- Configure_Injected_Conversions --
@@ -328,6 +259,14 @@ package body STM32.ADC is
       This.JSQR.JL := UInt2 (Conversions'Length - 1);  -- biased rep
    end Configure_Injected_Conversions;
 
+   -----------------------------------
+   -- Injected_Conversions_Expected --
+   -----------------------------------
+
+   function Injected_Conversions_Expected (This : Analog_To_Digital_Converter)
+     return Natural is
+     (Natural (This.JSQR.JL) + 1);
+
    ----------------------------
    -- Enable_VBat_Connection --
    ----------------------------
@@ -362,29 +301,22 @@ package body STM32.ADC is
    function VRef_TemperatureSensor_Enabled return Boolean is
       (ADC_Common_Periph.CCR.VREFEN and ADC_Common_Periph.CCR.TSEN);
 
-   ----------------------------------
-   -- Regular_Conversions_Expected --
-   ----------------------------------
+   ---------------------------------
+   -- Configure_Common_Properties --
+   ---------------------------------
 
-   function Regular_Conversions_Expected (This : Analog_To_Digital_Converter)
-     return Natural is
-     (Natural (This.SQR1.L) + 1);
-
-   -----------------------------------
-   -- Injected_Conversions_Expected --
-   -----------------------------------
-
-   function Injected_Conversions_Expected (This : Analog_To_Digital_Converter)
-     return Natural is
-     (Natural (This.JSQR.JL) + 1);
-
-   -----------------------
-   -- Scan_Mode_Enabled --
-   -----------------------
-
-   function Scan_Mode_Enabled (This : Analog_To_Digital_Converter)
-                               return Boolean
-     is (This.SQR1.L /= UInt4 (0));
+   procedure Configure_Common_Properties
+     (Mode           : Multi_ADC_Mode_Selections;
+      Clock_Mode     : ADC_Clock_Mode;
+      DMA_Mode       : Dual_ADC_DMA_Modes;
+      Sampling_Delay : Sampling_Delay_Selections)
+   is
+   begin
+      ADC_Common_Periph.CCR.DUAL    := Mode'Enum_Rep;
+      ADC_Common_Periph.CCR.DELAY_k := Sampling_Delay'Enum_Rep;
+      ADC_Common_Periph.CCR.MDMA    := DMA_Mode'Enum_Rep;
+      ADC_Common_Periph.CCR.CKMODE  := Clock_Mode'Enum_Rep;
+   end Configure_Common_Properties;
 
    -------------------------------
    -- Configure_Regular_Channel --
@@ -415,7 +347,7 @@ package body STM32.ADC is
    begin
       Set_Sampling_Time (This, Channel, Sample_Time);
       Set_Injected_Channel_Sequence_Position (This, Channel, Rank);
-      Set_Injected_Channel_Offset (This, Rank, Offset);
+      Set_Injected_Channel_Offset (This, Channel, Rank, Offset);
    end Configure_Injected_Channel;
 
    ----------------------
@@ -453,6 +385,28 @@ package body STM32.ADC is
    is
       (This.CR.ADSTART);
 
+   ----------------------
+   -- Conversion_Value --
+   ----------------------
+
+   function Conversion_Value
+     (This : Analog_To_Digital_Converter)
+      return UInt16
+   is
+   begin
+      return This.DR.RDATA;
+   end Conversion_Value;
+
+   ---------------------------
+   -- Data_Register_Address --
+   ---------------------------
+
+   function Data_Register_Address
+     (This : Analog_To_Digital_Converter)
+      return System.Address
+   is
+      (This.DR'Address);
+
    -------------------------------
    -- Start_Injected_Conversion --
    -------------------------------
@@ -472,6 +426,206 @@ package body STM32.ADC is
      return Boolean
    is
      (This.CR.JADSTART);
+
+   -------------------------------
+   -- Injected_Conversion_Value --
+   -------------------------------
+
+   function Injected_Conversion_Value
+     (This : Analog_To_Digital_Converter;
+      Rank : Injected_Channel_Rank)
+      return UInt16
+   is
+   begin
+      case Rank is
+         when 1 =>
+            return This.JDR1.JDATA1;
+         when 2 =>
+            return This.JDR2.JDATA2;
+         when 3 =>
+            return This.JDR3.JDATA3;
+         when 4 =>
+            return This.JDR4.JDATA4;
+      end case;
+   end Injected_Conversion_Value;
+
+   --------------------------------
+   -- Multimode_Conversion_Value --
+   --------------------------------
+
+   function Multimode_Conversion_Value (Value : CDR_Data)
+     return UInt16 is
+   begin
+      case Value is
+         when Master =>
+            return ADC_Common_Periph.CDR.RDATA_MST;
+         when Slave =>
+            return ADC_Common_Periph.CDR.RDATA_SLV;
+      end case;
+   end Multimode_Conversion_Value;
+
+   --------------------------------
+   -- Multimode_Conversion_Value --
+   --------------------------------
+
+   function Multimode_Conversion_Value return UInt32 is
+   begin
+      return Shift_Left (UInt32 (ADC_Common_Periph.CDR.RDATA_MST), 16) or
+               UInt32 (ADC_Common_Periph.CDR.RDATA_SLV);
+   end Multimode_Conversion_Value;
+
+   -------------------------------
+   -- Enable_Discontinuous_Mode --
+   -------------------------------
+
+   procedure Enable_Discontinuous_Mode
+     (This    : in out Analog_To_Digital_Converter;
+      Regular : Boolean;  -- if False, enabling for Injected channels
+      Count   : Discontinuous_Mode_Channel_Count)
+   is
+   begin
+      if Regular then
+         This.CFGR.JDISCEN := False;
+         This.CFGR.DISCEN := True;
+      else -- Injected
+         This.CFGR.DISCEN := False;
+         This.CFGR.JDISCEN := True;
+      end if;
+      This.CFGR.DISCNUM := UInt3 (Count - 1);  -- biased
+   end Enable_Discontinuous_Mode;
+
+   ----------------------------------------
+   -- Disable_Discontinuous_Mode_Regular --
+   ---------------------------------------
+
+   procedure Disable_Discontinuous_Mode_Regular
+     (This : in out Analog_To_Digital_Converter)
+   is
+   begin
+      This.CFGR.DISCEN := False;
+   end Disable_Discontinuous_Mode_Regular;
+
+   -----------------------------------------
+   -- Disable_Discontinuous_Mode_Injected --
+   -----------------------------------------
+
+   procedure Disable_Discontinuous_Mode_Injected
+     (This : in out Analog_To_Digital_Converter)
+   is
+   begin
+      This.CFGR.JDISCEN := False;
+   end Disable_Discontinuous_Mode_Injected;
+
+   ----------------------------------------
+   -- Discontinuous_Mode_Regular_Enabled --
+   ----------------------------------------
+
+   function Discontinuous_Mode_Regular_Enabled
+     (This : Analog_To_Digital_Converter)
+      return Boolean
+   is (This.CFGR.DISCEN);
+
+   -----------------------------------------
+   -- Discontinuous_Mode_Injected_Enabled --
+   -----------------------------------------
+
+   function Discontinuous_Mode_Injected_Enabled
+     (This : Analog_To_Digital_Converter)
+      return Boolean
+   is (This.CFGR.JDISCEN);
+
+   ---------------------------
+   -- AutoInjection_Enabled --
+   ---------------------------
+
+   function AutoInjection_Enabled
+     (This : Analog_To_Digital_Converter)
+      return Boolean
+   is (This.CFGR.JAUTO);
+
+   ----------------
+   -- Enable_DMA --
+   ----------------
+
+   procedure Enable_DMA (This : in out Analog_To_Digital_Converter) is
+   begin
+      This.CFGR.DMAEN := True;
+   end Enable_DMA;
+
+   -----------------
+   -- Disable_DMA --
+   -----------------
+
+   procedure Disable_DMA (This : in out Analog_To_Digital_Converter) is
+   begin
+      This.CFGR.DMAEN := False;
+   end Disable_DMA;
+
+   -----------------
+   -- DMA_Enabled --
+   -----------------
+
+   function DMA_Enabled (This : Analog_To_Digital_Converter) return Boolean is
+     (This.CFGR.DMAEN);
+
+   ------------------------------------
+   -- Enable_DMA_After_Last_Transfer --
+   ------------------------------------
+
+   procedure Enable_DMA_After_Last_Transfer
+     (This : in out Analog_To_Digital_Converter)
+   is
+   begin
+      This.CFGR.DMACFG := True;
+   end Enable_DMA_After_Last_Transfer;
+
+   -------------------------------------
+   -- Disable_DMA_After_Last_Transfer --
+   -------------------------------------
+
+   procedure Disable_DMA_After_Last_Transfer
+     (This : in out Analog_To_Digital_Converter)
+   is
+   begin
+      This.CFGR.DMACFG := False;
+   end Disable_DMA_After_Last_Transfer;
+
+   -------------------------------------
+   -- DMA_Enabled_After_Last_Transfer --
+   -------------------------------------
+
+   function DMA_Enabled_After_Last_Transfer
+     (This : Analog_To_Digital_Converter)
+      return Boolean
+   is (This.CFGR.DMACFG);
+
+   ------------------------------------------
+   -- Multi_Enable_DMA_After_Last_Transfer --
+   ------------------------------------------
+
+   procedure Multi_Enable_DMA_After_Last_Transfer is
+   begin
+      --  This is a common register. You must choose the value in
+      --  accordance to the resolution: 2 for 12 and 10-bit resolution,
+      --  3 for 8 and 6-bit resolution.
+      ADC_Common_Periph.CCR.MDMA := 2;
+   end Multi_Enable_DMA_After_Last_Transfer;
+
+   -------------------------------------------
+   -- Multi_Disable_DMA_After_Last_Transfer --
+   -------------------------------------------
+
+   procedure Multi_Disable_DMA_After_Last_Transfer is
+   begin
+      ADC_Common_Periph.CCR.MDMA := 0;
+   end Multi_Disable_DMA_After_Last_Transfer;
+
+   -------------------------------------------
+   -- Multi_DMA_Enabled_After_Last_Transfer --
+   -------------------------------------------
+
+   function Multi_DMA_Enabled_After_Last_Transfer return Boolean is
+     (ADC_Common_Periph.CCR.MDMA = 2);
 
    ------------------------------
    -- Watchdog_Enable_Channels --
@@ -637,180 +791,6 @@ package body STM32.ADC is
       end case;
    end Watchdog_Enabled;
 
-   -------------------------------
-   -- Enable_Discontinuous_Mode --
-   -------------------------------
-
-   procedure Enable_Discontinuous_Mode
-     (This    : in out Analog_To_Digital_Converter;
-      Regular : Boolean;  -- if False, enabling for Injected channels
-      Count   : Discontinuous_Mode_Channel_Count)
-   is
-   begin
-      if Regular then
-         This.CFGR.JDISCEN := False;
-         This.CFGR.DISCEN := True;
-      else -- Injected
-         This.CFGR.DISCEN := False;
-         This.CFGR.JDISCEN := True;
-      end if;
-      This.CFGR.DISCNUM := UInt3 (Count - 1);  -- biased
-   end Enable_Discontinuous_Mode;
-
-   ----------------------------------------
-   -- Disable_Discontinuous_Mode_Regular --
-   ---------------------------------------
-
-   procedure Disable_Discontinuous_Mode_Regular
-     (This : in out Analog_To_Digital_Converter)
-   is
-   begin
-      This.CFGR.DISCEN := False;
-   end Disable_Discontinuous_Mode_Regular;
-
-   -----------------------------------------
-   -- Disable_Discontinuous_Mode_Injected --
-   -----------------------------------------
-
-   procedure Disable_Discontinuous_Mode_Injected
-     (This : in out Analog_To_Digital_Converter)
-   is
-   begin
-      This.CFGR.JDISCEN := False;
-   end Disable_Discontinuous_Mode_Injected;
-
-   ----------------------------------------
-   -- Discontinuous_Mode_Regular_Enabled --
-   ----------------------------------------
-
-   function Discontinuous_Mode_Regular_Enabled
-     (This : Analog_To_Digital_Converter)
-      return Boolean
-   is (This.CFGR.DISCEN);
-
-   -----------------------------------------
-   -- Discontinuous_Mode_Injected_Enabled --
-   -----------------------------------------
-
-   function Discontinuous_Mode_Injected_Enabled
-     (This : Analog_To_Digital_Converter)
-      return Boolean
-   is (This.CFGR.JDISCEN);
-
-   ---------------------------
-   -- AutoInjection_Enabled --
-   ---------------------------
-
-   function AutoInjection_Enabled
-     (This : Analog_To_Digital_Converter)
-      return Boolean
-   is (This.CFGR.JAUTO);
-
-   ----------------
-   -- Enable_DMA --
-   ----------------
-
-   procedure Enable_DMA (This : in out Analog_To_Digital_Converter) is
-   begin
-      This.CFGR.DMAEN := True;
-   end Enable_DMA;
-
-   -----------------
-   -- Disable_DMA --
-   -----------------
-
-   procedure Disable_DMA (This : in out Analog_To_Digital_Converter) is
-   begin
-      This.CFGR.DMAEN := False;
-   end Disable_DMA;
-
-   -----------------
-   -- DMA_Enabled --
-   -----------------
-
-   function DMA_Enabled (This : Analog_To_Digital_Converter) return Boolean is
-     (This.CFGR.DMAEN);
-
-   ------------------------------------
-   -- Enable_DMA_After_Last_Transfer --
-   ------------------------------------
-
-   procedure Enable_DMA_After_Last_Transfer
-     (This : in out Analog_To_Digital_Converter)
-   is
-   begin
-      This.CFGR.DMACFG := True;
-   end Enable_DMA_After_Last_Transfer;
-
-   -------------------------------------
-   -- Disable_DMA_After_Last_Transfer --
-   -------------------------------------
-
-   procedure Disable_DMA_After_Last_Transfer
-     (This : in out Analog_To_Digital_Converter)
-   is
-   begin
-      This.CFGR.DMACFG := False;
-   end Disable_DMA_After_Last_Transfer;
-
-   -------------------------------------
-   -- DMA_Enabled_After_Last_Transfer --
-   -------------------------------------
-
-   function DMA_Enabled_After_Last_Transfer
-     (This : Analog_To_Digital_Converter)
-      return Boolean
-   is (This.CFGR.DMACFG);
-
-   ------------------------------------------
-   -- Multi_Enable_DMA_After_Last_Transfer --
-   ------------------------------------------
-
-   procedure Multi_Enable_DMA_After_Last_Transfer is
-   begin
-      --  This is a common register. You must choose the value in
-      --  accordance to the resolution: 2 for 12 and 10-bit resolution,
-      --  3 for 8 and 6-bit resolution.
-      ADC_Common_Periph.CCR.MDMA := 2;
-   end Multi_Enable_DMA_After_Last_Transfer;
-
-   -------------------------------------------
-   -- Multi_Disable_DMA_After_Last_Transfer --
-   -------------------------------------------
-
-   procedure Multi_Disable_DMA_After_Last_Transfer is
-   begin
-      ADC_Common_Periph.CCR.MDMA := 0;
-   end Multi_Disable_DMA_After_Last_Transfer;
-
-   -------------------------------------------
-   -- Multi_DMA_Enabled_After_Last_Transfer --
-   -------------------------------------------
-
-   function Multi_DMA_Enabled_After_Last_Transfer return Boolean is
-     (ADC_Common_Periph.CCR.MDMA = 2);
-
-   ---------------------
-   -- Poll_For_Status --
-   ---------------------
-
-   procedure Poll_For_Status
-     (This    : in out Analog_To_Digital_Converter;
-      Flag    : ADC_Status_Flag;
-      Success : out Boolean;
-      Timeout : Time_Span := Time_Span_Last)
-   is
-      Deadline : constant Time := Clock + Timeout;
-   begin
-      Success := False;
-      while Clock < Deadline loop
-         if Status (This, Flag) then
-            Success := True;
-            exit;
-         end if;
-      end loop;
-   end Poll_For_Status;
-
    ------------
    -- Status --
    ------------
@@ -842,7 +822,7 @@ package body STM32.ADC is
             return This.ISR.EOSMP;
          when Overrun =>
             return This.ISR.OVR;
-         when Injected_Queue_Context_Overflow =>
+         when Injected_Context_Queue_Overflow =>
             return This.ISR.JQOVF;
       end case;
    end Status;
@@ -877,10 +857,31 @@ package body STM32.ADC is
             This.ISR.EOSMP := True;
          when Overrun =>
             This.ISR.OVR := True;
-         when Injected_Queue_Context_Overflow =>
+         when Injected_Context_Queue_Overflow =>
             This.ISR.JQOVF := True;
       end case;
    end Clear_Status;
+
+   ---------------------
+   -- Poll_For_Status --
+   ---------------------
+
+   procedure Poll_For_Status
+     (This    : in out Analog_To_Digital_Converter;
+      Flag    : ADC_Status_Flag;
+      Success : out Boolean;
+      Timeout : Time_Span := Time_Span_Last)
+   is
+      Deadline : constant Time := Clock + Timeout;
+   begin
+      Success := False;
+      while Clock < Deadline loop
+         if Status (This, Flag) then
+            Success := True;
+            exit;
+         end if;
+      end loop;
+   end Poll_For_Status;
 
    -----------------------
    -- Enable_Interrupts --
@@ -912,7 +913,7 @@ package body STM32.ADC is
             This.IER.EOSMPIE := True;
          when Overrun =>
             This.IER.OVRIE := True;
-         when Injected_Queue_Context_Overflow =>
+         when Injected_Context_Queue_Overflow =>
             This.IER.JQOVFIE := True;
       end case;
    end Enable_Interrupts;
@@ -948,7 +949,7 @@ package body STM32.ADC is
             return This.IER.EOSMPIE;
          when Overrun =>
             return This.IER.OVRIE;
-         when Injected_Queue_Context_Overflow =>
+         when Injected_Context_Queue_Overflow =>
             return This.IER.JQOVFIE;
       end case;
    end Interrupt_Enabled;
@@ -983,7 +984,7 @@ package body STM32.ADC is
             This.IER.EOSMPIE := False;
          when Overrun =>
             This.IER.OVRIE := False;
-         when Injected_Queue_Context_Overflow =>
+         when Injected_Context_Queue_Overflow =>
             This.IER.JQOVFIE := False;
       end case;
    end Disable_Interrupts;
@@ -1018,7 +1019,7 @@ package body STM32.ADC is
             This.ISR.EOSMP := True;
          when Overrun =>
             This.ISR.OVR := True;
-         when Injected_Queue_Context_Overflow =>
+         when Injected_Context_Queue_Overflow =>
             This.ISR.JQOVF := True;
       end case;
    end Clear_Interrupt_Pending;
@@ -1115,16 +1116,29 @@ package body STM32.ADC is
    ---------------------------------
 
    procedure Set_Injected_Channel_Offset
-     (This   : in out Analog_To_Digital_Converter;
-      Rank   : Injected_Channel_Rank;
-      Offset : Injected_Data_Offset)
+     (This    : in out Analog_To_Digital_Converter;
+      Channel : Analog_Input_Channel;
+      Rank    : Injected_Channel_Rank;
+      Offset  : Injected_Data_Offset)
    is
    begin
       case Rank is
-         when 1 => This.OFR1.OFFSET1 := Offset;
-         when 2 => This.OFR2.OFFSET2 := Offset;
-         when 3 => This.OFR3.OFFSET3 := Offset;
-         when 4 => This.OFR4.OFFSET4 := Offset;
+         when 1 =>
+            This.OFR1.OFFSET1_CH := Channel;
+            This.OFR1.OFFSET1 := Offset;
+            This.OFR1.OFFSET1_EN := True;
+         when 2 =>
+            This.OFR2.OFFSET2_CH := Channel;
+            This.OFR2.OFFSET2 := Offset;
+            This.OFR2.OFFSET2_EN := True;
+         when 3 =>
+            This.OFR3.OFFSET3_CH := Channel;
+            This.OFR3.OFFSET3 := Offset;
+            This.OFR3.OFFSET3_EN := True;
+         when 4 =>
+            This.OFR4.OFFSET4_CH := Channel;
+            This.OFR4.OFFSET4 := Offset;
+            This.OFR4.OFFSET4_EN := True;
       end case;
    end Set_Injected_Channel_Offset;
 

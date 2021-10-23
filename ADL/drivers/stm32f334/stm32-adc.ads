@@ -581,7 +581,7 @@ package STM32.ADC is
       Analog_Watchdog_3_Event_Occurred,
       Sampling_Completed,
       Overrun,
-      Injected_Queue_Context_Overflow);
+      Injected_Context_Queue_Overflow);
 
    function Status
      (This : Analog_To_Digital_Converter;
@@ -620,7 +620,7 @@ package STM32.ADC is
       Analog_Watchdog_3_Event_Occurr,
       Sampling_Complete,
       Overrun,
-      Injected_Queue_Context_Overflow);
+      Injected_Context_Queue_Overflow);
 
    procedure Enable_Interrupts
      (This   : in out Analog_To_Digital_Converter;
