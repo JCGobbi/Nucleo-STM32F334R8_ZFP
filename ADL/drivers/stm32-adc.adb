@@ -1102,13 +1102,14 @@ package body STM32.ADC is
       Sample_Time : Channel_Sampling_Times)
    is
    begin
-      if Channel < 10 then
-         This.SMPR1.SMP.Arr (Natural (Channel)) :=
-           Channel_Sampling_Times'Enum_Rep (Sample_Time);
-      else
-         This.SMPR2.SMP.Arr (Natural (Channel)) :=
-           Channel_Sampling_Times'Enum_Rep (Sample_Time);
-      end if;
+      case Channel is
+         when 0 .. 9 =>
+            This.SMPR1.SMP.Arr (Natural (Channel)) :=
+              Channel_Sampling_Times'Enum_Rep (Sample_Time);
+         when 10 .. 18 =>
+            This.SMPR2.SMP.Arr (Natural (Channel)) :=
+              Channel_Sampling_Times'Enum_Rep (Sample_Time);
+      end case;
    end Set_Sampling_Time;
 
    ---------------------------------
