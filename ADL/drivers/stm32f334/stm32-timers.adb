@@ -608,14 +608,13 @@ package body STM32.Timers is
       Mode : Timer_Slave_Mode)
    is
    begin
-      case Mode'Enum_Rep is
-         when 0 .. 7 =>
+      case Mode is
+         when Disabled .. External_1 =>
             This.SMCR.Slave_Mode_Selection_2 := False;
             This.SMCR.Slave_Mode_Selection := UInt3 (Mode'Enum_Rep);
-         when 8 =>
+         when Combined_Reset_Trigger =>
             This.SMCR.Slave_Mode_Selection_2 := True;
             This.SMCR.Slave_Mode_Selection := UInt3 (Mode'Enum_Rep);
-         when others => null;
       end case;
    end Select_Slave_Mode;
 
@@ -1876,6 +1875,7 @@ package body STM32.Timers is
       IC2_Polarity : Timer_Input_Capture_Polarity)
    is
    begin
+      This.SMCR.Slave_Mode_Selection_2 := False;
       This.SMCR.Slave_Mode_Selection := UInt3 (Mode'Enum_Rep);
 
       Write_Channel_Input_Description

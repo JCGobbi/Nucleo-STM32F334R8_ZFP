@@ -937,12 +937,15 @@ package STM32.Timers is
 
    type Timer_Slave_Mode is
      (Disabled,
-      Encoder_Mode_TI1,
-      --  Counter counts up/down on TI1 edge.
-      Encoder_Mode_TI2,
-      --  Counter counts up/down on TI2 edge.
-      Encoder_Mode_TI1_TI2,
-      --  Counter counts up/down on both TI1 & TI2 edges.
+      Quadrature_Encoder_Mode_1,
+      --  x2 mode. Counter counts up/down on TI1FP1 edge depending on TI2FP2
+      --  level.
+      Quadrature_Encoder_Mode_2,
+      --  x2 mode. Counter counts up/down on TI2FP2 edge depending on TI1FP1
+      --  level.
+      Quadrature_Encoder_Mode_3,
+      --  x4 mode. Counter counts up/down on both TI1FP1 & TI2FP2 edges
+      --  depending on the level of the other input.
       Reset,
       --  Counter reinitialize and update registers on TRGI rising edge.
       Gated,
@@ -1047,8 +1050,8 @@ package STM32.Timers is
 
    ----------------------------------------------------------------------------
 
-   subtype Timer_Encoder_Mode is
-     Timer_Slave_Mode range Encoder_Mode_TI1 .. Encoder_Mode_TI1_TI2;
+   subtype Timer_Encoder_Mode is Timer_Slave_Mode
+     range Quadrature_Encoder_Mode_1 .. Quadrature_Encoder_Mode_3;
 
    procedure Configure_Encoder_Interface
      (This         : in out Timer;
