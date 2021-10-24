@@ -937,16 +937,23 @@ package STM32.Timers is
 
    type Timer_Slave_Mode is
      (Disabled,
-      --  counter counts up/down on TI1 edge
       Encoder_Mode_TI1,
-      --  counter counts up/down on TI2 edge
+      --  Counter counts up/down on TI1 edge.
       Encoder_Mode_TI2,
-      --  counter counts up/down on both TI1 & TI2 edges
+      --  Counter counts up/down on TI2 edge.
       Encoder_Mode_TI1_TI2,
+      --  Counter counts up/down on both TI1 & TI2 edges.
       Reset,
+      --  Counter reinitialize and update registers on TRGI rising edge.
       Gated,
+      --  Counter is enabled when TRGI is high and stops when low without reset.
       Trigger,
-      External_1);
+      --  Counter starts at TRGI trigger rising edge.
+      External_1,
+      --  Counter clocked by TRGI rising edges.
+      Combined_Reset_Trigger)
+      --  Counter reinitialize, update registers and start the counter on TRGI.
+    with Size => 4;
 
    procedure Select_Slave_Mode
      (This : in out Timer;
@@ -959,13 +966,13 @@ package STM32.Timers is
    procedure Disable_Master_Slave_Mode (This : in out Timer)
      with Pre => Slave_Mode_Supported (This);
 
-   type Timer_External_Trigger_Polarity is (Inverted, Noninverted);
+   type Timer_External_Trigger_Polarity is (NonInverted, Inverted);
 
    type Timer_External_Trigger_Prescaler is
      (Off,
-      Div2,
-      Div4,
-      Div8);
+      Div_2,
+      Div_4,
+      Div_8);
 
    type Timer_External_Trigger_Filter is
      (No_Filter,
@@ -1351,7 +1358,7 @@ private
 
    type TIMx_SMCR is record
       Reserved0                  : UInt15;
-      Slave_Mode_Selection_3     : Boolean;
+      Slave_Mode_Selection_2     : Boolean;
       External_Trigger_Polarity  : Timer_External_Trigger_Polarity;
       External_Clock_Enable      : Boolean;
       External_Trigger_Prescaler : Timer_External_Trigger_Prescaler;
@@ -1359,12 +1366,12 @@ private
       Master_Slave_Mode          : Boolean;
       Trigger_Selection          : Timer_Trigger_Input_Source;
       OCREF_Clear_Selection      : Boolean;
-      Slave_Mode_Selection       : Timer_Slave_Mode;
+      Slave_Mode_Selection       : UInt3;
    end record with Volatile_Full_Access, Size => 32;
 
    for TIMx_SMCR use record
       Reserved0                  at 0 range 17 .. 31;
-      Slave_Mode_Selection_3     at 0 range 16 .. 16;
+      Slave_Mode_Selection_2     at 0 range 16 .. 16;
       External_Trigger_Polarity  at 0 range 15 .. 15;
       External_Clock_Enable      at 0 range 14 .. 14;
       External_Trigger_Prescaler at 0 range 12 .. 13;
