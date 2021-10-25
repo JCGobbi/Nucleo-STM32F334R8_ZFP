@@ -242,7 +242,7 @@ package STM32.HRTimers is
    --  not re-triggerable - a counter reset can be done only if the counter is
    --  stoped (period elapsed), or re-triggerable - a counter reset is done
    --  whatever the counter state (running or stopped).
-   --  See pg. 636 in RM0364 rev. 4.
+   --  See RM0364 rev. 4 Section 21.3.4 pg. 636 Table 83 Timer operating modes.
 
    procedure Set_Counter (This : in out HRTimer_Master;  Value : UInt16)
      with Post => Current_Counter (This) = Value;
@@ -432,7 +432,7 @@ package STM32.HRTimers is
    --  below 32 (CKPSC[2:0] < 5), the least significant bits of the counter and
    --  capture registers are not significant. The least significant bits cannot
    --  be written (counter register only) and return 0 when read.
-   --  See Timer clock and prescaler at pg 632 RM0364 rev 4.
+   --  See RM0364 rev 4 Section 21.3.3 pg 632 Timer clock and prescaler.
    --  It is mandatory to have the same prescaling factors for all timers
    --  sharing resources (for instance master timer and Timer A must have
    --  identical CKPSC[2:0] values if master timer is controlling HRTIM_CHA1 or
@@ -460,8 +460,8 @@ package STM32.HRTimers is
       Trigger : DAC_Synchronization_Trigger);
    --  A DAC synchronization event can be enabled and generated when the master
    --  timer update occurs. These bits are defining on which output the DAC
-   --  synchronization is sent (refer to Section 21.3.19 in RM0364: DAC triggers
-   --  for connections details).
+   --  synchronization is sent (refer to RM0364 rev 4 Section 21.3.19: DAC
+   --  triggers for connections details).
 
    type Comparator_AutoDelayed_Mode is (CMP2, CMP4);
 
@@ -539,9 +539,9 @@ package STM32.HRTimers is
       Mode : Update_Gating_Mode);
    --  Define how the update occurs relatively to the burst DMA transaction
    --  and the external update request on update enable inputs 1 to 3 (see
-   --  Table 91: Update enable inputs and sources in section 27.3.2 RM0364
-   --  rev 4). The update events, can be: MSTU, TEU, TDU, TCU, TBU, TAU, TxRSTU,
-   --  TxREPU.
+   --  RM0364 rev 4 section 21.3.10 pg 674 Table 91: Update enable inputs and
+   --  sources). The update events, can be: MSTU, TEU, TDU, TCU, TBU, TAU,
+   --  TxRSTU, TxREPU.
 
    procedure Set_HalfPeriod_Mode
      (This : in out HRTimer_Channel;
@@ -586,7 +586,7 @@ package STM32.HRTimers is
    --  not re-triggerable - a counter reset can be done only if the counter is
    --  stoped (period elapsed), or re-triggerable - a counter reset is done
    --  whatever the counter state (running or stopped).
-   --  See pg. 636 in RM0364 rev. 4.
+   --  See RM0364 rev. 4 Chapter 21.3.4 pg. 636 Section Counter operating mode.
 
    procedure Set_Counter (This : in out HRTimer_Channel;  Value : UInt16)
      with Post => Current_Counter (This) = Value;
@@ -876,7 +876,7 @@ package STM32.HRTimers is
        Post => Enabled_Deadtime (This) = Enable;
    --  Enable or disable the deadtime. This parameter cannot be changed once
    --  the timer is operating (TxEN bit set) or if its outputs are enabled
-   --  and set/reset by another timer. See pg.761 in RM0364 rev. 4.
+   --  and set/reset by another timer. See RM0364 rev. 4 Chapter 21.5.37 pg.761.
 
    function Enabled_Deadtime (This : HRTimer_Channel) return Boolean;
    --  Return True if the timer deadtime is enabled.
@@ -891,9 +891,9 @@ package STM32.HRTimers is
       Falling_Value : UInt9;
       Falling_Sign  : HRTimer_Deadtime_Sign := Positive_Sign);
    --  Two deadtimes values can be defined in relationship with the rising edge
-   --  and the falling edge of the Output 1 reference waveform.
-   --  The sign determines whether the deadtime is positive or negative
-   --  (overlaping signals). See pg. 649 in RM0364 rev. 4.
+   --  and the falling edge of the Output 1 reference waveform. The sign
+   --  determines whether the deadtime is positive or negative (overlaping
+   --  signals). See RM0364 rev. 4 Chapter 21.3.4 Section Deadtime pg. 649.
    --  The deadtime cannot be used simultaneously with the push-pull mode.
 
    procedure Configure_Deadtime
@@ -1678,8 +1678,8 @@ package STM32.HRTimers is
      (Calibration_Start    : Boolean;
       Periodic_Calibration : Boolean;
       Calibration_Rate     : DLL_Calibration);
-   --  PLL calibration must be done before starting HRTIM master and
-   --  timing units. See pg. 709 from RM0364 rev 4 for the sequence of
+   --  PLL calibration must be done before starting HRTIM master and timing
+   --  units. See RM0364 rev 4 Chapter 21.3.22 pg. 709 for the sequence of
    --  initialization.
 
    procedure Set_Fault_Input
