@@ -1128,7 +1128,7 @@ package STM32.Timers is
       renames Has_32bit_Counter;
 
    --  Timers 1 .. 3, 15
-   function Has_At_Least_2_CC_Channels (This : Timer) return Boolean
+   function Clock_Management_Supported (This : Timer) return Boolean
    is
      (This'Address = STM32_SVD.TIM1_Base or
       This'Address = STM32_SVD.TIM2_Base or
@@ -1136,7 +1136,7 @@ package STM32.Timers is
       This'Address = STM32_SVD.TIM15_Base);
 
    --  Timers 1 .. 3, 15
-   function Clock_Management_Supported (This : Timer) return Boolean
+   function Has_At_Least_2_CC_Channels (This : Timer) return Boolean
    is
      (This'Address = STM32_SVD.TIM1_Base or
       This'Address = STM32_SVD.TIM2_Base or
@@ -1182,15 +1182,13 @@ package STM32.Timers is
       This'Address = STM32_SVD.TIM2_Base or
       This'Address = STM32_SVD.TIM3_Base);
 
-   --  Timers 1 .. 3, 15 .. 17
+   --  Timers 1 .. 3, 15
    function Input_XOR_Supported (This : Timer) return Boolean
    is
      (This'Address = STM32_SVD.TIM1_Base or
       This'Address = STM32_SVD.TIM2_Base or
       This'Address = STM32_SVD.TIM3_Base or
-      This'Address = STM32_SVD.TIM15_Base or
-      This'Address = STM32_SVD.TIM16_Base or
-      This'Address = STM32_SVD.TIM17_Base);
+      This'Address = STM32_SVD.TIM15_Base);
 
    --  Timers 1 .. 3, 6, 7, 15 ..17
    function DMA_Supported (This : Timer) return Boolean
@@ -1568,8 +1566,9 @@ private
 
    --  The CCER register is composed of a logical grouping of four sets of
    --  bits, one per channel. The type Single_CCE describe these four bits.
-   --  Channels 1 through 3 have all four bits, but channel 4 does not have
-   --  the complementary state and polarity bits. We pretend that it does for
+   --  Channels 1 through 3 have all four bits, channel 4 does not have the
+   --  complementary enable bits and channels 5 and 6 don't have the
+   --  complementary enable and polarity bits. We pretend that it does for
    --  the type declaration and then treat it accordingly in the accessing
    --  subprograms.
 
