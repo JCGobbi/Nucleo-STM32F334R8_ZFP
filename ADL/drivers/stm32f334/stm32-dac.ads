@@ -253,11 +253,6 @@ package STM32.DAC is
       return Boolean
      with Inline;
 
-   function Interrupt_Source
-     (This : Digital_To_Analog_Converter)
-      return DAC_Interrupts
-     with Inline;
-
    procedure Clear_Interrupt_Pending
      (This    : in out Digital_To_Analog_Converter;
       Channel : DAC_Channel)

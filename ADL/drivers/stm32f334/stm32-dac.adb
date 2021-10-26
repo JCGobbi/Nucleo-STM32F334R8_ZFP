@@ -507,22 +507,6 @@ package body STM32.DAC is
       end case;
    end Interrupt_Enabled;
 
-   ----------------------
-   -- Interrupt_Source --
-   ----------------------
-
-   function Interrupt_Source
-     (This : Digital_To_Analog_Converter)
-      return DAC_Interrupts
-   is
-   begin
-      if This.CR.DMAUDRIE1 then
-         return DMA_Underrun_Channel_1;
-      else
-         return DMA_Underrun_Channel_2;
-      end if;
-   end Interrupt_Source;
-
    -----------------------------
    -- Clear_Interrupt_Pending --
    -----------------------------
