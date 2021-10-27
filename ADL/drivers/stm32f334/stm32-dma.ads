@@ -110,17 +110,17 @@ package STM32.DMA with SPARK_Mode => Off is
    --  corresponding to the stream must be cleared. Note that the unit may not
    --  be enabled by the time the call returns.
 
+   function Enabled
+     (This   : DMA_Controller;
+      Stream : DMA_Stream_Selector)
+      return Boolean with Inline;
+
    procedure Disable
      (This   : DMA_Controller;
       Stream : DMA_Stream_Selector)
      with
        Post => not Enabled (This, Stream),
        Inline;
-
-   function Enabled
-     (This   : DMA_Controller;
-      Stream : DMA_Stream_Selector)
-      return Boolean with Inline;
 
    procedure Reset
      (This   : in out DMA_Controller;
@@ -129,7 +129,7 @@ package STM32.DMA with SPARK_Mode => Off is
        Post =>
          not Enabled (This, Stream)                               and
          Operating_Mode (This, Stream) = Normal_Mode              and
-         Current_NDT (This, Stream) = 0                           and
+         Current_Items_Number (This, Stream) = 0                  and
          Selected_Channel (This, Stream) = Channel_1              and
          Transfer_Direction (This, Stream) = Peripheral_To_Memory and
          not Circular_Mode (This, Stream)                         and
@@ -214,6 +214,30 @@ package STM32.DMA with SPARK_Mode => Off is
       Transfer_Complete_Interrupt,
       Global_Interrupt);
 
+   procedure Enable_Interrupt
+     (This   : DMA_Controller;
+      Stream : DMA_Stream_Selector;
+      Source : DMA_Interrupt)
+     with
+       Post => Interrupt_Enabled (This, Stream, Source);
+   --  The postcondition should not be relied upon completely because it is
+   --  possible, under just the wrong conditions, for the interrupt to be
+   --  disabled immediately, prior to return from this routine
+
+   function Interrupt_Enabled
+     (This   : DMA_Controller;
+      Stream : DMA_Stream_Selector;
+      Source : DMA_Interrupt)
+      return Boolean
+     with Inline;
+
+   procedure Disable_Interrupt
+     (This   : DMA_Controller;
+      Stream : DMA_Stream_Selector;
+      Source : DMA_Interrupt)
+     with
+       Post => not Interrupt_Enabled (This, Stream, Source);
+
    type Interrupt_Selections is array (DMA_Interrupt) of Boolean;
 
    procedure Start_Transfer_with_Interrupts
@@ -266,69 +290,19 @@ package STM32.DMA with SPARK_Mode => Off is
       Timeout        : Time_Span;
       Result         : out DMA_Error_Code);
 
-   procedure Set_NDT
-     (This       : DMA_Controller;
-      Stream     : DMA_Stream_Selector;
-      Data_Count : UInt16)
-     with
-       Pre  => not Enabled (This, Stream),
-       Post => Current_NDT (This, Stream) = Data_Count,
-       Inline;
-   --  Sets the number of data items to be transferred on the stream.
-   --  The Data_Count parameter specifies the number of data items to be
-   --  transferred (from 0 to 65535) on the next transfer. The value is
-   --  as described for procedure Configure_Data_Flow.
-
-   function Items_Transferred
-     (This   : DMA_Controller;
-      Stream : DMA_Stream_Selector)
-      return UInt16;
-   --  returns the number of items transfetred
-
-   function Current_NDT
-     (This   : DMA_Controller;
-      Stream : DMA_Stream_Selector)
-      return UInt16
-     with Inline;
-   --  Returns the value of the NDT register. Should not be used directly,
-   --  as the meaning changes depending on transfer mode. rather use
-   --  Items_Transferred()
-
-   function Circular_Mode
-     (This   : DMA_Controller;
-      Stream : DMA_Stream_Selector)
-      return Boolean
-     with Inline;
-
-   procedure Enable_Interrupt
-     (This   : DMA_Controller;
-      Stream : DMA_Stream_Selector;
-      Source : DMA_Interrupt)
-     with
-       Post => Interrupt_Enabled (This, Stream, Source);
-   --  The postcondition should not be relied upon completely because it is
-   --  possible, under just the wrong conditions, for the interrupt to be
-   --  disabled immediately, prior to return from this routine
-
-   procedure Disable_Interrupt
-     (This   : DMA_Controller;
-      Stream : DMA_Stream_Selector;
-      Source : DMA_Interrupt)
-     with
-       Post => not Interrupt_Enabled (This, Stream, Source);
-
-   function Interrupt_Enabled
-     (This   : DMA_Controller;
-      Stream : DMA_Stream_Selector;
-      Source : DMA_Interrupt)
-      return Boolean
-     with Inline;
-
    type DMA_Status_Flag is
      (Transfer_Error_Indicated,
       Half_Transfer_Complete_Indicated,
       Transfer_Complete_Indicated,
       Global_Event_Indicated);
+
+   function Status
+     (This   : DMA_Controller;
+      Stream : DMA_Stream_Selector;
+      Flag   : DMA_Status_Flag)
+      return Boolean
+     with Inline;
+   --  Returns whether the specified status flag is indicated
 
    procedure Clear_Status
      (This   : in out DMA_Controller;
@@ -345,13 +319,39 @@ package STM32.DMA with SPARK_Mode => Off is
        (for all Indicated in DMA_Status_Flag =>
           not Status (This, Stream, Indicated));
 
-   function Status
+   procedure Set_Items_Number
+     (This       : DMA_Controller;
+      Stream     : DMA_Stream_Selector;
+      Data_Count : UInt16)
+     with
+       Pre  => not Enabled (This, Stream),
+       Post => Current_Items_Number (This, Stream) = Data_Count,
+       Inline;
+   --  Sets the number of data items to be transferred on the stream.
+   --  The Data_Count parameter specifies the number of data items to be
+   --  transferred (from 0 to 65535) on the next transfer. The value is
+   --  as described for procedure Configure_Data_Flow.
+
+   function Items_Transferred
      (This   : DMA_Controller;
-      Stream : DMA_Stream_Selector;
-      Flag   : DMA_Status_Flag)
+      Stream : DMA_Stream_Selector)
+      return UInt16;
+   --  returns the number of items transfetred
+
+   function Current_Items_Number
+     (This   : DMA_Controller;
+      Stream : DMA_Stream_Selector)
+      return UInt16
+     with Inline;
+   --  Returns the value of the NDT register. Should not be used directly,
+   --  as the meaning changes depending on transfer mode. rather use
+   --  Items_Transferred()
+
+   function Circular_Mode
+     (This   : DMA_Controller;
+      Stream : DMA_Stream_Selector)
       return Boolean
      with Inline;
-   --  Returns whether the specified status flag is indicated
 
    type DMA_Channel_Selector is
      (Channel_0,
@@ -372,14 +372,15 @@ package STM32.DMA with SPARK_Mode => Off is
      (Peripheral_To_Memory,
       Memory_To_Peripheral,
       Memory_To_Memory);
-   --  Note that only DMA_2 is able to do Memory_To_Memory transfers, and that
-   --  in this direction the circular mode is not allowed and the internal FIFO
-   --  must be enabled.
 
    function Transfer_Direction
      (This : DMA_Controller;  Stream : DMA_Stream_Selector)
       return DMA_Data_Transfer_Direction
      with Inline;
+   --  The memory-to-memory mode must not be used in circular mode. Before
+   --  enabling a channel in memory-to-memory mode (MEM2MEM = 1), the software
+   --  must clear the CIRC bit of the DMA_CCRx register.
+   --  See RM0364 rev 4 Chapter 11.4.2 Section Memory-to-memory mode at pg 178.
 
    type DMA_Data_Transfer_Widths is
      (Bytes,
@@ -444,7 +445,7 @@ package STM32.DMA with SPARK_Mode => Off is
       --  and peripherals. It is vital to note that not all peripherals can
       --  be connected to all streams. The possibilities are organized by
       --  channels, per controller, as specified by the ST Micro Reference
-      --  Manual in the "DMA Request Mapping" tables.
+      --  Manual RM0364 rev 4 Section 11.3.2 "DMA Request Mapping" tables.
 
       Direction : DMA_Data_Transfer_Direction := DMA_Data_Transfer_Direction'First;
 
@@ -466,8 +467,9 @@ package STM32.DMA with SPARK_Mode => Off is
       --  transaction is expressed. See the description in Configure_Data_Flow.
 
       Operation_Mode : DMA_Mode := DMA_Mode'First;
-      --  Note that the circular buffer mode cannot be used if memory-to-memory
-      --  data transfer is configured on the selected Stream
+      --  The circular mode must not be used in memory-to-memory mode. Before
+      --  enabling a channel in circular mode (CIRC = 1), the software must
+      --  clear the MEM2MEM bit of the DMA_CCRx register.
 
       Priority : DMA_Priority_Level := DMA_Priority_Level'First;
       --  The relative priority of the given stream to all other streams

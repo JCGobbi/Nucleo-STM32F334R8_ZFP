@@ -152,6 +152,78 @@ package body STM32.DMA is
       end loop;
    end Disable;
 
+   -----------
+   -- Reset --
+   -----------
+
+   procedure Reset
+     (This   : in out DMA_Controller;
+      Stream : DMA_Stream_Selector)
+   is
+      This_Stream : DMA_Stream renames Get_Stream (This, Stream);
+   begin
+      Disable (This, Stream);
+
+      This_Stream.CR := (others => <>);
+      This_Stream.NDTR.NDT := 0;
+      This_Stream.PAR := 0;
+      This_Stream.MAR := 0;
+
+      Clear_All_Status (This, Stream);
+   end Reset;
+
+   -------------------------
+   -- Configure_Data_Flow --
+   -------------------------
+
+   procedure Configure_Data_Flow
+     (This        : DMA_Controller;
+      Stream      : DMA_Stream_Selector;
+      Source      : Address;
+      Destination : Address;
+      Data_Count  : UInt16)
+   is
+      This_Stream : DMA_Stream renames Get_Stream (This, Stream);
+      function W is new Ada.Unchecked_Conversion
+        (Address, UInt32);
+   begin
+      --  the following assignment has NO EFFECT if flow is controlled by
+      --  peripheral. The hardware resets it to 16#FFFF#, see RM0090 10.3.15.
+      This_Stream.NDTR.NDT := Data_Count;
+
+      if This_Stream.CR.DIR = True then --  Memory_To_Peripheral
+         This_Stream.MAR := W (Source);
+         This_Stream.PAR  := W (Destination);
+      else
+         This_Stream.PAR  := W (Source);
+         This_Stream.MAR := W (Destination);
+      end if;
+   end Configure_Data_Flow;
+
+   --------------------
+   -- Start_Transfer --
+   --------------------
+
+   procedure Start_Transfer
+     (This        : DMA_Controller;
+      Stream      : DMA_Stream_Selector;
+      Source      : Address;
+      Destination : Address;
+      Data_Count  : UInt16)
+   is
+   begin
+      Disable (This, Stream);  --  per the RM, eg section 10.5.6 for the NDTR
+
+      Configure_Data_Flow
+        (This,
+         Stream,
+         Source      => Source,
+         Destination => Destination,
+         Data_Count  => Data_Count);
+
+      Enable (This, Stream);
+   end Start_Transfer;
+
    ---------------------------
    -- Set_Interrupt_Enabler --
    ---------------------------
@@ -190,19 +262,6 @@ package body STM32.DMA is
    end Enable_Interrupt;
 
    -----------------------
-   -- Disable_Interrupt --
-   -----------------------
-
-   procedure Disable_Interrupt
-     (This   : DMA_Controller;
-      Stream : DMA_Stream_Selector;
-      Source : DMA_Interrupt)
-   is
-   begin
-      Set_Interrupt_Enabler (Get_Stream (This, Stream), Source, False);
-   end Disable_Interrupt;
-
-   -----------------------
    -- Interrupt_Enabled --
    -----------------------
 
@@ -233,29 +292,18 @@ package body STM32.DMA is
       return Result;
    end Interrupt_Enabled;
 
-   --------------------
-   -- Start_Transfer --
-   --------------------
+   -----------------------
+   -- Disable_Interrupt --
+   -----------------------
 
-   procedure Start_Transfer
-     (This        : DMA_Controller;
-      Stream      : DMA_Stream_Selector;
-      Source      : Address;
-      Destination : Address;
-      Data_Count  : UInt16)
+   procedure Disable_Interrupt
+     (This   : DMA_Controller;
+      Stream : DMA_Stream_Selector;
+      Source : DMA_Interrupt)
    is
    begin
-      Disable (This, Stream);  --  per the RM, eg section 10.5.6 for the NDTR
-
-      Configure_Data_Flow
-        (This,
-         Stream,
-         Source      => Source,
-         Destination => Destination,
-         Data_Count => Data_Count);
-
-      Enable (This, Stream);
-   end Start_Transfer;
+      Set_Interrupt_Enabler (Get_Stream (This, Stream), Source, False);
+   end Disable_Interrupt;
 
    ------------------------------------
    -- Start_Transfer_with_Interrupts --
@@ -287,34 +335,6 @@ package body STM32.DMA is
 
       Enable (This, Stream);
    end Start_Transfer_with_Interrupts;
-
-   -------------------------
-   -- Configure_Data_Flow --
-   -------------------------
-
-   procedure Configure_Data_Flow
-     (This        : DMA_Controller;
-      Stream      : DMA_Stream_Selector;
-      Source      : Address;
-      Destination : Address;
-      Data_Count  : UInt16)
-   is
-      This_Stream : DMA_Stream renames Get_Stream (This, Stream);
-      function W is new Ada.Unchecked_Conversion
-        (Address, UInt32);
-   begin
-      --  the following assignment has NO EFFECT if flow is controlled by
-      --  peripheral. The hardware resets it to 16#FFFF#, see RM0090 10.3.15.
-      This_Stream.NDTR.NDT := Data_Count;
-
-      if This_Stream.CR.DIR = True then --  Memory_To_Peripheral
-         This_Stream.MAR := W (Source);
-         This_Stream.PAR  := W (Destination);
-      else
-         This_Stream.PAR  := W (Source);
-         This_Stream.MAR := W (Destination);
-      end if;
-   end Configure_Data_Flow;
 
    --------------------
    -- Abort_Transfer --
@@ -387,6 +407,104 @@ package body STM32.DMA is
          Clear_Status (This, Stream, Half_Transfer_Complete_Indicated);
       end if;
    end Poll_For_Completion;
+
+   ------------
+   -- Status --
+   ------------
+
+   function Status
+     (This    : DMA_Controller;
+      Stream  : DMA_Stream_Selector;
+      Flag    : DMA_Status_Flag)
+      return Boolean
+   is
+   begin
+      case Stream is
+         when Stream_1 =>
+            case Flag is
+               when Transfer_Error_Indicated =>
+                  return This.ISR.TEIF1;
+               when Half_Transfer_Complete_Indicated =>
+                  return This.ISR.HTIF1;
+               when Transfer_Complete_Indicated =>
+                  return This.ISR.TCIF1;
+               when Global_Event_Indicated =>
+                  return This.ISR.GIF1;
+            end case;
+
+         when Stream_2 =>
+            case Flag is
+               when Transfer_Error_Indicated =>
+                  return This.ISR.TEIF2;
+               when Half_Transfer_Complete_Indicated =>
+                  return This.ISR.HTIF2;
+               when Transfer_Complete_Indicated =>
+                  return This.ISR.TCIF2;
+               when Global_Event_Indicated =>
+                  return This.ISR.GIF2;
+            end case;
+
+         when Stream_3 =>
+            case Flag is
+               when Transfer_Error_Indicated =>
+                  return This.ISR.TEIF3;
+               when Half_Transfer_Complete_Indicated =>
+                  return This.ISR.HTIF3;
+               when Transfer_Complete_Indicated =>
+                  return This.ISR.TCIF3;
+               when Global_Event_Indicated =>
+                  return This.ISR.GIF3;
+            end case;
+
+         when Stream_4 =>
+            case Flag is
+               when Transfer_Error_Indicated =>
+                  return This.ISR.TEIF4;
+               when Half_Transfer_Complete_Indicated =>
+                  return This.ISR.HTIF4;
+               when Transfer_Complete_Indicated =>
+                  return This.ISR.TCIF4;
+               when Global_Event_Indicated =>
+                  return This.ISR.GIF4;
+            end case;
+
+         when Stream_5 =>
+            case Flag is
+               when Transfer_Error_Indicated =>
+                  return This.ISR.TEIF5;
+               when Half_Transfer_Complete_Indicated =>
+                  return This.ISR.HTIF5;
+               when Transfer_Complete_Indicated =>
+                  return This.ISR.TCIF5;
+               when Global_Event_Indicated =>
+                  return This.ISR.GIF5;
+            end case;
+
+         when Stream_6 =>
+            case Flag is
+               when Transfer_Error_Indicated =>
+                  return This.ISR.TEIF6;
+               when Half_Transfer_Complete_Indicated =>
+                  return This.ISR.HTIF6;
+               when Transfer_Complete_Indicated =>
+                  return This.ISR.TCIF6;
+               when Global_Event_Indicated =>
+                  return This.ISR.GIF6;
+            end case;
+
+         when Stream_7 =>
+            case Flag is
+               when Transfer_Error_Indicated =>
+                  return This.ISR.TEIF7;
+               when Half_Transfer_Complete_Indicated =>
+                  return This.ISR.HTIF7;
+               when Transfer_Complete_Indicated =>
+                  return This.ISR.TCIF7;
+               when Global_Event_Indicated =>
+                  return This.ISR.GIF7;
+            end case;
+      end case;
+   end Status;
 
    ------------------
    -- Clear_Status --
@@ -497,130 +615,26 @@ package body STM32.DMA is
       case Stream is
          when Stream_1 =>
             This.IFCR.CGIF1 := True;
-
          when Stream_2 =>
             This.IFCR.CGIF2 := True;
-
          when Stream_3 =>
             This.IFCR.CGIF3 := True;
-
          when Stream_4 =>
             This.IFCR.CGIF4 := True;
-
          when Stream_5 =>
             This.IFCR.CGIF5 := True;
-
          when Stream_6 =>
             This.IFCR.CGIF6 := True;
-
          when Stream_7 =>
             This.IFCR.CGIF7 := True;
       end case;
    end Clear_All_Status;
 
-   ------------
-   -- Status --
-   ------------
+   ----------------------
+   -- Set_Items_Number --
+   ----------------------
 
-   function Status
-     (This    : DMA_Controller;
-      Stream  : DMA_Stream_Selector;
-      Flag    : DMA_Status_Flag)
-      return Boolean
-   is
-   begin
-      case Stream is
-         when Stream_1 =>
-            case Flag is
-               when Transfer_Error_Indicated =>
-                  return This.ISR.TEIF1;
-               when Half_Transfer_Complete_Indicated =>
-                  return This.ISR.HTIF1;
-               when Transfer_Complete_Indicated =>
-                  return This.ISR.TCIF1;
-               when Global_Event_Indicated =>
-                  return This.ISR.GIF1;
-            end case;
-
-         when Stream_2 =>
-            case Flag is
-               when Transfer_Error_Indicated =>
-                  return This.ISR.TEIF2;
-               when Half_Transfer_Complete_Indicated =>
-                  return This.ISR.HTIF2;
-               when Transfer_Complete_Indicated =>
-                  return This.ISR.TCIF2;
-               when Global_Event_Indicated =>
-                  return This.ISR.GIF2;
-            end case;
-
-         when Stream_3 =>
-            case Flag is
-               when Transfer_Error_Indicated =>
-                  return This.ISR.TEIF3;
-               when Half_Transfer_Complete_Indicated =>
-                  return This.ISR.HTIF3;
-               when Transfer_Complete_Indicated =>
-                  return This.ISR.TCIF3;
-               when Global_Event_Indicated =>
-                  return This.ISR.GIF3;
-            end case;
-
-         when Stream_4 =>
-            case Flag is
-               when Transfer_Error_Indicated =>
-                  return This.ISR.TEIF4;
-               when Half_Transfer_Complete_Indicated =>
-                  return This.ISR.HTIF4;
-               when Transfer_Complete_Indicated =>
-                  return This.ISR.TCIF4;
-               when Global_Event_Indicated =>
-                  return This.ISR.GIF4;
-            end case;
-
-         when Stream_5 =>
-            case Flag is
-               when Transfer_Error_Indicated =>
-                  return This.ISR.TEIF5;
-               when Half_Transfer_Complete_Indicated =>
-                  return This.ISR.HTIF5;
-               when Transfer_Complete_Indicated =>
-                  return This.ISR.TCIF5;
-               when Global_Event_Indicated =>
-                  return This.ISR.GIF5;
-            end case;
-
-         when Stream_6 =>
-            case Flag is
-               when Transfer_Error_Indicated =>
-                  return This.ISR.TEIF6;
-               when Half_Transfer_Complete_Indicated =>
-                  return This.ISR.HTIF6;
-               when Transfer_Complete_Indicated =>
-                  return This.ISR.TCIF6;
-               when Global_Event_Indicated =>
-                  return This.ISR.GIF6;
-            end case;
-
-         when Stream_7 =>
-            case Flag is
-               when Transfer_Error_Indicated =>
-                  return This.ISR.TEIF7;
-               when Half_Transfer_Complete_Indicated =>
-                  return This.ISR.HTIF7;
-               when Transfer_Complete_Indicated =>
-                  return This.ISR.TCIF7;
-               when Global_Event_Indicated =>
-                  return This.ISR.GIF7;
-            end case;
-      end case;
-   end Status;
-
-   -----------------
-   -- Set_Counter --
-   -----------------
-
-   procedure Set_NDT
+   procedure Set_Items_Number
      (This       : DMA_Controller;
       Stream     : DMA_Stream_Selector;
       Data_Count : UInt16)
@@ -628,14 +642,18 @@ package body STM32.DMA is
       This_Stream : DMA_Stream renames Get_Stream (This, Stream);
    begin
       This_Stream.NDTR.NDT := Data_Count;
-   end Set_NDT;
+   end Set_Items_Number;
+
+   -----------------------
+   -- Items_Transferred --
+   -----------------------
 
    function Items_Transferred
      (This   : DMA_Controller;
       Stream : DMA_Stream_Selector)
       return UInt16
    is
-      ndt : constant UInt16 := Current_NDT (This, Stream);
+      ndt : constant UInt16 := Current_Items_Number (This, Stream);
       items : UInt16;
    begin
       if Operating_Mode (This, Stream) = Peripheral_Flow_Control_Mode then
@@ -646,7 +664,11 @@ package body STM32.DMA is
       return items;
    end Items_Transferred;
 
-   function Current_NDT
+   --------------------------
+   -- Current_Items_Number --
+   --------------------------
+
+   function Current_Items_Number
      (This   : DMA_Controller;
       Stream : DMA_Stream_Selector)
       return UInt16
@@ -654,7 +676,7 @@ package body STM32.DMA is
       This_Stream : DMA_Stream renames Get_Stream (This, Stream);
    begin
       return This_Stream.NDTR.NDT;
-   end Current_NDT;
+   end Current_Items_Number;
 
    -------------------
    -- Circular_Mode --
@@ -668,6 +690,93 @@ package body STM32.DMA is
    begin
       return Get_Stream (This, Stream).CR.CIRC;
    end Circular_Mode;
+
+   ------------------------
+   -- Transfer_Direction --
+   ------------------------
+
+   function Transfer_Direction
+     (This : DMA_Controller;  Stream : DMA_Stream_Selector)
+      return DMA_Data_Transfer_Direction
+   is
+   begin
+      if Get_Stream (This, Stream).CR.MEM2MEM then
+         return Memory_To_Memory;
+      elsif Get_Stream (This, Stream).CR.DIR then
+         return Memory_To_Peripheral;
+      end if;
+      return Peripheral_To_Memory;
+   end Transfer_Direction;
+
+   ---------------------------
+   -- Peripheral_Data_Width --
+   ---------------------------
+
+   function Peripheral_Data_Width
+     (This : DMA_Controller;  Stream : DMA_Stream_Selector)
+      return DMA_Data_Transfer_Widths
+   is
+   begin
+      return DMA_Data_Transfer_Widths'Val
+        (Get_Stream (This, Stream).CR.PSIZE);
+   end Peripheral_Data_Width;
+
+   -----------------------
+   -- Memory_Data_Width --
+   -----------------------
+
+   function Memory_Data_Width
+     (This : DMA_Controller;  Stream : DMA_Stream_Selector)
+      return DMA_Data_Transfer_Widths
+   is
+   begin
+      return DMA_Data_Transfer_Widths'Val
+        (Get_Stream (This, Stream).CR.MSIZE);
+   end Memory_Data_Width;
+
+   ----------------------
+   -- Selected_Channel --
+   ----------------------
+
+   function Selected_Channel
+     (This : DMA_Controller;  Stream : DMA_Stream_Selector)
+      return DMA_Channel_Selector
+   is
+   begin
+      if Get_Stream (This, Stream).CR.EN = True then
+         return DMA_Channel_Selector'Val (DMA_Stream_Selector'Pos (Stream));
+      end if;
+      return Channel_0;
+   end Selected_Channel;
+
+   --------------------
+   -- Operating_Mode --
+   --------------------
+
+   function Operating_Mode
+     (This : DMA_Controller;  Stream : DMA_Stream_Selector)
+      return DMA_Mode
+   is
+   begin
+      if Get_Stream (This, Stream).CR.PINC then
+         return Peripheral_Flow_Control_Mode;
+      elsif Get_Stream (This, Stream).CR.CIRC then
+         return Circular_Mode;
+      end if;
+      return Normal_Mode;
+   end Operating_Mode;
+
+   --------------
+   -- Priority --
+   --------------
+
+   function Priority
+     (This : DMA_Controller;  Stream : DMA_Stream_Selector)
+      return DMA_Priority_Level
+   is
+   begin
+      return DMA_Priority_Level'Val (Get_Stream (This, Stream).CR.PL);
+   end Priority;
 
    ---------------
    -- Configure --
@@ -718,113 +827,6 @@ package body STM32.DMA is
       end case;
 
    end Configure;
-
-   -----------
-   -- Reset --
-   -----------
-
-   procedure Reset
-     (This   : in out DMA_Controller;
-      Stream : DMA_Stream_Selector)
-   is
-      This_Stream : DMA_Stream renames Get_Stream (This, Stream);
-   begin
-      Disable (This, Stream);
-
-      This_Stream.CR := (others => <>);
-      This_Stream.NDTR.NDT := 0;
-      This_Stream.PAR := 0;
-      This_Stream.MAR := 0;
-
-      Clear_All_Status (This, Stream);
-   end Reset;
-
-   ---------------------------
-   -- Peripheral_Data_Width --
-   ---------------------------
-
-   function Peripheral_Data_Width
-     (This : DMA_Controller;  Stream : DMA_Stream_Selector)
-      return DMA_Data_Transfer_Widths
-   is
-   begin
-      return DMA_Data_Transfer_Widths'Val
-        (Get_Stream (This, Stream).CR.PSIZE);
-   end Peripheral_Data_Width;
-
-   -----------------------
-   -- Memory_Data_Width --
-   -----------------------
-
-   function Memory_Data_Width
-     (This : DMA_Controller;  Stream : DMA_Stream_Selector)
-      return DMA_Data_Transfer_Widths
-   is
-   begin
-      return DMA_Data_Transfer_Widths'Val
-        (Get_Stream (This, Stream).CR.MSIZE);
-   end Memory_Data_Width;
-
-   ------------------------
-   -- Transfer_Direction --
-   ------------------------
-
-   function Transfer_Direction
-     (This : DMA_Controller;  Stream : DMA_Stream_Selector)
-      return DMA_Data_Transfer_Direction
-   is
-   begin
-      if Get_Stream (This, Stream).CR.MEM2MEM then
-         return Memory_To_Memory;
-      elsif Get_Stream (This, Stream).CR.DIR then
-         return Memory_To_Peripheral;
-      end if;
-      return Peripheral_To_Memory;
-   end Transfer_Direction;
-
-   --------------------
-   -- Operating_Mode --
-   --------------------
-
-   function Operating_Mode
-     (This : DMA_Controller;  Stream : DMA_Stream_Selector)
-      return DMA_Mode
-   is
-   begin
-      if Get_Stream (This, Stream).CR.PINC then
-         return Peripheral_Flow_Control_Mode;
-      elsif Get_Stream (This, Stream).CR.CIRC then
-         return Circular_Mode;
-      end if;
-      return Normal_Mode;
-   end Operating_Mode;
-
-   --------------
-   -- Priority --
-   --------------
-
-   function Priority
-     (This : DMA_Controller;  Stream : DMA_Stream_Selector)
-      return DMA_Priority_Level
-   is
-   begin
-      return DMA_Priority_Level'Val (Get_Stream (This, Stream).CR.PL);
-   end Priority;
-
-   ----------------------
-   -- Selected_Channel --
-   ----------------------
-
-   function Selected_Channel
-     (This : DMA_Controller;  Stream : DMA_Stream_Selector)
-      return DMA_Channel_Selector
-   is
-   begin
-      if Get_Stream (This, Stream).CR.EN = True then
-         return DMA_Channel_Selector'Val (DMA_Stream_Selector'Pos (Stream));
-      end if;
-      return Channel_0;
-   end Selected_Channel;
 
    -------------
    -- Aligned --
