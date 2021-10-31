@@ -258,13 +258,6 @@ package body STM32.SPI is
    function CRC_Enabled (This : SPI_Port) return Boolean is
       (This.Periph.CR1.CRCEN);
 
-   ----------------------------
-   -- Channel_Side_Indicated --
-   ----------------------------
-
-   function Channel_Side_Indicated (This : SPI_Port) return Boolean is
-     (This.Periph.SR.CHSIDE);
-
    ------------------------
    -- Underrun_Indicated --
    ------------------------

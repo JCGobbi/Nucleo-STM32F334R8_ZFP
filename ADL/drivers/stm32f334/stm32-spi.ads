@@ -145,9 +145,6 @@ package STM32.SPI is
    function Busy (This : SPI_Port) return Boolean
      with Inline;
 
-   function Channel_Side_Indicated (This : SPI_Port) return Boolean
-     with Inline;
-
    function Underrun_Indicated (This : SPI_Port) return Boolean
      with Inline;
 
