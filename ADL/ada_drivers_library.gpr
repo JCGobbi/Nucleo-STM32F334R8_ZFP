@@ -230,13 +230,13 @@ library project Ada_Drivers_Library is
    Max_Mount_Name_Length          := "128";               -- From user input
 
    --  Project source directories
-   Src_Dirs_Root := ".";
+   Src_Dirs_Root := "./";
    for Source_Dirs use (
-    Src_Dirs_Root & "/devices",
-    Src_Dirs_Root & "/system",
-    Src_Dirs_Root & "/drivers",
-    Src_Dirs_Root & "/hal/",
-    Src_Dirs_Root & "/svd",
-    Src_Dirs_Root & "/src");
+     Src_Dirs_Root & "devices",
+     Src_Dirs_Root & "system",
+     Src_Dirs_Root & "drivers",
+     Src_Dirs_Root & "hal/",
+     Src_Dirs_Root & "svd",
+     Src_Dirs_Root & "src");
 
 end Ada_Drivers_Library;
