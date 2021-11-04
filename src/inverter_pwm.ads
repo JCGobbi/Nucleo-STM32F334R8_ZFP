@@ -59,12 +59,12 @@ package Inverter_PWM is
 
    subtype Deadtime_Range is Float range 0.0 .. 400.0e-9;
    --  Maximum deadtime permissible is 126 us.
-   --  Maximum deadtime chosen is 1% of the PWM_Frequency_Hz = 0.01/25_000.
+   --  Maximum deadtime chosen is 1% of the PWM_Frequency_Hz = 0.01/25000.
    PWM_Deadtime : constant Deadtime_Range := 166.7e-9;
    --  The delay exists in the rising edges.
    --  It depends on the electronic circuit rise and fall times.
-   --  166.7e-9 * 30 kHz * 100 = 0.5% of the total period,
-   --  0.5% of 2800 ticks = 14 ticks.
+   --  For 60 Hz => 166.7e-9 * 30 kHz * 100 = 0.5% of the total period,
+   --  0.5% of 4800 ticks = 24 ticks.
 
    subtype Sine_Step_Range is Natural range 1 .. 250;
    --  Number of steps for the half sine table.
