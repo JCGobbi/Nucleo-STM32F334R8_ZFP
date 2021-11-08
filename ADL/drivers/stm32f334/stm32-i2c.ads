@@ -34,6 +34,7 @@
 
 private with STM32_SVD.I2C;
 with HAL.I2C;
+with STM32.GPIO; use STM32.GPIO;
 
 package STM32.I2C is
 
@@ -80,6 +81,13 @@ package STM32.I2C is
           Post => Is_Configured (This);
 
    function Is_Configured (Port : I2C_Port) return Boolean;
+
+   procedure Setup_I2C_Master (Port           : in out I2C_Port'Class;
+                               SDA, SCL       : GPIO_Point;
+                               SDA_AF, SCL_AF : GPIO_Alternate_Function;
+                               Clock_Speed    : UInt32);
+   --  GPIO : Alternate function, High speed, open drain, floating
+   --  I2C  : 7bit address, stretching enabled, general call disabled
 
    overriding
    procedure Master_Transmit

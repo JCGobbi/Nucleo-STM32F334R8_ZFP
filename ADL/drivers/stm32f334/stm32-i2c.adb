@@ -29,6 +29,7 @@
 --                                                                          --
 ------------------------------------------------------------------------------
 
+with STM32.Device;
 with SYS.Real_Time; use SYS.Real_Time;
 
 with STM32_SVD.I2C; use STM32_SVD.I2C;
@@ -158,6 +159,56 @@ package body STM32.I2C is
    begin
       return Port.State /= Reset;
    end Is_Configured;
+
+   ----------------------
+   -- Setup_I2C_Master --
+   ----------------------
+
+   procedure Setup_I2C_Master (Port           : in out I2C_Port'Class;
+                               SDA, SCL       : GPIO_Point;
+                               SDA_AF, SCL_AF : GPIO_Alternate_Function;
+                               Clock_Speed    : UInt32)
+   is
+      use STM32.Device;
+      I2C_Conf : I2C_Configuration;
+   begin
+      if Port_Enabled (Port) then
+         return;
+      end if;
+
+      --  GPIO --
+      Enable_Clock (SDA & SCL);
+
+      Configure_IO (SDA,
+                    (Mode           => Mode_AF,
+                     AF             => SDA_AF,
+                     AF_Speed       => Speed_High,
+                     AF_Output_Type => Open_Drain,
+                     Resistors      => Floating));
+      Configure_IO (SCL,
+                    (Mode           => Mode_AF,
+                     AF             => SCL_AF,
+                     AF_Speed       => Speed_High,
+                     AF_Output_Type => Open_Drain,
+                     Resistors      => Floating));
+      Lock (SDA & SCL);
+
+      -- I2C --
+
+      Enable_Clock (Port);
+      Delay_Until (Clock + Milliseconds (200));
+      Reset (Port);
+
+      I2C_Conf.Own_Address := 16#00#;
+      I2C_Conf.Addressing_Mode := Addressing_Mode_7bit;
+      I2C_Conf.General_Call_Enabled := False;
+      I2C_Conf.Clock_Stretching_Enabled := True;
+
+      I2C_Conf.Clock_Speed := Clock_Speed;
+      I2C_Conf.Enable_DMA  := True;
+
+      Port.Configure (I2C_Conf);
+   end Setup_I2C_Master;
 
    ---------------------
    -- Config_Transfer --
