@@ -41,7 +41,7 @@ begin
    Initialize_Timers;
 
    --  Set TIM1 clock source to 144 MHz
-   Device.Set_Clock_Source (PWM_Timer, Device.PLLCLK);
+   Device.Write_Clock_Source (PWM_Timer, Device.PLLCLK);
 
    --  Initialize GPIO ports
    Initialize_GPIO;

@@ -81,7 +81,7 @@ package body Startup is
       --  Wait_Until_V_Battery;
 
       --  Set PWM generator (TIM1) clock source to 144 MHz
-      Device.Set_Clock_Source (PWM_Timer, Device.PLLCLK);
+      Device.Write_Clock_Source (PWM_Timer, Device.PLLCLK);
 
       --  Disable PWM gate drivers because some gate drivers enable with
       --  low level.

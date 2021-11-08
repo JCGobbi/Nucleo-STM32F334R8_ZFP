@@ -42,9 +42,7 @@
 --  This file provides declarations for devices on the STM32F334x8 MCUs
 --  manufactured by ST Microelectronics.  For example, an STM32F334R8.
 
-with System;         use System;
-
-with STM32_SVD.RCC;  use STM32_SVD;
+with STM32_SVD;      use STM32_SVD;
 --  with STM32_SVD.SYSCFG; --  Enable for COMP and OPAMP
 
 with STM32.GPIO;     use STM32.GPIO;
@@ -57,7 +55,7 @@ with STM32.ADC;      use STM32.ADC;
 --  with STM32.I2C;      use STM32.I2C;
 --  with STM32.RTC;      use STM32.RTC;
 with STM32.Timers;   use STM32.Timers;
-with STM32.HRTimers; use STM32.HRTimers;
+--  with STM32.HRTimers; use STM32.HRTimers;
 --  with STM32.OPAMP;    use STM32.OPAMP;
 --  with STM32.COMP;     use STM32.COMP;
 
@@ -253,6 +251,29 @@ package STM32.Device is
 
    procedure Reset_All_ADC_Units;
 
+   type ADC_Prescaler_Enum is
+     (DIV_1,  DIV_2,  DIV_4,  DIV_6,  DIV_8,   DIV_10,
+      DIV_12, DIV_16, DIV_32, DIV_64, DIV_128, DIV_256)
+     with Size => 4;
+
+   type ADC_Prescaler is record
+      Enabled : Boolean := False;
+      Value   : ADC_Prescaler_Enum := ADC_Prescaler_Enum'First;
+   end record with Size => 5;
+
+   for ADC_Prescaler use record
+      Enabled at 0 range 4 .. 4;
+      Value   at 0 range 0 .. 3;
+   end record;
+
+   procedure Write_Clock_Source
+     (This      : Analog_To_Digital_Converter;
+      Prescaler : ADC_Prescaler);
+   --  Example to create a variable:
+   --  AHB_PRE  : ADC_Prescaler := (Enabled => True, Value => DIV2);
+   --  To disable (and use AHB) use:
+   --  AHB_PRE  : ADC_Prescaler := (Enabled => False, Value => DIV2);
+
    ---------
    -- DAC --
    ---------
@@ -314,6 +335,16 @@ package STM32.Device is
 
    --  procedure Reset (This : aliased USART);
 
+   --  type USART_Clock_Source is (PCLK, SYSCLK, LSE, HSI);
+   --
+   --  procedure Write_Clock_Source
+   --    (This   : USART;
+   --     Source : USART_Clock_Source)
+   --    with Post => Read_Clock_Source (This) = Source;
+   --  --  Set the clock for USART1.
+   --
+   --  function Read_Clock_Source (This : USART) return USART_Clock_Source;
+
    ---------
    -- I2C --
    ---------
@@ -334,6 +365,20 @@ package STM32.Device is
 
    --  procedure Reset (This : I2C_Port'Class);
    --  procedure Reset (This : I2C_Port_Id);
+
+   --  type I2C_Clock_Source is (HSI, SYSCLK);
+   --
+   --  procedure Write_Clock_Source (This   : I2C_Port'Class;
+   --                                Source : I2C_Clock_Source);
+   --
+   --  procedure Write_Clock_Source (This   : I2C_Port_Id;
+   --                                Source : I2C_Clock_Source);
+   --  --  Set I2C Clock Mux source.
+   --
+   --  function Read_Clock_Source (This : I2C_Port'Class) return I2C_Clock_Source;
+   --
+   --  function Read_Clock_Source (This : I2C_Port_Id) return I2C_Clock_Source;
+   --  --  Return I2C Clock Mux source.
 
    ---------
    -- SPI --
@@ -378,8 +423,6 @@ package STM32.Device is
    -- Timer --
    -----------
 
-   type Timer_Clock_Source is (PCLK2, PLLCLK);
-
    Timer_1  : aliased Timer with Import, Volatile, Address => TIM1_Base;
    Timer_2  : aliased Timer with Import, Volatile, Address => TIM2_Base;
    Timer_3  : aliased Timer with Import, Volatile, Address => TIM3_Base;
@@ -393,14 +436,15 @@ package STM32.Device is
 
    procedure Reset (This : Timer);
 
-   procedure Set_Clock_Source
+   type Timer_Clock_Source is (PCLK2, PLLCLK);
+
+   procedure Write_Clock_Source
      (This   : Timer;
       Source : Timer_Clock_Source)
-     with pre => (if This'Address = TIM1_Base then
-                    STM32_SVD.RCC.RCC_Periph.CR.PLLON = True and
-                    STM32_SVD.RCC.RCC_Periph.CFGR.HPRE < 2#1000# and
-                    STM32_SVD.RCC.RCC_Periph.CFGR.PPRE.Arr (2) < 2#100#);
-   --  Set the clock for TIM1 to PLLCLK = 144 MHz or PCLK2 = 72 MHz.
+     with Post => Read_Clock_Source (This) = Source;
+   --  Set the clock for TIM1 to 2 x PLLCLK or PCLK2.
+
+   function Read_Clock_Source (This : Timer) return Timer_Clock_Source;
 
    function Get_Clock_Frequency (This : Timer) return UInt32;
    --  Returns the timer input frequency in Hz.
@@ -409,41 +453,41 @@ package STM32.Device is
    -- HRTimer --
    -------------
 
-   HRTimer_M : aliased HRTimer_Master
-     with Import, Volatile, Address => HRTIM_Master_Base;
-
-   HRTimer_A : aliased HRTimer_Channel
-     with Import, Volatile, Address => HRTIM_TIMA_Base;
-   HRTimer_B : aliased HRTimer_Channel
-     with Import, Volatile, Address => HRTIM_TIMB_Base;
-   HRTimer_C : aliased HRTimer_Channel
-     with Import, Volatile, Address => HRTIM_TIMC_Base;
-   HRTimer_D : aliased HRTimer_Channel
-     with Import, Volatile, Address => HRTIM_TIMD_Base;
-   HRTimer_E : aliased HRTimer_Channel
-     with Import, Volatile, Address => HRTIM_TIME_Base;
-
-   procedure Enable_Clock (This : HRTimer_Master);
-
-   procedure Enable_Clock (This : HRTimer_Channel);
-
-   procedure Reset (This : HRTimer_Master);
-
-   procedure Reset (This : HRTimer_Channel);
-
-   procedure Set_Clock_Source
-     (This   : HRTimer_Master;
-      Source : Timer_Clock_Source)
-     with pre => (if This'Address = HRTIM_Master_Base then
-                    STM32_SVD.RCC.RCC_Periph.CR.PLLON = True and
-                    STM32_SVD.RCC.RCC_Periph.CFGR.PPRE.Arr (2) <= 2#100#);
-   --  Set the clock for HRTIM1 to PLLCLK = 144 MHz or PCLK2 = 72 MHz.
-
-   function Get_Clock_Frequency (This : HRTimer_Master) return UInt32;
-   --  Returns the timer input frequency in Hz.
-
-   function Get_Clock_Frequency (This : HRTimer_Channel) return UInt32;
-   --  Returns the HRTIM1 input frequency in Hz.
+   --  HRTimer_M : aliased HRTimer_Master
+   --    with Import, Volatile, Address => HRTIM_Master_Base;
+   --
+   --  HRTimer_A : aliased HRTimer_Channel
+   --    with Import, Volatile, Address => HRTIM_TIMA_Base;
+   --  HRTimer_B : aliased HRTimer_Channel
+   --    with Import, Volatile, Address => HRTIM_TIMB_Base;
+   --  HRTimer_C : aliased HRTimer_Channel
+   --    with Import, Volatile, Address => HRTIM_TIMC_Base;
+   --  HRTimer_D : aliased HRTimer_Channel
+   --    with Import, Volatile, Address => HRTIM_TIMD_Base;
+   --  HRTimer_E : aliased HRTimer_Channel
+   --    with Import, Volatile, Address => HRTIM_TIME_Base;
+   --
+   --  procedure Enable_Clock (This : HRTimer_Master);
+   --
+   --  procedure Enable_Clock (This : HRTimer_Channel);
+   --
+   --  procedure Reset (This : HRTimer_Master);
+   --
+   --  procedure Reset (This : HRTimer_Channel);
+   --
+   --  procedure Write_Clock_Source
+   --    (This   : HRTimer_Master;
+   --     Source : Timer_Clock_Source)
+   --    with Post => Read_Clock_Source (This) = Source;
+   --  --  Set the clock for HRTIM1 to 2 x PLLCLK or PCLK2.
+   --
+   --  function Read_Clock_Source (This : HRTimer_Master) return Timer_Clock_Source;
+   --
+   --  function Get_Clock_Frequency (This : HRTimer_Master) return UInt32;
+   --  --  Returns the timer input frequency in Hz.
+   --
+   --  function Get_Clock_Frequency (This : HRTimer_Channel) return UInt32;
+   --  --  Returns the HRTIM1 input frequency in Hz.
 
    ----------------
    -- Comparator --
