@@ -98,7 +98,7 @@ package STM32.GPIO is
 
    for Pin_Output_Types use (Push_Pull => 0, Open_Drain => 1);
 
-   type Pin_Output_Speeds is (Speed_2MHz, Speed_25MHz, Speed_50MHz, Speed_100MHz)
+   type Pin_Output_Speeds is (Speed_2MHz,  Speed_25MHz, Speed_50MHz, Speed_100MHz)
      with Size => 2;
 
    for Pin_Output_Speeds use
