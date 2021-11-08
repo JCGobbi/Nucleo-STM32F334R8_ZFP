@@ -484,17 +484,6 @@ package STM32.Device is
       I2CCLK    : UInt32;
    end record;
 
-   type PLL_Source is
-     (PLL_SRC_HSI,
-      PLL_SRC_HSE)
-     with Size => 1;
-
-   type SYSCLK_Source is
-     (SYSCLK_SRC_HSI,
-      SYSCLK_SRC_HSE,
-      SYSCLK_SRC_PLL)
-     with Size => 2;
-
    function System_Clock_Frequencies return RCC_System_Clocks;
    --  Returns each RCC system clock frequency in Hz.
 

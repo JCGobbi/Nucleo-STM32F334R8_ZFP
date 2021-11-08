@@ -29,18 +29,24 @@
 --                                                                          --
 ------------------------------------------------------------------------------
 
-with ADL_Config;
-
 with STM32_SVD.RCC; use STM32_SVD.RCC;
 with STM32_SVD.CRC; use STM32_SVD.CRC;
 
+with STM32.RCC;     use STM32.RCC;
+
 package body STM32.Device is
 
-   HSE_VALUE : constant := ADL_Config.High_Speed_External_Clock;
+   HSE_VALUE : constant := 8_000_000;
    --  External oscillator in Hz
+
+   --  LSE_VALUE : constant := 32_768;
+   --  Low-Speed external oscillator in Hz
 
    HSI_VALUE : constant := 8_000_000;
    --  Internal oscillator in Hz
+
+   --  LSI_VALUE : constant := 40_000;
+   --  Low-Speed internal oscillator in Hz
 
    HPRE_Presc_Table : constant array (UInt4) of UInt32 :=
      (1, 1, 1, 1, 1, 1, 1, 1, 2, 4, 8, 16, 64, 128, 256, 512);
