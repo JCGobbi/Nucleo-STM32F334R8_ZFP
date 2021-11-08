@@ -180,12 +180,13 @@ package body SYS.CPU_Clock is
       if Activate_PLL then
          --  Disable the main PLL before configuring it
          RCC_Periph.CR.PLLON := False;
+         loop
+            exit when not RCC_Periph.CR.PLLRDY;
+         end loop;
 
          --  Configure the PLL clock source, multiplication and division
          --  factors
-         RCC_Periph.CFGR2 :=
-           (PREDIV => PREDIV,
-            others => <>);
+         RCC_Periph.CFGR2.PREDIV := PREDIV;
 
          RCC_Periph.CFGR :=
            (PLLMUL => PLLMUL,
@@ -224,26 +225,23 @@ package body SYS.CPU_Clock is
                       Arr      => (1 => To_APB (APB1_PRE),
                                    2 => To_APB (APB2_PRE))),
          --  Microcontroller clock output
-         MCO      => MCO_Clock_Selection'Enum_Rep (MCOSEL_HSI),
-         MCOPRE   => MCO_Prescaler'Enum_Rep (MCOPRE_DIV1),
+         MCO      => MCOSEL_HSI'Enum_Rep,
+         MCOPRE   => MCOPRE_DIV1'Enum_Rep,
          others   => <>);
 
       --  Test system clock switch status
       case SW is
          when SYSCLK_SRC_PLL =>
             loop
-               exit when RCC_Periph.CFGR.SWS =
-                 SYSCLK_Source'Enum_Rep (SYSCLK_SRC_PLL);
+               exit when RCC_Periph.CFGR.SWS = SYSCLK_SRC_PLL'Enum_Rep;
             end loop;
          when SYSCLK_SRC_HSE =>
             loop
-               exit when RCC_Periph.CFGR.SWS =
-                 SYSCLK_Source'Enum_Rep (SYSCLK_SRC_HSE);
+               exit when RCC_Periph.CFGR.SWS = SYSCLK_SRC_HSE'Enum_Rep;
             end loop;
          when SYSCLK_SRC_HSI =>
             loop
-               exit when RCC_Periph.CFGR.SWS =
-                 SYSCLK_Source'Enum_Rep (SYSCLK_SRC_HSI);
+               exit when RCC_Periph.CFGR.SWS = SYSCLK_SRC_HSI'Enum_Rep;
             end loop;
       end case;
 
