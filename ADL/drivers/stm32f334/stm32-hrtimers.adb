@@ -1,4 +1,4 @@
-
+with Ada.Unchecked_Conversion;
 with STM32.Device;
 
 package body STM32.HRTimers is
@@ -57,17 +57,25 @@ package body STM32.HRTimers is
       return False;
    end Enabled;
 
+   function UInt32_To_MCR is new Ada.Unchecked_Conversion
+     (UInt32, STM32_SVD.HRTIM.MCR_Register);
+   function MCR_To_UInt32 is new Ada.Unchecked_Conversion
+     (STM32_SVD.HRTIM.MCR_Register, UInt32);
+
    ------------
    -- Enable --
    ------------
 
    procedure Enable (Counters : HRTimer_List) is
-      Value : UInt6 := 2#000000#;
+      Value : UInt32 := 16#00000000#;
+      MCR_Value : UInt32 := MCR_To_UInt32 (HRTIM_Master_Periph.MCR);
    begin
       for Counter of Counters loop
-         Value := Value or Counter'Enum_Rep;
+         Value := Value or UInt32 (Counter'Enum_Rep);
       end loop;
-      Counter_Enable_Field.TxCEN := Counter_Enable_Field.TxCEN or Value;
+
+      MCR_Value := MCR_Value or Shift_Left (Value, 16);
+      HRTIM_Master_Periph.MCR := UInt32_To_MCR (MCR_Value);
    end Enable;
 
    -------------
@@ -75,7 +83,8 @@ package body STM32.HRTimers is
    -------------
 
    procedure Disable (Counters : HRTimer_List) is
-      Value : UInt6 := 2#111111#;
+      Value : UInt32 := 16#00000000#;
+      MCR_Value : UInt32 := MCR_To_UInt32 (HRTIM_Master_Periph.MCR);
    begin
       for Counter of Counters loop
          case Counter is
@@ -84,7 +93,7 @@ package body STM32.HRTimers is
                if not (HRTimer_Common_Periph.OENR.TA1OEN or
                          HRTimer_Common_Periph.OENR.TA2OEN)
                then
-                  Value := Value and not Counter'Enum_Rep;
+                  Value := Value or UInt32 (Counter'Enum_Rep);
                end if;
 
             when HRTimer_B =>
@@ -92,7 +101,7 @@ package body STM32.HRTimers is
                if not (HRTimer_Common_Periph.OENR.TB1OEN or
                          HRTimer_Common_Periph.OENR.TB2OEN)
                then
-                  Value := Value and not Counter'Enum_Rep;
+                  Value := Value or UInt32 (Counter'Enum_Rep);
                end if;
 
             when HRTimer_C =>
@@ -100,7 +109,7 @@ package body STM32.HRTimers is
                if not (HRTimer_Common_Periph.OENR.TC1OEN or
                          HRTimer_Common_Periph.OENR.TC2OEN)
                then
-                  Value := Value and not Counter'Enum_Rep;
+                  Value := Value or UInt32 (Counter'Enum_Rep);
                end if;
 
             when HRTimer_D =>
@@ -108,7 +117,7 @@ package body STM32.HRTimers is
                if not (HRTimer_Common_Periph.OENR.TD1OEN or
                          HRTimer_Common_Periph.OENR.TD2OEN)
                then
-                  Value := Value and not Counter'Enum_Rep;
+                  Value := Value or UInt32 (Counter'Enum_Rep);
                end if;
 
             when HRTimer_E =>
@@ -116,7 +125,7 @@ package body STM32.HRTimers is
                if not (HRTimer_Common_Periph.OENR.TE1OEN or
                          HRTimer_Common_Periph.OENR.TE2OEN)
                then
-                  Value := Value and not Counter'Enum_Rep;
+                  Value := Value or UInt32 (Counter'Enum_Rep);
                end if;
 
             when HRTimer_M => -- Master
@@ -132,12 +141,13 @@ package body STM32.HRTimers is
                  not (HRTimer_Common_Periph.OENR.TE1OEN or
                  HRTimer_Common_Periph.OENR.TE2OEN)
                then
-                  Value := Value and not Counter'Enum_Rep;
+                  Value := Value or UInt32 (Counter'Enum_Rep);
                end if;
          end case;
       end loop;
 
-      Counter_Enable_Field.TxCEN := Counter_Enable_Field.TxCEN and Value;
+      MCR_Value := MCR_Value and not Shift_Left (Value, 16);
+      HRTIM_Master_Periph.MCR := UInt32_To_MCR (MCR_Value);
    end Disable;
 
    ------------------------
@@ -2244,31 +2254,6 @@ package body STM32.HRTimers is
       end case;
    end Set_Register_Update;
 
-   -------------------------
-   -- Set_Register_Update --
-   -------------------------
-
-   procedure Set_Register_Update
-     (Counters : HRTimer_List;
-      Update   : HRTimer_Register_Update)
-   is
-      Value : UInt6 := 2#000000#;
-   begin
-      for Counter of Counters loop
-         Value := Value or Counter'Enum_Rep;
-      end loop;
-      case Update is
-         when Imediate =>
-            Counter_Update_Reset_Field.TxSWU := Value;
-         when Enable =>
-            Counter_Update_Reset_Field.TxRST :=
-              Counter_Update_Reset_Field.TxRST or Value;
-         when Disable =>
-            Counter_Update_Reset_Field.TxRST :=
-              Counter_Update_Reset_Field.TxRST and not Value;
-      end case;
-   end Set_Register_Update;
-
    ---------------------------
    -- Enable_Software_Reset --
    ---------------------------
@@ -2291,6 +2276,43 @@ package body STM32.HRTimers is
       end case;
    end Enable_Software_Reset;
 
+   function UInt32_To_CR1 is new Ada.Unchecked_Conversion
+     (UInt32, STM32_SVD.HRTIM.CR1_Register);
+   function CR1_To_UInt32 is new Ada.Unchecked_Conversion
+     (STM32_SVD.HRTIM.CR1_Register, UInt32);
+   function UInt32_To_CR2 is new Ada.Unchecked_Conversion
+     (UInt32, STM32_SVD.HRTIM.CR2_Register);
+   function CR2_To_UInt32 is new Ada.Unchecked_Conversion
+     (STM32_SVD.HRTIM.CR2_Register, UInt32);
+
+   -------------------------
+   -- Set_Register_Update --
+   -------------------------
+
+   procedure Set_Register_Update
+     (Counters : HRTimer_List;
+      Update   : HRTimer_Register_Update)
+   is
+      Value : UInt32 := 16#00000000#;
+      CR1_Value : UInt32 := CR1_To_UInt32 (HRTimer_Common_Periph.CR1);
+      CR2_Value : UInt32 := CR2_To_UInt32 (HRTimer_Common_Periph.CR2);
+   begin
+      for Counter of Counters loop
+         Value := Value or UInt32 (Counter'Enum_Rep);
+      end loop;
+      case Update is
+         when Imediate =>
+            CR2_Value := CR2_Value or Value;
+            HRTimer_Common_Periph.CR2 := UInt32_To_CR2 (CR2_Value);
+         when Enable =>
+            CR1_Value := CR1_Value or Value;
+            HRTimer_Common_Periph.CR1 := UInt32_To_CR1 (CR1_Value);
+         when Disable =>
+            CR1_Value := CR1_Value and not Value;
+            HRTimer_Common_Periph.CR1 := UInt32_To_CR1 (CR1_Value);
+      end case;
+   end Set_Register_Update;
+
    ---------------------------
    -- Enable_Software_Reset --
    ---------------------------
@@ -2298,13 +2320,15 @@ package body STM32.HRTimers is
    procedure Enable_Software_Reset
      (Counters : HRTimer_List)
    is
-      Value : UInt6 := 2#000000#;
+      Value : UInt32 := 16#00000000#;
+      CR2_Value : UInt32 := CR2_To_UInt32 (HRTimer_Common_Periph.CR2);
    begin
       for Counter of Counters loop
          Value := Value or Counter'Enum_Rep;
       end loop;
 
-      Counter_Update_Reset_Field.TxRST := Value;
+      CR2_Value := CR2_Value or Shift_Left (Value, 8);
+      HRTimer_Common_Periph.CR2 := UInt32_To_CR2 (CR2_Value);
    end Enable_Software_Reset;
 
    ----------------------
