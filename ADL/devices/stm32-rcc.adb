@@ -205,7 +205,7 @@ package body STM32.RCC is
    -- Configure_System_Clock_Mux --
    --------------------------------
 
-   procedure Configure_System_Clock_Mux (Source : SYSCLK_Source)
+   procedure Configure_System_Clock_Mux (Source : SYSCLK_Clock_Source)
    is
    begin
       RCC_Periph.CFGR.SW := Source'Enum_Rep;
@@ -250,7 +250,7 @@ package body STM32.RCC is
    -- Configure_PLL_Source_Mux --
    ------------------------------
 
-   procedure Configure_PLL_Source_Mux (Source : PLL_Source) is
+   procedure Configure_PLL_Source_Mux (Source : PLL_Clock_Source) is
    begin
          RCC_Periph.CFGR.PLLSRC := Source = PLL_SRC_HSE;
    end Configure_PLL_Source_Mux;
@@ -288,7 +288,7 @@ package body STM32.RCC is
    --------------------------------
 
    procedure Configure_MCO_Output_Clock
-     (Source : MCO_Source;
+     (Source : MCO_Clock_Source;
       Value  : MCO_Prescaler;
       Nodiv  : Boolean := False)
    is

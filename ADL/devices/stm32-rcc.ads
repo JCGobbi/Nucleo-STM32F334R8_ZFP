@@ -105,18 +105,18 @@ package STM32.RCC is
    -- System Clock --
    ------------------
 
-   type SYSCLK_Source is
+   type SYSCLK_Clock_Source is
      (SYSCLK_SRC_HSI,
       SYSCLK_SRC_HSE,
       SYSCLK_SRC_PLL)
      with Size => 2;
 
-   for SYSCLK_Source use
+   for SYSCLK_Clock_Source use
      (SYSCLK_SRC_HSI => 2#01#,
       SYSCLK_SRC_HSE => 2#10#,
       SYSCLK_SRC_PLL => 2#11#);
 
-   procedure Configure_System_Clock_Mux (Source : SYSCLK_Source);
+   procedure Configure_System_Clock_Mux (Source : SYSCLK_Clock_Source);
 
    ------------------------
    -- AHB and APB Clocks --
@@ -128,33 +128,33 @@ package STM32.RCC is
      with Size => 3;
 
    type AHB_Prescaler is record
-      Enabled : Boolean := False;
-      Value   : AHB_Prescaler_Enum := AHB_Prescaler_Enum'First;
+      Enable : Boolean := False;
+      Value  : AHB_Prescaler_Enum := AHB_Prescaler_Enum'First;
    end record with Size => 4;
 
    for AHB_Prescaler use record
-      Enabled at 0 range 3 .. 3;
-      Value   at 0 range 0 .. 2;
+      Enable at 0 range 3 .. 3;
+      Value  at 0 range 0 .. 2;
    end record;
 
    procedure Configure_AHB_Clock_Prescaler
      (Value : AHB_Prescaler);
    --  The AHB clock bus is the CPU clock selected by the AHB prescaler.
    --  Example to create a variable:
-   --  AHB_PRE  : AHB_Prescaler := (Enabled => True, Value => DIV2);
+   --  AHB_PRE  : AHB_Prescaler := (Enable => True, Value => DIV2);
 
    type APB_Prescaler_Enum is
      (DIV2,  DIV4,  DIV8,  DIV16)
      with Size => 2;
 
    type APB_Prescaler is record
-      Enabled : Boolean;
-      Value   : APB_Prescaler_Enum := APB_Prescaler_Enum'First;
+      Enable : Boolean;
+      Value  : APB_Prescaler_Enum := APB_Prescaler_Enum'First;
    end record with Size => 3;
 
    for APB_Prescaler use record
-      Enabled at 0 range 2 .. 2;
-      Value   at 0 range 0 .. 1;
+      Enable at 0 range 2 .. 2;
+      Value  at 0 range 0 .. 1;
    end record;
 
    type APB_Clock_Range is (APB_1, APB_2);
@@ -167,22 +167,22 @@ package STM32.RCC is
    --  The APB2 clock bus is the APB2 peripheral clock selected by the APB2
    --  prescaler.
    --  Example to create a variable:
-   --  APB_PRE  : APB_Prescaler := (Enabled => True, Value => DIV2);
+   --  APB_PRE  : APB_Prescaler := (Enable => True, Value => DIV2);
 
    ----------------
    -- PLL Clocks --
    ----------------
 
-   type PLL_Source is
+   type PLL_Clock_Source is
      (PLL_SRC_HSI,
       PLL_SRC_HSE)
      with Size => 2;
 
-   for PLL_Source use
+   for PLL_Clock_Source use
      (PLL_SRC_HSI => 2#10#,
       PLL_SRC_HSE => 2#11#);
 
-   procedure Configure_PLL_Source_Mux (Source : PLL_Source);
+   procedure Configure_PLL_Source_Mux (Source : PLL_Clock_Source);
 
    subtype PREDIV_Range is Integer range 1 .. 16;
    subtype PLLMUL_Range is Integer range 2 .. 16;
@@ -198,7 +198,7 @@ package STM32.RCC is
    -- Output Clocks --
    -------------------
 
-   type MCO_Source is
+   type MCO_Clock_Source is
      (MCOSEL_Disabled,
       MCOSEL_LSI,
       MCOSEL_LSE,
@@ -208,7 +208,7 @@ package STM32.RCC is
       MCOSEL_PLL)
      with Size => 3;
 
-   for MCO_Source use
+   for MCO_Clock_Source use
      (MCOSEL_Disabled => 2#000#,
       MCOSEL_LSI      => 2#010#,
       MCOSEL_LSE      => 2#011#,
@@ -229,7 +229,7 @@ package STM32.RCC is
      with Size => 3;
 
    procedure Configure_MCO_Output_Clock
-     (Source : MCO_Source;
+     (Source : MCO_Clock_Source;
       Value  : MCO_Prescaler;
       Nodiv  : Boolean := False);
    --  Select the source for micro-controller clock output.
