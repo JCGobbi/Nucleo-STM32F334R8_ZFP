@@ -251,28 +251,31 @@ package STM32.Device is
 
    procedure Reset_All_ADC_Units;
 
+   type ADC_Clock_Source is (AHB, PLLCLK);
+
    type ADC_Prescaler_Enum is
      (DIV_1,  DIV_2,  DIV_4,  DIV_6,  DIV_8,   DIV_10,
       DIV_12, DIV_16, DIV_32, DIV_64, DIV_128, DIV_256)
      with Size => 4;
 
    type ADC_Prescaler is record
-      Enabled : Boolean := False;
-      Value   : ADC_Prescaler_Enum := ADC_Prescaler_Enum'First;
+      Enable : Boolean := False;
+      Value  : ADC_Prescaler_Enum := ADC_Prescaler_Enum'First;
    end record with Size => 5;
 
    for ADC_Prescaler use record
-      Enabled at 0 range 4 .. 4;
-      Value   at 0 range 0 .. 3;
+      Enable at 0 range 4 .. 4;
+      Value  at 0 range 0 .. 3;
    end record;
 
-   procedure Write_Clock_Source
+   procedure Select_Clock_Source
      (This      : Analog_To_Digital_Converter;
-      Prescaler : ADC_Prescaler);
+      Source    : ADC_Clock_Source;
+      Prescaler : ADC_Prescaler := (Enable => False, Value => DIV_2));
    --  Example to create a variable:
-   --  AHB_PRE  : ADC_Prescaler := (Enabled => True, Value => DIV2);
+   --  AHB_PRE  : ADC_Prescaler := (Enable => True, Value => DIV2);
    --  To disable (and use AHB) use:
-   --  AHB_PRE  : ADC_Prescaler := (Enabled => False, Value => DIV2);
+   --  AHB_PRE  : ADC_Prescaler := (Enable => False, Value => DIV2);
 
    ---------
    -- DAC --
@@ -336,13 +339,13 @@ package STM32.Device is
    --  procedure Reset (This : aliased USART);
 
    --  type USART_Clock_Source is (PCLK, SYSCLK, LSE, HSI);
-   --
-   --  procedure Write_Clock_Source
+
+   --  procedure Select_Clock_Source
    --    (This   : USART;
    --     Source : USART_Clock_Source)
    --    with Post => Read_Clock_Source (This) = Source;
    --  --  Set the clock for USART1.
-   --
+
    --  function Read_Clock_Source (This : USART) return USART_Clock_Source;
 
    ---------
@@ -351,28 +354,28 @@ package STM32.Device is
 
    --  Internal_I2C_Port_1 : aliased Internal_I2C_Port
    --  with Import, Volatile, Address => I2C_Base;
-
+   --
    --  type I2C_Port_Id is (I2C_Id_1);
-
+   --
    --  I2C_1 : aliased I2C_Port (Internal_I2C_Port_1'Access);
-
+   --
    --  I2C_1_DMA : aliased I2C_Port_DMA (Internal_I2C_Port_1'Access);
-
+   --
    --  function As_Port_Id (Port : I2C_Port'Class) return I2C_Port_Id with Inline;
-
+   --
    --  procedure Enable_Clock (This : aliased I2C_Port'Class);
    --  procedure Enable_Clock (This : I2C_Port_Id);
-
+   --
    --  procedure Reset (This : I2C_Port'Class);
    --  procedure Reset (This : I2C_Port_Id);
 
    --  type I2C_Clock_Source is (HSI, SYSCLK);
    --
-   --  procedure Write_Clock_Source (This   : I2C_Port'Class;
-   --                                Source : I2C_Clock_Source);
+   --  procedure Select_Clock_Source (This   : I2C_Port'Class;
+   --                                 Source : I2C_Clock_Source);
    --
-   --  procedure Write_Clock_Source (This   : I2C_Port_Id;
-   --                                Source : I2C_Clock_Source);
+   --  procedure Select_Clock_Source (This   : I2C_Port_Id;
+   --                                 Source : I2C_Clock_Source);
    --  --  Set I2C Clock Mux source.
    --
    --  function Read_Clock_Source (This : I2C_Port'Class) return I2C_Clock_Source;
@@ -405,7 +408,7 @@ package STM32.Device is
    --  type RTC_Clock_Source is (No_Clock, LSE, LSI, HSE)
    --    with Size => 2;
    --
-   --  procedure Write_Clock_Source
+   --  procedure Select_Clock_Source
    --    (This       : RTC_Device;
    --     Source     : RTC_Clock_Source)
    --    with Post => Source = Read_Clock_Source (This);
@@ -438,7 +441,7 @@ package STM32.Device is
 
    type Timer_Clock_Source is (PCLK2, PLLCLK);
 
-   procedure Write_Clock_Source
+   procedure Select_Clock_Source
      (This   : Timer;
       Source : Timer_Clock_Source)
      with Post => Read_Clock_Source (This) = Source;
@@ -475,7 +478,7 @@ package STM32.Device is
    --
    --  procedure Reset (This : HRTimer_Channel);
    --
-   --  procedure Write_Clock_Source
+   --  procedure Select_Clock_Source
    --    (This   : HRTimer_Master;
    --     Source : Timer_Clock_Source)
    --    with Post => Read_Clock_Source (This) = Source;
