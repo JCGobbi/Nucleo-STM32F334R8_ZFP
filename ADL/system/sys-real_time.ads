@@ -60,6 +60,24 @@ is
    --  the current time exceeds the Alarm_Time by at most half the modulus
    --  of Timer_Interval.
 
+   function "<"  (Left, Right : Time) return Boolean with
+     Global => null;
+   function "<=" (Left, Right : Time) return Boolean with
+     Global => null;
+   function ">"  (Left, Right : Time) return Boolean with
+     Global => null;
+   function ">=" (Left, Right : Time) return Boolean with
+     Global => null;
+
+   function "<"  (Left, Right : Time_Span) return Boolean with
+     Global => null;
+   function "<=" (Left, Right : Time_Span) return Boolean with
+     Global => null;
+   function ">"  (Left, Right : Time_Span) return Boolean with
+     Global => null;
+   function ">=" (Left, Right : Time_Span) return Boolean with
+     Global => null;
+
    function "+" (Left : Time; Right : Time_Span) return Time
      with Global => null;
 
@@ -176,6 +194,11 @@ private
    Time_Span_Unit  : constant Time_Span := 1;
 
    Tick : constant Time_Span := 1;
+
+   pragma Import (Intrinsic, "<");
+   pragma Import (Intrinsic, "<=");
+   pragma Import (Intrinsic, ">");
+   pragma Import (Intrinsic, ">=");
 
    pragma Inline (Clock);
    pragma Inline (Epoch);
