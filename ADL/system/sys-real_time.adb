@@ -6,7 +6,9 @@ with STM32_SVD.SCB;       use STM32_SVD.SCB;
 
 with SYS.Int;
 
-package body SYS.Real_Time is
+package body SYS.Real_Time with
+  SPARK_Mode => Off
+is
    pragma Suppress (Overflow_Check);
    --  This package has careful manual overflow checks, and unsuppresses them
    --  where appropriate. This default enables compilation with checks enabled
