@@ -76,19 +76,19 @@ package STM32.HRTimers is
    --  preload registers.
 
    type HRTimer_Prescaler is
-     (Div_1, --  fHRCK = 32 * fHRTIM
-      Div_2, --  fHRCK = 16 * fHRTIM
-      Div_4, --  fHRCK = 8 * fHRTIM
-      Div_8, --  fHRCK = 4 * fHRTIM
-      Div_16, --  fHRCK = 2 * fHRTIM
-      Div_32, --  fHRCK = fHRTIM
-      Div_64, --  fHRCK = fHRTIM / 2
-      Div_128) --  fHRCK = fHRTIM / 4
+     (Mul_32, --  fHRCK = 32 * fHRTIM
+      Mul_16, --  fHRCK = 16 * fHRTIM
+      Mul_8, --  fHRCK = 8 * fHRTIM
+      Mul_4, --  fHRCK = 4 * fHRTIM
+      Mul_2, --  fHRCK = 2 * fHRTIM
+      Mul_1, --  fHRCK = fHRTIM
+      Div_2, --  fHRCK = fHRTIM / 2
+      Div_4) --  fHRCK = fHRTIM / 4
      with Size => 3;
    --  The fHRCK input clock to the prescaler is equal to 32 x fHRTIM, so when
-   --  the prescaler is Div_32, fHRCK = fHRTIM. For example, with fHRTIM =
-   --  144 MHz, fHRCK = 4.608 GHz with resolution 217 ps. See RM0364 rev 4
-   --  Chapter 21.3.3 "Clocks".
+   --  the prescaler is Div_32, fHRCK = fHRTIM. With fHRTIM = 144 MHz,
+   --  fHRCK = 4.608 GHz with resolution 217 ps. See RM0364 rev 4 Chapter 21.3.3
+   --  "Clocks".
 
    type HRTimer_Prescaler_Array is array (HRTimer_Prescaler) of UInt16;
    HRTimer_Prescaler_Value : HRTimer_Prescaler_Array := (1, 2, 4, 8, 16, 32, 64, 128);
