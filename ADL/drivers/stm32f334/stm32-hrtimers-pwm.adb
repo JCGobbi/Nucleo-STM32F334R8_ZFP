@@ -31,7 +31,7 @@
 
 with STM32.Device;  use STM32.Device;
 
-package body STM32.HRPWM is
+package body STM32.HRTimers.PWM is
 
    procedure Configure_PWM_GPIO
      (Output : GPIO_Point;
@@ -315,4 +315,4 @@ package body STM32.HRPWM is
       end if;
    end Set_Duty_Time;
 
-end STM32.HRPWM;
+end STM32.HRTimers.PWM;
