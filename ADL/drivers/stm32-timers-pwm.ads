@@ -61,9 +61,8 @@
 --     ...
 
 with STM32.GPIO;   use STM32.GPIO;
-with STM32.Timers; use STM32.Timers;
 
-package STM32.PWM is
+package STM32.Timers.PWM is
    pragma Elaborate_Body;
 
    subtype Hertz is UInt32;
@@ -208,4 +207,4 @@ private
       Channel    : Timer_Channel;
    end record;
 
-end STM32.PWM;
+end STM32.Timers.PWM;

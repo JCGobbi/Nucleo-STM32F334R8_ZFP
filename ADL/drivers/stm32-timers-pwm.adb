@@ -31,7 +31,7 @@
 
 with STM32.Device; use STM32.Device;
 
-package body STM32.PWM is
+package body STM32.Timers.PWM is
 
    function Timer_Period (This : PWM_Modulator) return UInt32 is
       (Current_Autoreload (This.Generator.all));
@@ -336,4 +336,4 @@ package body STM32.PWM is
       return Result;
    end Microseconds_Per_Period;
 
-end STM32.PWM;
+end STM32.Timers.PWM;
