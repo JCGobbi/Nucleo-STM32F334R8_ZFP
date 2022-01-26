@@ -67,7 +67,7 @@ __vectors:
         .word __I2C1_ER_handler /* 32 */
         .word __unknown_interrupt_handler /* 33 */
         .word __unknown_interrupt_handler /* 34 */
-        .word __unknown_interrupt_handler /* 35 */
+        .word __SPI1_handler /* 35 */
         .word __unknown_interrupt_handler /* 36 */
         .word __USART1_EXTI25_handler /* 37 */
         .word __USART2_EXTI26_handler /* 38 */
@@ -222,6 +222,8 @@ __vectors:
    .thumb_set __I2C1_EV_EXTI23_handler,__common_int_handler
    .weak      __I2C1_ER_handler
    .thumb_set __I2C1_ER_handler,__common_int_handler
+   .weak      __SPI1_handler
+   .thumb_set __SPI1_handler,__common_int_handler
    .weak      __USART1_EXTI25_handler
    .thumb_set __USART1_EXTI25_handler,__common_int_handler
    .weak      __USART2_EXTI26_handler
