@@ -359,7 +359,7 @@ package STM32.Device is
    --
    --  I2C_1 : aliased I2C_Port (Internal_I2C_Port_1'Access);
    --
-   --  I2C_1_DMA : aliased I2C_Port_DMA (Internal_I2C_Port_1'Access);
+   --  --  I2C_1_DMA : aliased I2C_Port_DMA (Internal_I2C_Port_1'Access);
    --
    --  function As_Port_Id (Port : I2C_Port'Class) return I2C_Port_Id with Inline;
    --
