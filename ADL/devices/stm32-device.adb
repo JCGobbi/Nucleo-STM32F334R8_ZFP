@@ -291,8 +291,9 @@ package body STM32.Device is
    -----------
 
    --  procedure Reset (This : CRC_32) is
+   --     pragma Unreferenced (This);
    --  begin
-   --     This.CR.RESET := True;
+   --     CRC_Periph.CR.RESET := True;
    --  end Reset;
 
    ------------------
