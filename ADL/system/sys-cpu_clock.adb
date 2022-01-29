@@ -158,7 +158,7 @@ package body SYS.CPU_Clock is
 
       else
          --  Configure high-speed external clock, if enabled
-         RCC_Periph.CR.HSEBYP := (if HSE_Bypass then True else False);
+         RCC_Periph.CR.HSEBYP := HSE_Bypass;
          --  Enable security for HSERDY
          RCC_Periph.CR.CSSON := True;
          --  Setup high-speed external clock and wait for HSE stabilisation.
@@ -190,7 +190,7 @@ package body SYS.CPU_Clock is
 
          RCC_Periph.CFGR :=
            (PLLMUL => PLLMUL,
-            PLLSRC => (if HSE_Enabled then True else False),
+            PLLSRC => HSE_Enabled,
             others => <>);
 
          --  Setup PLL and wait for stabilization.
