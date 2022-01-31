@@ -4,8 +4,7 @@ with STM32.Timers; use STM32.Timers;
 package body Inverter_ADC is
 
    function To_Voltage (Value : in UInt16) return Voltage
-   with
-      Inline;
+     with Inline;
 
    procedure Initialize_ADC_Timer;
    --  Initialize the timer to start ADCs convertions.
@@ -224,8 +223,7 @@ package body Inverter_ADC is
 
             --  Save the ADC values into a buffer
             Regular_Samples (Rank) := Conversion_Value (Sensor_ADC.all);
-            if Rank = ADC_Reading'Last
-            then
+            if Rank = ADC_Reading'Last then
                Rank := ADC_Reading'First;
             else
                Rank := ADC_Reading'Succ (Rank);

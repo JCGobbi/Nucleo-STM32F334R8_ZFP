@@ -4,6 +4,7 @@
 package Startup is
 
    procedure Initialize
+     with Pre => not Is_Initialized; --  Initialization can only happen once
    --  Procedure to initialize the board. This procedure must be called before
    --  any other operation. The operations to perform are:
    --    - Hardware initialization
@@ -12,10 +13,6 @@ package Startup is
    --       * Timer
    --    - Initialize the floating point unit
    --    - Signal the flag corresponding to the initialization
-
-     with
-       Pre => not Is_Initialized;
-       --  Initialization can only happen once
 
    procedure Initialize_Inverter;
    --  Initializes peripherals and configures them into a known state.
