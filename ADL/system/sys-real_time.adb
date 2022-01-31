@@ -22,8 +22,6 @@ is
    subtype LLI is Long_Long_Integer;
 
    Max_Pos_Time_Span : constant := UInt64 (Time_Span'Last);
-   pragma Unreferenced (Max_Pos_Time_Span);
-
    Max_Neg_Time_Span : constant := UInt64 (2 ** 63);
    --  Absolute value of Time_Span_Last and Time_Span_First. Used in overflow
    --  checks. Note that we avoid using abs on Time_Span_First everywhere.
@@ -137,6 +135,144 @@ is
    begin
       return Time_Span (LLI (Left) + LLI (Right));
    end "+";
+
+   ---------
+   -- "-" --
+   ---------
+
+   function "-" (Left : Time; Right : Time_Span) return Time is
+   begin
+      --  Overflow checks must be performed by hand assuming that Time and
+      --  Time_Span are 64-bit unsigned and signed integers respectively.
+      --  Otherwise these checks would need an intermediate type with more
+      --  than 64-bit.
+
+      if Right >= 0 and then Left >= Time (Right) then
+         return Time (UInt64 (Left) - UInt64 (Right));
+
+      --  The case of Right = Time_Span'First needs to be treated differently
+      --  because the absolute value of -2 ** 63 is not within the range of
+      --  Time_Span.
+
+      elsif Right = Time_Span'First
+        and then UInt64 (Time_Last) - UInt64 (Left) >= Max_Neg_Time_Span
+      then
+         return Left + Time (Max_Neg_Time_Span);
+
+      elsif Right < 0 and then Right > Time_Span'First
+        and then UInt64 (Time_Last) - UInt64 (Left) >= UInt64 (abs (Right))
+      then
+         return Left + Time (abs (Right));
+
+      else
+         raise Constraint_Error;
+      end if;
+   end "-";
+
+   function "-" (Left, Right : Time) return Time_Span is
+   begin
+      --  Overflow checks must be performed by hand assuming that Time and
+      --  Time_Span are 64-bit unsigned and signed integers respectively.
+      --  Otherwise these checks would need an intermediate type with more
+      --  than 64-bit.
+
+      if Left >= Right
+        and then UInt64 (Left) - UInt64 (Right) <= Max_Pos_Time_Span
+      then
+         return Time_Span (UInt64 (Left) - UInt64 (Right));
+
+      elsif Left < Right
+        and then UInt64 (Right) - UInt64 (Left) <= Max_Neg_Time_Span
+      then
+         return -1 - Time_Span (UInt64 (Right) - UInt64 (Left) - 1);
+
+      else
+         raise Constraint_Error;
+      end if;
+   end "-";
+
+   overriding
+   function "-" (Left, Right : Time_Span) return Time_Span is
+      pragma Unsuppress (Overflow_Check);
+   begin
+      return Time_Span (LLI (Left) - LLI (Right));
+   end "-";
+
+   overriding
+   function "-" (Right : Time_Span) return Time_Span is
+      pragma Unsuppress (Overflow_Check);
+   begin
+      return Time_Span (-LLI (Right));
+   end "-";
+
+   ---------
+   -- "*" --
+   ---------
+
+   function "*" (Left : Time_Span; Right : Integer) return Time_Span is
+      Is_Negative : constant Boolean :=
+        (if Left > 0 then
+            Right < 0
+         elsif Left < 0
+            then Right > 0
+         else
+            False);
+      --  Sign of the result
+
+      Max_Value : constant UInt64 :=
+        (if Is_Negative then
+            Max_Neg_Time_Span
+         else
+            Max_Pos_Time_Span);
+      --  Maximum absolute value that can be returned by the multiplication
+      --  taking into account the sign of the operators.
+
+      Abs_Left : constant UInt64 :=
+        (if Left = Time_Span_First then
+            Max_Neg_Time_Span
+         else
+            UInt64 (abs (Left)));
+      --  Remove sign of left operator
+
+      Abs_Right : constant UInt64 := UInt64 (abs (LLI (Right)));
+      --  Remove sign of right operator
+
+   begin
+      --  Overflow check is performed by hand assuming that Time_Span is a
+      --  64-bit signed integer. Otherwise these checks would need an
+      --  intermediate type with more than 64-bit. The sign of the operators
+      --  is removed to simplify the intermediate computation of the overflow
+      --  check.
+
+      if Abs_Right /= 0 and then Max_Value / Abs_Right < Abs_Left then
+         raise Constraint_Error;
+      else
+         return Left * Time_Span (Right);
+      end if;
+   end "*";
+
+   function "*" (Left : Integer; Right : Time_Span) return Time_Span is
+   begin
+      return Right * Left;
+   end "*";
+
+   ---------
+   -- "/" --
+   ---------
+
+   function "/" (Left, Right : Time_Span) return Integer is
+      pragma Unsuppress (Overflow_Check);
+      pragma Unsuppress (Division_Check);
+   begin
+      return Integer (LLI (Left) / LLI (Right));
+   end "/";
+
+   function "/" (Left : Time_Span; Right : Integer) return Time_Span is
+      pragma Unsuppress (Overflow_Check);
+      pragma Unsuppress (Division_Check);
+   begin
+      return Left / Time_Span (Right);
+   end "/";
 
    -----------------
    -- Nanoseconds --
