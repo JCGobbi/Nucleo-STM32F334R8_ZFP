@@ -1,8 +1,9 @@
-with STM32.Device; use STM32.Device;
-with STM32.GPIO;   use STM32.GPIO;
-with STM32.EXTI;   use STM32.EXTI;
-with STM32.Timers; use STM32.Timers;
-with STM32.ADC;    use STM32.ADC;
+with STM32.Device;  use STM32.Device;
+with STM32.GPIO;    use STM32.GPIO;
+with STM32.EXTI;    use STM32.EXTI;
+with STM32.Timers;  use STM32.Timers;
+with STM32.ADC;     use STM32.ADC;
+with SYS.Real_Time; use SYS.Real_Time;
 
 package STM_Board is
 
@@ -135,6 +136,9 @@ package STM_Board is
 private
 
    Initialized : Boolean := False;
+
+   Debounce_Time : constant Time_Span := Milliseconds (300);
+   Last_Time : Time := Clock;
 
    procedure Button_Handler;
    pragma Export (Asm, Button_Handler, Button_Interrupt);
