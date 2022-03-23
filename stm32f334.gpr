@@ -1,3 +1,7 @@
+--  Add if you want to compile the runtime. You don't need this if you are using
+--  the zfp-cortex-m4f from the Adacore Community compiler.
+with "ADL/runtime/zfp-cortex-m4f/runtime_build.gpr";
+
 with "ADL/ada_drivers_library.gpr";
 
 project STM32F334 is
@@ -10,12 +14,17 @@ project STM32F334 is
 
    -- Executable files to choose:
    -- test_led_pwm.adb, test_led_rt, demo_inverter.adb, main.adb
-   for Main use ("demo_inverter.adb");
+   for Main use ("main.adb");
 
    --  Target architecture
    for Target use "arm-eabi";   
-   -- generic ZFP run-time compatible with our MCU
-   for Runtime ("Ada") use "zfp-cortex-m4f";
+
+   --  Generic ZFP run-time compatible with our MCU:
+   --  Use this if you are using the runtime from the Adacore ARM Community compiler
+   -- for Runtime ("Ada") use "zfp-cortex-m4f";
+
+   -- Use this if you want to compile the runtime
+   for Runtime ("Ada") use Project'Project_Dir & "ADL/runtime/zfp-cortex-m4f";
 
    package Compiler renames Ada_Drivers_Library.Compiler;
    
