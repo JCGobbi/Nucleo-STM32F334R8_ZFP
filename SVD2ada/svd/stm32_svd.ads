@@ -58,11 +58,11 @@ package STM32_SVD is
    HRTIM_TIME_Base : constant System.Address := System'To_Address (16#40017680#);
    HRTIM_Common_Base : constant System.Address := System'To_Address (16#40017780#);
    NVIC_Base : constant System.Address := System'To_Address (16#E000E100#);
+   NVIC_STIR_Base : constant System.Address := System'To_Address (16#E000EF00#);
    FPU_Base : constant System.Address := System'To_Address (16#E000EF34#);
    MPU_Base : constant System.Address := System'To_Address (16#E000ED90#);
    STK_Base : constant System.Address := System'To_Address (16#E000E010#);
    SCB_Base : constant System.Address := System'To_Address (16#E000ED00#);
-   NVIC_STIR_Base : constant System.Address := System'To_Address (16#E000EF00#);
    FPU_CPACR_Base : constant System.Address := System'To_Address (16#E000ED88#);
    SCB_ACTRL_Base : constant System.Address := System'To_Address (16#E000E008#);
 

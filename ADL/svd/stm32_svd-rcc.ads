@@ -562,7 +562,9 @@ package STM32_SVD.RCC is
       --  Read-only. Internal low speed oscillator ready
       LSIRDY        : Boolean := False;
       --  unspecified
-      Reserved_2_23 : HAL.UInt22 := 16#0#;
+      Reserved_2_22 : HAL.UInt21 := 16#0#;
+      --  Reset flag of the 1.8V domain
+      V18PWRRSTF    : Boolean := False;
       --  Remove reset flag
       RMVF          : Boolean := False;
       --  Option byte loader reset flag
@@ -586,7 +588,8 @@ package STM32_SVD.RCC is
    for CSR_Register use record
       LSION         at 0 range 0 .. 0;
       LSIRDY        at 0 range 1 .. 1;
-      Reserved_2_23 at 0 range 2 .. 23;
+      Reserved_2_22 at 0 range 2 .. 22;
+      V18PWRRSTF    at 0 range 23 .. 23;
       RMVF          at 0 range 24 .. 24;
       OBLRSTF       at 0 range 25 .. 25;
       PINRSTF       at 0 range 26 .. 26;

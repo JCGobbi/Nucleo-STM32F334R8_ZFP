@@ -1,5 +1,5 @@
 --
---  Copyright (C) 2021, AdaCore
+--  Copyright (C) 2022, AdaCore
 --
 
 pragma Style_Checks (Off);
@@ -650,6 +650,7 @@ package Interfaces.STM32.RCC is
 
    subtype CSR_LSION_Field is Interfaces.STM32.Bit;
    subtype CSR_LSIRDY_Field is Interfaces.STM32.Bit;
+   subtype CSR_V18PWRRSTF_Field is Interfaces.STM32.Bit;
    subtype CSR_RMVF_Field is Interfaces.STM32.Bit;
    subtype CSR_OBLRSTF_Field is Interfaces.STM32.Bit;
    subtype CSR_PINRSTF_Field is Interfaces.STM32.Bit;
@@ -666,7 +667,9 @@ package Interfaces.STM32.RCC is
       --  Read-only. Internal low speed oscillator ready
       LSIRDY        : CSR_LSIRDY_Field := 16#0#;
       --  unspecified
-      Reserved_2_23 : Interfaces.STM32.UInt22 := 16#0#;
+      Reserved_2_22 : Interfaces.STM32.UInt21 := 16#0#;
+      --  Reset flag of the 1.8V domain
+      V18PWRRSTF    : CSR_V18PWRRSTF_Field := 16#0#;
       --  Remove reset flag
       RMVF          : CSR_RMVF_Field := 16#0#;
       --  Option byte loader reset flag
@@ -690,7 +693,8 @@ package Interfaces.STM32.RCC is
    for CSR_Register use record
       LSION         at 0 range 0 .. 0;
       LSIRDY        at 0 range 1 .. 1;
-      Reserved_2_23 at 0 range 2 .. 23;
+      Reserved_2_22 at 0 range 2 .. 22;
+      V18PWRRSTF    at 0 range 23 .. 23;
       RMVF          at 0 range 24 .. 24;
       OBLRSTF       at 0 range 25 .. 25;
       PINRSTF       at 0 range 26 .. 26;
