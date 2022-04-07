@@ -84,9 +84,9 @@ package STM32.USARTs is
 
    procedure Set_Stop_Bits (This : in out USART;  To : Stop_Bits);
 
-   type Word_Length is (Word_7_Bits, Word_8_Bits, Word_9_Bits);
+   type Word_Lengths is (Word_Length_7, Word_Length_8, Word_Length_9);
 
-   procedure Set_Word_Length (This : in out USART;  To : Word_Length);
+   procedure Set_Word_Length (This : in out USART;  To : Word_Lengths);
 
    type Parities is (No_Parity, Even_Parity, Odd_Parity);
 

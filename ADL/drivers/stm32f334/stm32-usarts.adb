@@ -103,17 +103,17 @@ package body STM32.USARTs is
 
    procedure Set_Word_Length
      (This : in out USART;
-      To : Word_Length)
+      To : Word_Lengths)
    is
    begin
       case To is
-         when Word_8_Bits =>
+         when Word_Length_8 =>
             This.Periph.CR1.M0 := False;
             This.Periph.CR1.M1 := False;
-         when Word_9_Bits =>
+         when Word_Length_9 =>
             This.Periph.CR1.M0 := True;
             This.Periph.CR1.M1 := False;
-         when Word_7_Bits =>
+         when Word_Length_7 =>
             This.Periph.CR1.M0 := False;
             This.Periph.CR1.M1 := True;
       end case;
