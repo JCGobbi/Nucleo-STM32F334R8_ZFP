@@ -58,6 +58,7 @@ with STM32.Timers;   use STM32.Timers;
 --  with STM32.HRTimers; use STM32.HRTimers;
 --  with STM32.OPAMP;    use STM32.OPAMP;
 --  with STM32.COMP;     use STM32.COMP;
+--  with STM32.CAN;      use STM32.CAN;
 
 package STM32.Device is
    pragma Elaborate_Body;
@@ -347,6 +348,15 @@ package STM32.Device is
    --  --  Set the clock for USART1.
 
    --  function Read_Clock_Source (This : USART) return USART_Clock_Source;
+
+   ---------
+   -- CAN --
+   ---------
+
+   --  CAN_1 : aliased CAN_Controller with Volatile, Import, Address => CAN_Base;
+
+   --  procedure Enable_Clock (This : aliased in out CAN_Controller);
+   --  procedure Reset (This : aliased in out CAN_Controller);
 
    ---------
    -- I2C --
