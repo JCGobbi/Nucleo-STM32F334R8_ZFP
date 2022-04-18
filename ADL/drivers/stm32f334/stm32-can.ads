@@ -72,20 +72,37 @@ package STM32.CAN is
    subtype Segment_1_Quanta is Positive range 1 .. 16;
    --  Defines the location of the sample point (number of time quanta).
    --  It includes the PROP_SEG and PHASE_SEG1 of the CAN standard.
-   subtype Segment_2_Quanta is Positive range 1 .. 8 + 2;
+   subtype Segment_2_Quanta is Positive range 1 .. 8;
    --  Defines the location of the sample point (number of time quanta).
    --  It represents the PHASE_SEG2 of the CAN standard.
    subtype Time_Quanta_Prescaler is Positive range 1 .. 1024;
    --  These bits define the length of a time quanta.
 
-   subtype Bit_Time_Quanta is Positive range 8 .. 25;
+   Segment_Sync_Quanta : constant Positive := 1;
+   --  This is the SYNC_SEG segment, the time quanta for syncronism.
+
+   subtype Sample_Point_At is Float range 50.0 .. 90.0;
+   --  The sample point of the start frame (at the end of PHASE_SEG1) is taken
+   --  between 50 to 90% of the Bit Time. The preferred value used by CANopen
+   --  and DeviceNet is 87.5% and 75% for ARINC 825.
+   --  See http://www.bittiming.can-wiki.info/#bxCAN for this calculation.
+
+   Sample_Point : constant Sample_Point_At := 87.5;
+   --  Preferred percentage value for CANopen and DeviceNet.
+
+   subtype Bit_Time_Quanta is Positive range 8 .. 19;
+   --  This is the number of time quanta in one Bit Time.
    --  1 Bit time (= 1/bit rate) is defined by four time segments. The length
-   --  of these time segments in 1 Bit time is:
+   --  of these time segments is:
    --  SYNC_SEG - 1 time quantum long;
    --  PROP_SEG - 1 to 8 time quanta long;
    --  PHASE_SEG1 - 1 to 8 time quanta long;
    --  PHASE_SEG2 - maximum of PHASE_SEG1 and the Information processing time,
    --  that is less then or equal to 2 Time Quanta long.
+   --
+   --  The sample point is taken at 87.5% of Bit_Time_Quanta'Last, and must not
+   --  be grater then SYNC_SEG + PROP_SEG + PHASE_SEG (Segment_Sync_Quanta +
+   --  Segment_1_Quanta) = 17. So the maximum value is 17 / 0.875 = 19.4 ~ 19.
 
    type Bit_Timing_Config is record
       Resynch_Jump_Width : Resynch_Quanta := 1;
@@ -99,14 +116,8 @@ package STM32.CAN is
       Timing_Config : in     Bit_Timing_Config)
      with Pre => Is_Init_Mode (This);
 
-   subtype Bit_Rate is Positive range 1 .. 1000;
+   subtype Bit_Rate is Positive range 10 .. 1_000;
    --  This is the actual bit rate frequency of the CAN bus in kHz.
-
-   subtype Sample_Point_At is Float range 50.0 .. 90.0;
-   --  The sample point of the start frame (at the end of PHASE_SEG1) is taken
-   --  between 50 to 90% of the Bit Time. The preferred value used by CANopen
-   --  and DeviceNet is 87.5% and 75% for ARINC 825.
-   --  See http://www.bittiming.can-wiki.info/#bxCAN for this calculation.
 
    procedure Calculate_Quanta_Prescaler
      (Speed      : in Bit_Rate;

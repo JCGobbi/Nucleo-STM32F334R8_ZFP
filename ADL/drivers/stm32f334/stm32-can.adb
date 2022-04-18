@@ -188,16 +188,15 @@ package body STM32.CAN is
       --  Number of Time Quanta in one Bit Time.
       Time_Quanta_Nr : Positive;
 
-      --  Preferred value for CANopen and DeviceNet.
-      Sample_Point : constant Sample_Point_At := 87.5;
-      --  Time quanta for syncronism
-      Segment_Sync_Quanta : constant Positive := 1;
    begin
       for I in 1 .. Time_Quanta_Prescaler'Last loop
          --  Choose the minimum divisor for the maximum number of Time Quanta.
-         if (Clock_In / (Speed * 1000 * I) < Bit_Time_Quanta'Last) then
-            Bit_Timing.Quanta_Prescaler := I;
-            exit;
+         if (Clock_In / (Speed * 1000 * I) <= Bit_Time_Quanta'Last) then
+            --  We want an integer division.
+            if Clock_In rem (Speed * 1000 * I) = 0 then
+               Bit_Timing.Quanta_Prescaler := I;
+               exit;
+            end if;
          end if;
       end loop;
 
