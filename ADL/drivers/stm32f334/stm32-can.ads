@@ -68,24 +68,27 @@ package STM32.CAN is
    subtype Resynch_Quanta is Positive range 1 .. 4;
    --  These bits define the maximum number of time quanta the CAN hardware is
    --  allowed to lengthen or shorten a bit to perform the resynchronization.
+   --  This is the SJW. The preferred value used for CANopen and DeviceNet is 1.
    subtype Segment_1_Quanta is Positive range 1 .. 16;
    --  Defines the location of the sample point (number of time quanta).
    --  It includes the PROP_SEG and PHASE_SEG1 of the CAN standard.
-   subtype Segment_2_Quanta is Positive range 1 .. 8;
+   subtype Segment_2_Quanta is Positive range 1 .. 8 + 2;
    --  Defines the location of the sample point (number of time quanta).
    --  It represents the PHASE_SEG2 of the CAN standard.
    subtype Time_Quanta_Prescaler is Positive range 1 .. 1024;
    --  These bits define the length of a time quanta.
 
+   subtype Bit_Time_Quanta is Positive range 8 .. 25;
    --  1 Bit time (= 1/bit rate) is defined by four time segments. The length
    --  of these time segments in 1 Bit time is:
    --  SYNC_SEG - 1 time quantum long;
    --  PROP_SEG - 1 to 8 time quanta long;
    --  PHASE_SEG1 - 1 to 8 time quanta long;
-   --  PHASE_SEG2 - maximum of PHASE_SEG1 and the Information processing time.
+   --  PHASE_SEG2 - maximum of PHASE_SEG1 and the Information processing time,
+   --  that is less then or equal to 2 Time Quanta long.
 
    type Bit_Timing_Config is record
-      Resynch_Jump_Width : Resynch_Quanta;
+      Resynch_Jump_Width : Resynch_Quanta := 1;
       Time_Segment_1     : Segment_1_Quanta;
       Time_Segment_2     : Segment_2_Quanta;
       Quanta_Prescaler   : Time_Quanta_Prescaler;
@@ -99,9 +102,17 @@ package STM32.CAN is
    subtype Bit_Rate is Positive range 1 .. 1000;
    --  This is the actual bit rate frequency of the CAN bus in kHz.
 
+   subtype Sample_Point_At is Float range 50.0 .. 90.0;
+   --  The sample point of the start frame (at the end of PHASE_SEG1) is taken
+   --  between 50 to 90% of the Bit Time. The preferred value used by CANopen
+   --  and DeviceNet is 87.5% and 75% for ARINC 825.
+   --  See http://www.bittiming.can-wiki.info/#bxCAN for this calculation.
+
    procedure Calculate_Quanta_Prescaler
      (Speed      : in Bit_Rate;
       Bit_Timing : in out Bit_Timing_Config);
+   --  Automatically calculate bit timings based on requested bit rate and
+   --  sample ratio.
    --  1 nominal Bit Time is defined by the time length in quanta of four time
    --  segments: SINC_SEG, PROP_SEG, PHASE_SEG1 and PHASE_SEG2. The Baud Rate
    --  is the inverse of 1 nominal Bit Time. The prescaler is calculated to get

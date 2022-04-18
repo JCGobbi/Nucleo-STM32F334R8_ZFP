@@ -161,8 +161,6 @@ package body STM32.CAN is
       Timing_Config : in     Bit_Timing_Config)
    is
    begin
-      --  TODO: Automatically calc this based on requested bit rate and
-      --        sample ratio.
       This.BTR :=
          (BRP            => UInt10 (Timing_Config.Quanta_Prescaler - 1),
           Reserved_10_15 => 0,
@@ -187,12 +185,33 @@ package body STM32.CAN is
       Clock_In : constant Integer :=
         Integer (STM32.Device.System_Clock_Frequencies.PCLK1);
 
-      --  The Bit time is defined by the length of the four time segments, so
-      --  it is useful to choose its lengths for an exact division.
-      Divisor : constant Integer :=
-        Speed * (1 + Bit_Timing.Time_Segment_1 + Bit_Timing.Time_Segment_2);
+      --  Number of Time Quanta in one Bit Time.
+      Time_Quanta_Nr : Positive;
+
+      --  Preferred value for CANopen and DeviceNet.
+      Sample_Point : constant Sample_Point_At := 87.5;
+      --  Time quanta for syncronism
+      Segment_Sync_Quanta : constant Positive := 1;
    begin
-      Bit_Timing.Quanta_Prescaler := Clock_In / Divisor;
+      for I in 1 .. Time_Quanta_Prescaler'Last loop
+         --  Choose the minimum divisor for the maximum number of Time Quanta.
+         if (Clock_In / (Speed * 1000 * I) < Bit_Time_Quanta'Last) then
+            Bit_Timing.Quanta_Prescaler := I;
+            exit;
+         end if;
+      end loop;
+
+      Time_Quanta_Nr := Clock_In / (Speed * 1000 * Bit_Timing.Quanta_Prescaler);
+
+      pragma Assert
+        (Time_Quanta_Nr < Bit_Time_Quanta'First,
+           "CAN clock frequency too low for this bit rate.");
+
+      Bit_Timing.Time_Segment_1 :=
+        Integer (Float (Time_Quanta_Nr) * Sample_Point) - Segment_Sync_Quanta;
+      Bit_Timing.Time_Segment_2 :=
+        Time_Quanta_Nr - Segment_Sync_Quanta - Bit_Timing.Time_Segment_1;
+
    end Calculate_Quanta_Prescaler;
 
    ------------------------
