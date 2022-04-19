@@ -81,7 +81,7 @@ package STM32.CAN is
    Segment_Sync_Quanta : constant Positive := 1;
    --  This is the SYNC_SEG segment, the time quanta for syncronism.
 
-   subtype Sample_Point_At is Float range 50.0 .. 90.0;
+   subtype Sample_Point_Range is Float range 50.0 .. 90.0;
    --  The sample point of the start frame (at the end of PHASE_SEG1) is taken
    --  between 50 to 90% of the Bit Time. The preferred value used by CANopen
    --  and DeviceNet is 87.5% and 75% for ARINC 825.
@@ -89,7 +89,7 @@ package STM32.CAN is
 
    type CAN_Protocol is (CANopen, DeviceNet, Arinc_825);
 
-   type Sample_Point_Array is array (CAN_Protocol) of Sample_Point_At;
+   type Sample_Point_Array is array (CAN_Protocol) of Sample_Point_Range;
 
    Sample_Point : Sample_Point_Array := (87.5, 87.5, 75.0);
    --  Preferred percentage values for CANopen, DeviceNet and ARINC 825.
@@ -110,6 +110,26 @@ package STM32.CAN is
    --  PHASE_SEG (Segment_Sync_Quanta + Segment_1_Quanta) = 17. So the maximum
    --  value for Bit_Time_Quanta is 17 / 0.875 = 19.4 ~ 19.
 
+   subtype Bit_Rate_Range is Positive range 10 .. 1_000;
+   --  This is the actual bit rate frequency of the CAN bus in kHz.
+   --  The standard frequencies are 10, 20, 50, 83.333, 100, 125, 250, 500, 800
+   --  and 1000 kHz.
+
+   type Bit_Rate_Select is
+     (Rate_1000,
+      Rate_800,
+      Rate_500,
+      Rate_250,
+      Rate_125,
+      Rate_100,
+      Rate_83,
+      Rate_50,
+      Rate_20,
+      Rate_10);
+
+   type Bit_Rate_Array is array (Bit_Rate_Select) of Bit_Rate_Range;
+   Bit_Rate : Bit_Rate_Array := (1_000, 800, 500, 250, 125, 100, 83, 50, 20, 10);
+
    type Bit_Timing_Config is record
       Resynch_Jump_Width : Resynch_Quanta := 1;
       Time_Segment_1     : Segment_1_Quanta;
@@ -117,11 +137,8 @@ package STM32.CAN is
       Quanta_Prescaler   : Time_Quanta_Prescaler;
    end record;
 
-   subtype Bit_Rate is Positive range 10 .. 1_000;
-   --  This is the actual bit rate frequency of the CAN bus in kHz.
-
    procedure Calculate_Quanta_Prescaler
-     (Speed      : in Bit_Rate;
+     (Speed      : in Bit_Rate_Select;
       Protocol   : in CAN_Protocol;
       Bit_Timing : in out Bit_Timing_Config);
    --  Automatically calculate bit timings based on requested bit rate and

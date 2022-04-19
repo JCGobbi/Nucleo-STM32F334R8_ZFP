@@ -157,7 +157,7 @@ package body STM32.CAN is
    --------------------------------
 
    procedure Calculate_Quanta_Prescaler
-     (Speed      : in Bit_Rate;
+     (Speed      : in Bit_Rate_Select;
       Protocol   : in CAN_Protocol;
       Bit_Timing : in out Bit_Timing_Config)
    is
@@ -171,16 +171,30 @@ package body STM32.CAN is
    begin
       for I in 1 .. Time_Quanta_Prescaler'Last loop
          --  Choose the minimum divisor for the maximum number of Time Quanta.
-         if (Clock_In / (Speed * 1000 * I) <= Bit_Time_Quanta'Last) then
-            --  We want an integer division.
-            if Clock_In rem (Speed * 1000 * I) = 0 then
-               Bit_Timing.Quanta_Prescaler := I;
-               exit;
-            end if;
-         end if;
+         case Speed is
+            when Rate_83 =>
+               --  Bit rate 83.333 is calculated with the fraction 250/3 = 83.333,
+               --  so the value Clock_In / (Bit_Rate (Speed) * 1000 * I) turns to
+               --  Clock_In * 3 / (250_000 * I).
+               if ((Clock_In * 3) / (250_000 * I) <= Bit_Time_Quanta'Last) then
+                  --  We want an integer division.
+                  if (Clock_In * 3) rem (250_000 * I) = 0 then
+                     Bit_Timing.Quanta_Prescaler := I;
+                     Time_Quanta_Nr := Clock_In * 3 / (250_000 * Bit_Timing.Quanta_Prescaler);
+                     exit;
+                  end if;
+               end if;
+            when others =>
+               if (Clock_In / (Bit_Rate (Speed) * 1_000 * I) <= Bit_Time_Quanta'Last) then
+                  --  We want an integer division.
+                  if Clock_In rem (Bit_Rate (Speed) * 1000 * I) = 0 then
+                     Bit_Timing.Quanta_Prescaler := I;
+                     Time_Quanta_Nr := Clock_In / (Bit_Rate (Speed) * 1000 * Bit_Timing.Quanta_Prescaler);
+                     exit;
+                  end if;
+               end if;
+         end case;
       end loop;
-
-      Time_Quanta_Nr := Clock_In / (Speed * 1000 * Bit_Timing.Quanta_Prescaler);
 
       pragma Assert
         (Time_Quanta_Nr < Bit_Time_Quanta'First,
