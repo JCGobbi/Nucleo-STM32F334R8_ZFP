@@ -87,22 +87,28 @@ package STM32.CAN is
    --  and DeviceNet is 87.5% and 75% for ARINC 825.
    --  See http://www.bittiming.can-wiki.info/#bxCAN for this calculation.
 
-   Sample_Point : constant Sample_Point_At := 87.5;
-   --  Preferred percentage value for CANopen and DeviceNet.
+   type CAN_Protocol is (CANopen, DeviceNet, Arinc_825);
+
+   type Sample_Point_Array is array (CAN_Protocol) of Sample_Point_At;
+
+   Sample_Point : Sample_Point_Array := (87.5, 87.5, 75.0);
+   --  Preferred percentage values for CANopen, DeviceNet and ARINC 825.
 
    subtype Bit_Time_Quanta is Positive range 8 .. 19;
-   --  This is the number of time quanta in one Bit Time.
-   --  1 Bit time (= 1/bit rate) is defined by four time segments. The length
-   --  of these time segments is:
+   --  This is the number of time quanta in one Bit Time. So for a 1 MHz bit
+   --  rate and the minimum Bit_Time_Quanta = 8, the minimum prescaler input
+   --  frequency is 8 MHz.
+   --  1 Bit time (= 1/bit rate) is defined by four time segments:
    --  SYNC_SEG - 1 time quantum long;
    --  PROP_SEG - 1 to 8 time quanta long;
    --  PHASE_SEG1 - 1 to 8 time quanta long;
    --  PHASE_SEG2 - maximum of PHASE_SEG1 and the Information processing time,
    --  that is less then or equal to 2 Time Quanta long.
    --
-   --  The sample point is taken at 87.5% of Bit_Time_Quanta'Last, and must not
-   --  be grater then SYNC_SEG + PROP_SEG + PHASE_SEG (Segment_Sync_Quanta +
-   --  Segment_1_Quanta) = 17. So the maximum value is 17 / 0.875 = 19.4 ~ 19.
+   --  The sample point of start frame is taken at 87.5% maximum of
+   --  Bit_Time_Quanta'Last, and must not be grater then SYNC_SEG + PROP_SEG +
+   --  PHASE_SEG (Segment_Sync_Quanta + Segment_1_Quanta) = 17. So the maximum
+   --  value for Bit_Time_Quanta is 17 / 0.875 = 19.4 ~ 19.
 
    type Bit_Timing_Config is record
       Resynch_Jump_Width : Resynch_Quanta := 1;
@@ -111,16 +117,12 @@ package STM32.CAN is
       Quanta_Prescaler   : Time_Quanta_Prescaler;
    end record;
 
-   procedure Configure_Bit_Timing
-     (This          : in out CAN_Controller;
-      Timing_Config : in     Bit_Timing_Config)
-     with Pre => Is_Init_Mode (This);
-
    subtype Bit_Rate is Positive range 10 .. 1_000;
    --  This is the actual bit rate frequency of the CAN bus in kHz.
 
    procedure Calculate_Quanta_Prescaler
      (Speed      : in Bit_Rate;
+      Protocol   : in CAN_Protocol;
       Bit_Timing : in out Bit_Timing_Config);
    --  Automatically calculate bit timings based on requested bit rate and
    --  sample ratio.
@@ -131,6 +133,11 @@ package STM32.CAN is
    --  peripheral by the baud rate (to get the Bit frequency) and divide this
    --  value by the number of quanta in one nominal Bit time (to get the quanta
    --  frequency). See RM0364 rev. 4 chapter 30.7.7 Bit timing.
+
+   procedure Configure_Bit_Timing
+     (This          : in out CAN_Controller;
+      Timing_Config : in     Bit_Timing_Config)
+     with Pre => Is_Init_Mode (This);
 
    type Operating_Mode is
      (Normal,

@@ -152,33 +152,13 @@ package body STM32.CAN is
       Set_Sleep_Mode (This, False);
    end Wakeup;
 
-   --------------------------
-   -- Configure_Bit_Timing --
-   --------------------------
-
-   procedure Configure_Bit_Timing
-     (This          : in out CAN_Controller;
-      Timing_Config : in     Bit_Timing_Config)
-   is
-   begin
-      This.BTR :=
-         (BRP            => UInt10 (Timing_Config.Quanta_Prescaler - 1),
-          Reserved_10_15 => 0,
-          TS1            => UInt4 (Timing_Config.Time_Segment_1 - 1),
-          TS2            => UInt3 (Timing_Config.Time_Segment_2 - 1),
-          Reserved_23_23 => 0,
-          SJW            => UInt2 (Timing_Config.Resynch_Jump_Width - 1),
-          Reserved_26_29 => 0,
-          LBKM           => This.BTR.LBKM,
-          SILM           => This.BTR.SILM);
-   end Configure_Bit_Timing;
-
    --------------------------------
    -- Calculate_Quanta_Prescaler --
    --------------------------------
 
    procedure Calculate_Quanta_Prescaler
      (Speed      : in Bit_Rate;
+      Protocol   : in CAN_Protocol;
       Bit_Timing : in out Bit_Timing_Config)
    is
       --  The CAN clock frequency comes from APB1 peripheral clock (PCLK1).
@@ -207,11 +187,33 @@ package body STM32.CAN is
            "CAN clock frequency too low for this bit rate.");
 
       Bit_Timing.Time_Segment_1 :=
-        Integer (Float (Time_Quanta_Nr) * Sample_Point) - Segment_Sync_Quanta;
+        Integer (Float (Time_Quanta_Nr) * Sample_Point (Protocol)) - Segment_Sync_Quanta;
+      --  Casting a float to integer rounds it to the near integer.
       Bit_Timing.Time_Segment_2 :=
         Time_Quanta_Nr - Segment_Sync_Quanta - Bit_Timing.Time_Segment_1;
 
    end Calculate_Quanta_Prescaler;
+
+   --------------------------
+   -- Configure_Bit_Timing --
+   --------------------------
+
+   procedure Configure_Bit_Timing
+     (This          : in out CAN_Controller;
+      Timing_Config : in     Bit_Timing_Config)
+   is
+   begin
+      This.BTR :=
+         (BRP            => UInt10 (Timing_Config.Quanta_Prescaler - 1),
+          Reserved_10_15 => 0,
+          TS1            => UInt4 (Timing_Config.Time_Segment_1 - 1),
+          TS2            => UInt3 (Timing_Config.Time_Segment_2 - 1),
+          Reserved_23_23 => 0,
+          SJW            => UInt2 (Timing_Config.Resynch_Jump_Width - 1),
+          Reserved_26_29 => 0,
+          LBKM           => This.BTR.LBKM,
+          SILM           => This.BTR.SILM);
+   end Configure_Bit_Timing;
 
    ------------------------
    -- Set_Operating_Mode --
