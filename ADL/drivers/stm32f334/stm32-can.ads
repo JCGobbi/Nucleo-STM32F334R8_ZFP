@@ -116,13 +116,13 @@ package STM32.CAN is
    --  and 1000 kHz.
 
    type Bit_Rate_Select is
-     (Rate_1000,
+     (Rate_1000, --  1 MHz
       Rate_800,
       Rate_500,
-      Rate_250,
+      Rate_250, --  250 kHz
       Rate_125,
       Rate_100,
-      Rate_83,
+      Rate_83, --  83.333 kHz
       Rate_50,
       Rate_20,
       Rate_10);
@@ -137,19 +137,20 @@ package STM32.CAN is
       Quanta_Prescaler   : Time_Quanta_Prescaler;
    end record;
 
-   procedure Calculate_Quanta_Prescaler
+   procedure Calculate_Bit_Timing
      (Speed      : in Bit_Rate_Select;
       Protocol   : in CAN_Protocol;
       Bit_Timing : in out Bit_Timing_Config);
    --  Automatically calculate bit timings based on requested bit rate and
    --  sample ratio.
    --  1 nominal Bit Time is defined by the time length in quanta of four time
-   --  segments: SINC_SEG, PROP_SEG, PHASE_SEG1 and PHASE_SEG2. The Baud Rate
-   --  is the inverse of 1 nominal Bit Time. The prescaler is calculated to get
-   --  the time of one quanta, so we divide the bus frequency of the CAN
-   --  peripheral by the baud rate (to get the Bit frequency) and divide this
-   --  value by the number of quanta in one nominal Bit time (to get the quanta
-   --  frequency). See RM0364 rev. 4 chapter 30.7.7 Bit timing.
+   --  segments, each one composed of 1 or more quanta: SINC_SEG, PROP_SEG,
+   --  PHASE_SEG1 and PHASE_SEG2.
+   --  The Baud Rate (the Bit frequency) is the inverse of 1 nominal Bit Time.
+   --  The prescaler is calculated to get the time of one quanta, so we divide
+   --  the bus frequency of the CAN peripheral by the baud rate and divide this
+   --  value by the number of quanta in one nominal Bit time.
+   --  See RM0364 rev. 4 chapter 30.7.7 Bit timing.
 
    procedure Configure_Bit_Timing
      (This          : in out CAN_Controller;

@@ -152,11 +152,11 @@ package body STM32.CAN is
       Set_Sleep_Mode (This, False);
    end Wakeup;
 
-   --------------------------------
-   -- Calculate_Quanta_Prescaler --
-   --------------------------------
+   --------------------------
+   -- Calculate_Bit_Timing --
+   --------------------------
 
-   procedure Calculate_Quanta_Prescaler
+   procedure Calculate_Bit_Timing
      (Speed      : in Bit_Rate_Select;
       Protocol   : in CAN_Protocol;
       Bit_Timing : in out Bit_Timing_Config)
@@ -206,7 +206,7 @@ package body STM32.CAN is
       Bit_Timing.Time_Segment_2 :=
         Time_Quanta_Nr - Segment_Sync_Quanta - Bit_Timing.Time_Segment_1;
 
-   end Calculate_Quanta_Prescaler;
+   end Calculate_Bit_Timing;
 
    --------------------------
    -- Configure_Bit_Timing --
