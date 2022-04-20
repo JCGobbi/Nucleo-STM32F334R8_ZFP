@@ -6,7 +6,7 @@ pragma Restrictions (No_Elaboration_Code);
 
 with System;
 
-with SYS.CPU_Clock; use SYS;
+with SYS.CPU_Clock;
 
 package SYS.Real_Time with
   SPARK_Mode,
