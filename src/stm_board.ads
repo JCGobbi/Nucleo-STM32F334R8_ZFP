@@ -3,7 +3,7 @@ with STM32.GPIO;    use STM32.GPIO;
 with STM32.EXTI;    use STM32.EXTI;
 with STM32.Timers;  use STM32.Timers;
 with STM32.ADC;     use STM32.ADC;
-with SYS.Real_Time; use SYS.Real_Time;
+with Sys.Real_Time; use Sys.Real_Time;
 
 package STM_Board is
 

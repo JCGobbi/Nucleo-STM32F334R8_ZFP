@@ -1,6 +1,6 @@
 --  Root package fot the system drivers of the STM32F334 MCU
 
-package SYS is
+package Sys is
    pragma Pure;
 
-end SYS;
+end Sys;

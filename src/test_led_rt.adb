@@ -1,7 +1,7 @@
 pragma Restrictions (No_Task_Hierarchy);
 
-with SYS.CPU_Clock; use SYS;
-with SYS.Real_Time; use SYS.Real_Time;
+with Sys.CPU_Clock; use Sys.CPU_Clock;
+with Sys.Real_Time; use Sys.Real_Time;
 with STM_Board;     use STM_Board;
 
 procedure Test_LED_RT is
@@ -9,8 +9,8 @@ begin
 
    --  Configure the CPU clock
    --  Change from HSI clock (8 MHz) to HSE + PLL (72 MHz)
-   CPU_Clock.Reset_Clocks;
-   CPU_Clock.Initialize_Clocks;
+   Reset_Clocks;
+   Initialize_Clocks;
 
    --  Initialize the SysTick downcounter timer
    Initialize_SysTick;

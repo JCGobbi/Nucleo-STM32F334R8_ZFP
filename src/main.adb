@@ -1,6 +1,6 @@
 pragma Restrictions (No_Task_Hierarchy);
 
-with SYS.Real_Time; use SYS.Real_Time;
+with Sys.Real_Time; use Sys.Real_Time;
 with STM_Board;     use STM_Board;
 with Startup;
 

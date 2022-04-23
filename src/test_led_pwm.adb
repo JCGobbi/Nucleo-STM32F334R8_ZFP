@@ -14,7 +14,7 @@ pragma Restrictions (No_Task_Hierarchy);
 with STM32.Device;        use STM32.Device;
 with STM32.Timers.PWM;    use STM32.Timers, STM32.Timers.PWM;
 
-with SYS.CPU_Clock;       use SYS;
+with Sys.CPU_Clock;       use Sys;
 
 with STM_Board;           use STM_Board;
 

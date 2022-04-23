@@ -34,7 +34,7 @@ with STM32.Device;
 
 package body STM32.CAN is
 
-   use SYS.Real_Time;
+   use Sys.Real_Time;
 
    ---------------
    -- Reset_CAN --

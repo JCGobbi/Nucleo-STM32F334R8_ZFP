@@ -3,7 +3,7 @@ with HAL;           use HAL;
 
 with STM32_SVD.PWR; use STM32_SVD.PWR;
 
-package SYS.CPU_Clock is
+package Sys.CPU_Clock is
    --  This file has definitions and routines from the following files:
    --  setup_pll, s-stm32, s-bbmcpa, s-bbbopa, s-bbpara.
    --  It permits to program the CPU clock to HSI or HSE with and
@@ -184,4 +184,4 @@ package SYS.CPU_Clock is
    --  When the voltage detector is on, the detector output is off
    --  if the voltage of the CPU is above the voltage threshold.
 
-end SYS.CPU_Clock;
+end Sys.CPU_Clock;

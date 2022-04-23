@@ -1,8 +1,8 @@
 with STM32.Device;  use STM32;
 
-with SYS.CPU_Clock; use SYS;
-with SYS.Int.Names;
-with SYS.Real_Time; use SYS.Real_Time;
+with Sys.CPU_Clock; use Sys;
+with Sys.Int.Names;
+with Sys.Real_Time; use Sys.Real_Time;
 
 with STM_Board;     use STM_Board;
 with Inverter_ADC;  use Inverter_ADC;

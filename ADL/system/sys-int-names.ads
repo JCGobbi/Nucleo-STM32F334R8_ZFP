@@ -3,7 +3,7 @@ pragma Style_Checks (Off);
 --  This spec has been automatically generated from STM32F3x4.svd
 
 --  This is a version for the STM32F3x4 MCU
-package SYS.Int.Names is
+package Sys.Int.Names is
 
    --  All identifiers in this unit are implementation defined
    pragma Implementation_Defined;
@@ -159,4 +159,4 @@ package SYS.Int.Names is
    --  FPU global interrupt
    FPU_Interrupt                 : constant Interrupt_ID := 81;
 
-end SYS.Int.Names;
+end Sys.Int.Names;

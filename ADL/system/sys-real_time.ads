@@ -6,9 +6,9 @@ pragma Restrictions (No_Elaboration_Code);
 
 with System;
 
-with SYS.CPU_Clock;
+with Sys.CPU_Clock;
 
-package SYS.Real_Time with
+package Sys.Real_Time with
   SPARK_Mode,
   Abstract_State => (Clock_Time with Synchronous),
   Initializes    => Clock_Time
@@ -232,4 +232,4 @@ private
    procedure SysTick_Handler;
    pragma Export (Asm, SysTick_Handler, "SysTick_Handler");
 
-end SYS.Real_Time;
+end Sys.Real_Time;

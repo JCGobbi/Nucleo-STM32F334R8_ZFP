@@ -1,6 +1,6 @@
 with STM32.SYSCFG;
 
-with SYS.Real_Time; use SYS.Real_Time;
+with Sys.Real_Time; use Sys.Real_Time;
 
 package body STM32.OPAMP is
 

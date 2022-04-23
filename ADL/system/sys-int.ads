@@ -7,7 +7,7 @@ pragma Restrictions (No_Elaboration_Code);
 
 with System; use System;
 
-package SYS.Int is
+package Sys.Int is
    --  This file has definitions and routines from the following files:
    --  s-bbcppr, s-bbinte, s-bbbosu, s-multip
 
@@ -203,4 +203,4 @@ private
    procedure Pend_SV_Handler;
    pragma Export (Asm, Pend_SV_Handler, "PendSV_Handler");
 
-end SYS.Int;
+end Sys.Int;

@@ -35,7 +35,7 @@
 with System;
 
 private with STM32_SVD.CAN;
-with SYS.Real_Time;
+with Sys.Real_Time;
 
 package STM32.CAN is
    pragma Elaborate_Body;
@@ -337,15 +337,15 @@ package STM32.CAN is
       Fifo : Fifo_Nr)
       return UInt2;
 
-   Default_Timeout : constant SYS.Real_Time.Time_Span :=
-      SYS.Real_Time.Milliseconds (100);
+   Default_Timeout : constant Sys.Real_Time.Time_Span :=
+      Sys.Real_Time.Milliseconds (100);
 
    procedure Receive_Message
      (This    : in out CAN_Controller;
       Fifo    : in     Fifo_Nr;
       Message :    out CAN_Message;
       Success :    out Boolean;
-      Timeout : in     SYS.Real_Time.Time_Span := Default_Timeout);
+      Timeout : in     Sys.Real_Time.Time_Span := Default_Timeout);
 
    type Mailbox_Type is (Mailbox_0, Mailbox_1, Mailbox_2);
 
@@ -353,7 +353,7 @@ package STM32.CAN is
      (This    : in out CAN_Controller;
       Message : in     CAN_Message;
       Success :    out Boolean;
-      Timeout : in     SYS.Real_Time.Time_Span := Default_Timeout);
+      Timeout : in     Sys.Real_Time.Time_Span := Default_Timeout);
 
    procedure Get_Empty_Mailbox
      (This        : in out CAN_Controller;

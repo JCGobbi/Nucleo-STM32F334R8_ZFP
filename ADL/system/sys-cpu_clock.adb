@@ -34,7 +34,7 @@ with STM32_SVD;           use STM32_SVD;
 with STM32_SVD.Flash;     use STM32_SVD.Flash;
 with STM32_SVD.RCC;       use STM32_SVD.RCC;
 
-package body SYS.CPU_Clock is
+package body Sys.CPU_Clock is
 
    -----------------------
    -- Initialize_Clocks --
@@ -294,4 +294,4 @@ package body SYS.CPU_Clock is
       end loop;
    end PWR_Initialize;
 
-end SYS.CPU_Clock;
+end Sys.CPU_Clock;

@@ -31,7 +31,7 @@
 
 --  Note this version is for use with the ravenscar-sfp runtime.
 
-with SYS.Real_Time; use SYS.Real_Time;
+with Sys.Real_Time; use Sys.Real_Time;
 
 with STM_Board;
 with Error_Handling;

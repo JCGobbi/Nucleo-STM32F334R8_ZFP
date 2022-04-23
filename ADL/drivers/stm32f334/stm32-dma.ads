@@ -82,7 +82,7 @@
 pragma Restrictions (No_Elaboration_Code);
 
 with System;         use System;
-with SYS.Real_Time;  use SYS.Real_Time;
+with Sys.Real_Time;  use Sys.Real_Time;
 
 private with STM32_SVD.DMA;
 

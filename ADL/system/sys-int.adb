@@ -7,7 +7,7 @@ with STM32_SVD.SCB;            use STM32_SVD.SCB;
 with STM32_SVD.NVIC;           use STM32_SVD.NVIC;
 with STM32_SVD.STK;            use STM32_SVD.STK, STM32_SVD;
 
-package body SYS.Int is
+package body Sys.Int is
 
    NL : constant String := ASCII.LF & ASCII.HT;
    --  New line separator in Asm templates
@@ -262,4 +262,4 @@ package body SYS.Int is
       GNAT_Error_Handler (Pend_SV_Vector);
    end Pend_SV_Handler;
 
-end SYS.Int;
+end Sys.Int;

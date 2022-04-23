@@ -4,9 +4,9 @@ with HAL;                 use HAL;
 with STM32_SVD.STK;       use STM32_SVD.STK;
 with STM32_SVD.SCB;       use STM32_SVD.SCB;
 
-with SYS.Int;
+with Sys.Int;
 
-package body SYS.Real_Time with
+package body Sys.Real_Time with
   SPARK_Mode => Off
 is
    pragma Suppress (Overflow_Check);
@@ -622,4 +622,4 @@ is
       Int.Enable_Interrupts;
    end SysTick_Handler;
 
-end SYS.Real_Time;
+end Sys.Real_Time;
