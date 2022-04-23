@@ -1,7 +1,7 @@
 with System;
-with HAL;           use HAL;
+with HAL;
 
-with STM32_SVD.PWR; use STM32_SVD.PWR;
+with STM32_SVD.PWR;
 
 package Sys.CPU_Clock is
    --  This file has definitions and routines from the following files:
@@ -47,9 +47,9 @@ package Sys.CPU_Clock is
    ------------
 
    type MCU_ID_Register is record
-      DEV_ID   : UInt12;
-      Reserved : UInt4;
-      REV_ID   : UInt16;
+      DEV_ID   : HAL.UInt12;
+      Reserved : HAL.UInt4;
+      REV_ID   : HAL.UInt16;
    end record with Pack, Size => 32;
 
    MCU_ID : MCU_ID_Register with Volatile,
@@ -79,7 +79,7 @@ package Sys.CPU_Clock is
    type FLASH_WS is (FWS0, FWS1, FWS2)
      with Size => 3;
 
-   FLASH_Latency : UInt3 := FLASH_WS'Enum_Rep (FWS2);
+   FLASH_Latency : HAL.UInt3 := FLASH_WS'Enum_Rep (FWS2);
 
    --------------------
    --  RCC constants --
@@ -178,7 +178,7 @@ package Sys.CPU_Clock is
 
    --  System.BB.MCU.Parameters
    procedure PWR_Initialize
-     with Post => PWR_Periph.CSR.PVDO = False;
+     with Post => STM32_SVD.PWR.PWR_Periph.CSR.PVDO = False;
    --  Set the PWR voltage threshold and detector and wait until
    --  voltage supply scaling has completed.
    --  When the voltage detector is on, the detector output is off

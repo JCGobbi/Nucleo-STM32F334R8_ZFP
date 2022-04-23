@@ -1,8 +1,7 @@
-with System.Machine_Code; use System;
-with HAL;                 use HAL;
+with System.Machine_Code;
+with HAL;
 
-with STM32_SVD.STK;       use STM32_SVD.STK;
-with STM32_SVD.SCB;       use STM32_SVD.SCB;
+with STM32_SVD.STK;
 
 with Sys.Int;
 
@@ -21,8 +20,8 @@ is
 
    subtype LLI is Long_Long_Integer;
 
-   Max_Pos_Time_Span : constant := UInt64 (Time_Span'Last);
-   Max_Neg_Time_Span : constant := UInt64 (2 ** 63);
+   Max_Pos_Time_Span : constant := HAL.UInt64 (Time_Span'Last);
+   Max_Neg_Time_Span : constant := HAL.UInt64 (2 ** 63);
    --  Absolute value of Time_Span_Last and Time_Span_First. Used in overflow
    --  checks. Note that we avoid using abs on Time_Span_First everywhere.
 
@@ -101,6 +100,7 @@ is
    ---------
 
    function "+" (Left : Time; Right : Time_Span) return Time is
+      use HAL;
    begin
       --  Overflow checks are performed by hand assuming that Time and
       --  Time_Span are 64-bit unsigned and signed integers respectively.
@@ -141,6 +141,7 @@ is
    ---------
 
    function "-" (Left : Time; Right : Time_Span) return Time is
+      use HAL;
    begin
       --  Overflow checks must be performed by hand assuming that Time and
       --  Time_Span are 64-bit unsigned and signed integers respectively.
@@ -170,6 +171,7 @@ is
    end "-";
 
    function "-" (Left, Right : Time) return Time_Span is
+      use HAL;
    begin
       --  Overflow checks must be performed by hand assuming that Time and
       --  Time_Span are 64-bit unsigned and signed integers respectively.
@@ -210,6 +212,8 @@ is
    ---------
 
    function "*" (Left : Time_Span; Right : Integer) return Time_Span is
+      use HAL;
+
       Is_Negative : constant Boolean :=
         (if Left > 0 then
             Right < 0
@@ -346,7 +350,7 @@ is
    begin
       while Clock < T loop
          --  Wait for interrupt.
-         Int.Wait_For_Interrupt;
+         Sys.Int.Wait_For_Interrupt;
       end loop;
    end Delay_Until;
 
@@ -355,9 +359,10 @@ is
    ------------------------
 
    procedure Initialize_SysTick is
+      use STM32_SVD.STK;
    begin
       --  Mask interrupts
-      Int.Disable_Interrupts;
+      Sys.Int.Disable_Interrupts;
 
       --  Because we operate the SysTick clock as a periodic timer, and 24 bits
       --  at 72 MHz is sufficient for that, use the unscaled system clock.
@@ -372,7 +377,7 @@ is
       --  Set the SysTick reload value to get 1 ms, set current value of the
       --  counter to 0, select AHB bus clock source without division by 8
       --  and enable SysTick peripheral.
-      STK_Periph.LOAD.RELOAD := UInt24 (Tick_Period - 1);
+      STK_Periph.LOAD.RELOAD := HAL.UInt24 (Tick_Period - 1);
       STK_Periph.VAL.CURRENT := 0;
       STK_Periph.CTRL.CLKSOURCE := True;
       STK_Periph.CTRL.ENABLE := True;
@@ -383,7 +388,7 @@ is
       STK_Periph.CTRL.TICKINT := True;
 
       --  Unmask interrupts
-      Int.Enable_Interrupts;
+      Sys.Int.Enable_Interrupts;
 
    end Initialize_SysTick;
 
@@ -424,15 +429,15 @@ is
       --  As several registers and variables need to be read or modified, do
       --  it atomically.
 
-      Machine_Code.Asm ("mrs %0, PRIMASK",
+      System.Machine_Code.Asm ("mrs %0, PRIMASK",
                         Outputs => Word'Asm_Output ("=&r", PRIMASK),
                         Volatile => True);
-      Machine_Code.Asm ("msr PRIMASK, %0",
+      System.Machine_Code.Asm ("msr PRIMASK, %0",
                         Inputs  => Word'Asm_Input  ("r", 1),
                         Volatile => True);
 
       --  We must read the counter register before the flag
-      Count := Timer_Interval (STK_Periph.VAL.CURRENT);
+      Count := Timer_Interval (STM32_SVD.STK.STK_Periph.VAL.CURRENT);
 
       --  If we read the flag first, a reload can occur just after the read
       --  and the count register would wrap around. We'd end up with a Count
@@ -444,7 +449,7 @@ is
       --  (or has just triggered the interrupt), so count is either zero or
       --  not far from Tick_Period.
 
-      Flag := STK_Periph.CTRL.COUNTFLAG;
+      Flag := STM32_SVD.STK.STK_Periph.CTRL.COUNTFLAG;
 
       if Flag then
          --  Systick counter has just reached zero, pretend it is still zero
@@ -466,7 +471,7 @@ is
       end if;
 
       --  Restore interrupt mask
-      Machine_Code.Asm ("msr PRIMASK, %0",
+      System.Machine_Code.Asm ("msr PRIMASK, %0",
                         Inputs => Word'Asm_Input ("r", PRIMASK),
                         Volatile => True);
 
@@ -614,12 +619,12 @@ is
 
    procedure SysTick_Handler is
    begin
-      Int.Disable_Interrupts;
+      Sys.Int.Disable_Interrupts;
 
       --  Actualize value of MSP & LSP of software clock.
       Update_Clock;
 
-      Int.Enable_Interrupts;
+      Sys.Int.Enable_Interrupts;
    end SysTick_Handler;
 
 end Sys.Real_Time;

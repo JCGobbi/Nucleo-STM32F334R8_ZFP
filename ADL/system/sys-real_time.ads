@@ -5,7 +5,6 @@ pragma Restrictions (No_Elaboration_Code);
 --  Consequently, packages used by this code cannot require elaboration.
 
 with System;
-
 with Sys.CPU_Clock;
 
 package Sys.Real_Time with
@@ -22,7 +21,7 @@ is
 
    type Word is mod 2**System.Word_Size;
 
-   Ticks_Per_Second : constant Integer := CPU_Clock.Main_Clock_Frequency;
+   Ticks_Per_Second : constant Integer := Sys.CPU_Clock.Main_Clock_Frequency;
    --  Number of clock ticks per second,
    --  May be extracted from STM32.Devices.System_Clock_Frequencies.HCLK.
 

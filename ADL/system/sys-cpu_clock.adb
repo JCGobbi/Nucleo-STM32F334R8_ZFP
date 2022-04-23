@@ -30,9 +30,8 @@
 
 with Ada.Unchecked_Conversion;
 
-with STM32_SVD;           use STM32_SVD;
-with STM32_SVD.Flash;     use STM32_SVD.Flash;
-with STM32_SVD.RCC;       use STM32_SVD.RCC;
+with STM32_SVD.Flash;
+with STM32_SVD.RCC;
 
 package body Sys.CPU_Clock is
 
@@ -45,6 +44,9 @@ package body Sys.CPU_Clock is
                                 LSI_Enabled  : Boolean := True;
                                 Activate_PLL : Boolean := True)
    is
+      use HAL;
+      use STM32_SVD.Flash;
+      use STM32_SVD.RCC;
       -------------------------------
       -- Compute Clock Frequencies --
       -------------------------------
@@ -252,6 +254,7 @@ package body Sys.CPU_Clock is
    ------------------
 
    procedure Reset_Clocks is
+      use STM32_SVD.RCC;
    begin
       --  Switch on high speed internal clock
       RCC_Periph.CR.HSION := True;
@@ -280,6 +283,7 @@ package body Sys.CPU_Clock is
 
    procedure PWR_Initialize
    is
+      use STM32_SVD.PWR;
    begin
       --  Set the PWR voltage threshold and detector
       PWR_Periph.CR.PLS := 4;

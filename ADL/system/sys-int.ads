@@ -5,7 +5,7 @@ pragma Restrictions (No_Elaboration_Code);
 --  The kernel initialization routine needs to execute before elaboration.
 --  Consequently, packages used by this code cannot require elaboration.
 
-with System; use System;
+with System;
 
 package Sys.Int is
    --  This file has definitions and routines from the following files:

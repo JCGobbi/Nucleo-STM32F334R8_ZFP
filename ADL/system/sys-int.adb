@@ -3,9 +3,9 @@
 
 with System.Machine_Code;
 
-with STM32_SVD.SCB;            use STM32_SVD.SCB;
-with STM32_SVD.NVIC;           use STM32_SVD.NVIC;
-with STM32_SVD.STK;            use STM32_SVD.STK, STM32_SVD;
+with STM32_SVD.SCB;
+with STM32_SVD.NVIC;
+with STM32_SVD.STK;
 
 package body Sys.Int is
 
@@ -33,8 +33,9 @@ package body Sys.Int is
    --------------------
 
    procedure Initialize_CPU is
+      use STM32_SVD.SCB;
 
-      VTOR : Address with Volatile, Address => SCB_Periph.VTOR'Address;
+      VTOR : System.Address with Volatile, Address => SCB_Periph.VTOR'Address;
       --  16#E000_ED08#; -- Vector Table Offset Register
    begin
 
@@ -56,7 +57,7 @@ package body Sys.Int is
       SCB_Periph.SHCSR.MEMFAULTENA := True;
 
       --  Unmask Fault
-      Machine_Code.Asm (Template => "cpsie f", Volatile => True);
+      System.Machine_Code.Asm (Template => "cpsie f", Volatile => True);
 
    end Initialize_CPU;
 
@@ -69,9 +70,9 @@ package body Sys.Int is
    begin
       if Interrupt = Alarm_Interrupt_ID then
          --  Clear alarm (SysTick) interrupt
-         SCB_Periph.ICSR.PENDSTCLR := True;
+         STM32_SVD.SCB.SCB_Periph.ICSR.PENDSTCLR := True;
          --  Enable alarm (SysTick) interrupt
-         STK_Periph.CTRL.TICKINT := True;
+         STM32_SVD.STK.STK_Periph.CTRL.TICKINT := True;
       else
          declare
             pragma Assert (Interrupt >= 0);
@@ -79,7 +80,7 @@ package body Sys.Int is
             Regofs : constant Natural := IRQ / 32; --  register offset
             Regbit : constant Word := 2** (IRQ mod 32);  -- bit offset
             NVIC_ISER : array (0 .. 15) of Word
-              with Volatile, Address => NVIC_Periph.ISER0'Address;
+              with Volatile, Address => STM32_SVD.NVIC.NVIC_Periph.ISER0'Address;
 
             --  Many NVIC registers use 16 words of 32 bits each to serve as a
             --  bitmap for all interrupt channels. Regofs indicates register
@@ -101,9 +102,9 @@ package body Sys.Int is
    begin
       if Interrupt = Alarm_Interrupt_ID then
          --  Clear alarm (SysTick) interrupt
-         SCB_Periph.ICSR.PENDSTCLR := True;
+         STM32_SVD.SCB.SCB_Periph.ICSR.PENDSTCLR := True;
          --  Disable alarm (SysTick) interrupt
-         STK_Periph.CTRL.TICKINT := False;
+         STM32_SVD.STK.STK_Periph.CTRL.TICKINT := False;
       else
          declare
             pragma Assert (Interrupt >= 0);
@@ -111,9 +112,9 @@ package body Sys.Int is
             Regofs    : constant Natural := IRQ / 32; --  register offset
             Regbit    : constant Word := 2** (IRQ mod 32);  -- bit offset
             NVIC_ICER : array (0 .. 15) of Word
-              with Volatile, Address => NVIC_Periph.ICER0'Address;
+              with Volatile, Address => STM32_SVD.NVIC.NVIC_Periph.ICER0'Address;
             NVIC_ICPR : array (0 .. 15) of Word
-              with Volatile, Address => NVIC_Periph.ICPR0'Address;
+              with Volatile, Address => STM32_SVD.NVIC.NVIC_Periph.ICPR0'Address;
 
             --  Many NVIC registers use 16 words of 32 bits each to serve as a
             --  bitmap for all interrupt channels. Regofs indicates register
@@ -138,7 +139,7 @@ package body Sys.Int is
       --  to ensure subsequent instructions are executed with interrupts
       --  enabled and at the right hardware priority level.
 
-      Machine_Code.Asm
+      System.Machine_Code.Asm
         (Template => "cpsie i" & NL & "dsb" & NL & "isb",
          Clobber  => "memory",
          Volatile => True);
@@ -150,7 +151,7 @@ package body Sys.Int is
 
    procedure Disable_Interrupts is
    begin
-      Machine_Code.Asm (Template => "cpsid i", Volatile => True);
+      System.Machine_Code.Asm (Template => "cpsid i", Volatile => True);
    end Disable_Interrupts;
 
    ------------------------
@@ -159,7 +160,7 @@ package body Sys.Int is
 
    procedure Wait_For_Interrupt is
    begin
-      Machine_Code.Asm (Template => "wfi", Volatile => True);
+      System.Machine_Code.Asm (Template => "wfi", Volatile => True);
    end Wait_For_Interrupt;
 
    -----------
