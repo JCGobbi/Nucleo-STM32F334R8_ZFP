@@ -38,7 +38,6 @@ private with STM32_SVD.CAN;
 with Sys.Real_Time;
 
 package STM32.CAN is
-   pragma Elaborate_Body;
 
    type CAN_Controller is limited private;
 
