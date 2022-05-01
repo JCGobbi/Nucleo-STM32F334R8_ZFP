@@ -167,29 +167,41 @@ package body STM32.CAN is
 
       --  Number of Time Quanta in one Bit Time.
       Time_Quanta_Nr : Positive;
-
+      --  Found Bit Time Quanta value.
+      BTQ : Boolean := False;
    begin
+      --  Assure the clock frequency is high enough.
+      pragma Assert
+        (Clock_In / (Bit_Rate (Speed) * 1_000 * Time_Quanta_Prescaler'First) < Bit_Time_Quanta'First,
+         "CAN clock frequency too low for this bit rate.");
+      --  Assure the clock frequency is low enough.
+      pragma Assert
+        (Clock_In / (Bit_Rate (Speed) * 1_000 * Time_Quanta_Prescaler'Last) > Bit_Time_Quanta'Last,
+         "CAN clock frequency too high for this bit rate.");
+
       for I in 1 .. Time_Quanta_Prescaler'Last loop
          --  Choose the minimum divisor for the maximum number of Time Quanta.
          case Speed is
-            when Rate_83 =>
+            when Kbps_83 =>
                --  Bit rate 83.333 is calculated with the fraction 250/3 = 83.333,
-               --  so the value Clock_In / (Bit_Rate (Speed) * 1000 * I) turns to
+               --  so the value Clock_In / (Bit_Rate (Speed) * 1000 * I) turns to:
                --  Clock_In * 3 / (250_000 * I).
-               if ((Clock_In * 3) / (250_000 * I) <= Bit_Time_Quanta'Last) then
+               if (Clock_In * 3 / (250_000 * I) in Bit_Time_Quanta'Range) then
                   --  We want an integer division.
                   if (Clock_In * 3) rem (250_000 * I) = 0 then
                      Bit_Timing.Quanta_Prescaler := I;
-                     Time_Quanta_Nr := Clock_In * 3 / (250_000 * Bit_Timing.Quanta_Prescaler);
+                     Time_Quanta_Nr := Clock_In * 3 / (250_000 * I);
+                     BTQ := True;
                      exit;
                   end if;
                end if;
             when others =>
-               if (Clock_In / (Bit_Rate (Speed) * 1_000 * I) <= Bit_Time_Quanta'Last) then
+               if (Clock_In / (Bit_Rate (Speed) * 1_000 * I) in Bit_Time_Quanta'Range) then
                   --  We want an integer division.
                   if Clock_In rem (Bit_Rate (Speed) * 1000 * I) = 0 then
                      Bit_Timing.Quanta_Prescaler := I;
-                     Time_Quanta_Nr := Clock_In / (Bit_Rate (Speed) * 1000 * Bit_Timing.Quanta_Prescaler);
+                     Time_Quanta_Nr := Clock_In / (Bit_Rate (Speed) * 1000 * I);
+                     BTQ := True;
                      exit;
                   end if;
                end if;
@@ -197,8 +209,7 @@ package body STM32.CAN is
       end loop;
 
       pragma Assert
-        (Time_Quanta_Nr < Bit_Time_Quanta'First,
-           "CAN clock frequency too low for this bit rate.");
+        (not BTQ, "Can't find an integer division factor for this bit rate.");
 
       Bit_Timing.Time_Segment_1 :=
         Integer (Float (Time_Quanta_Nr) * Sample_Point (Protocol)) - Segment_Sync_Quanta;
