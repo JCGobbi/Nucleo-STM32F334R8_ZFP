@@ -77,16 +77,23 @@ package STM32.CAN is
    subtype Time_Quanta_Prescaler is Positive range 1 .. 1024;
    --  These bits define the length of a time quanta.
 
+   type Bit_Timing_Config is record
+      Resynch_Jump_Width : Resynch_Quanta := 1;
+      Time_Segment_1     : Segment_1_Quanta;
+      Time_Segment_2     : Segment_2_Quanta;
+      Quanta_Prescaler   : Time_Quanta_Prescaler;
+   end record;
+
    Segment_Sync_Quanta : constant Positive := 1;
    --  This is the SYNC_SEG segment, the time quanta for syncronism.
+
+   type CAN_Protocol is (CANopen, DeviceNet, Arinc_825);
 
    subtype Sample_Point_Range is Float range 50.0 .. 90.0;
    --  The sample point of the start frame (at the end of PHASE_SEG1) is taken
    --  between 50 to 90% of the Bit Time. The preferred value used by CANopen
    --  and DeviceNet is 87.5% and 75% for ARINC 825.
    --  See http://www.bittiming.can-wiki.info/#bxCAN for this calculation.
-
-   type CAN_Protocol is (CANopen, DeviceNet, Arinc_825);
 
    type Sample_Point_Array is array (CAN_Protocol) of Sample_Point_Range;
 
@@ -115,26 +122,19 @@ package STM32.CAN is
    --  and 1000 kHz.
 
    type Bit_Rate_Select is
-     (Rate_1000, --  1 MHz
-      Rate_800,
-      Rate_500,
-      Rate_250, --  250 kHz
-      Rate_125,
-      Rate_100,
-      Rate_83, --  83.333 kHz
-      Rate_50,
-      Rate_20,
-      Rate_10);
+     (Kbps_1000,
+      Kbps_800,
+      Kbps_500,
+      Kbps_250,
+      Kbps_125,
+      Kbps_100,
+      Kbps_83, --  83.333 kHz
+      Kbps_50,
+      Kbps_20,
+      Kbps_10);
 
    type Bit_Rate_Array is array (Bit_Rate_Select) of Bit_Rate_Range;
    Bit_Rate : Bit_Rate_Array := (1_000, 800, 500, 250, 125, 100, 83, 50, 20, 10);
-
-   type Bit_Timing_Config is record
-      Resynch_Jump_Width : Resynch_Quanta := 1;
-      Time_Segment_1     : Segment_1_Quanta;
-      Time_Segment_2     : Segment_2_Quanta;
-      Quanta_Prescaler   : Time_Quanta_Prescaler;
-   end record;
 
    procedure Calculate_Bit_Timing
      (Speed      : in Bit_Rate_Select;
