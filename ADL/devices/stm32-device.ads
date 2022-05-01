@@ -67,6 +67,22 @@ package STM32.Device is
    --  Raised by the routines below for a device passed as an actual parameter
    --  when that device is not present on the given hardware instance.
 
+   -----------------------
+   -- CPU Clock Sources --
+   -----------------------
+
+   HSE_VALUE : constant := 8_000_000;
+   --  External oscillator in Hz
+
+   --  LSE_VALUE : constant := 32_768;
+   --  Low-Speed external oscillator in Hz
+
+   HSI_VALUE : constant := 8_000_000;
+   --  Internal oscillator in Hz
+
+   --  LSI_VALUE : constant := 40_000;
+   --  Low-Speed internal oscillator in Hz
+
    ----------
    -- GPIO --
    ----------
