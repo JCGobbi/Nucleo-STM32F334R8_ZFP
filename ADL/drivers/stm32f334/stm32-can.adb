@@ -157,65 +157,64 @@ package body STM32.CAN is
    --------------------------
 
    procedure Calculate_Bit_Timing
-     (Speed      : in Bit_Rate_Select;
-      Protocol   : in CAN_Protocol;
-      Bit_Timing : in out Bit_Timing_Config)
+     (Speed        : in Bit_Rate_Range;
+      Sample_Point : in Sample_Point_Range;
+      Bit_Timing   : in out Bit_Timing_Config;
+      Tolerance    : in Clock_Tolerance)
    is
       --  The CAN clock frequency comes from APB1 peripheral clock (PCLK1).
-      Clock_In : constant Integer :=
-        Integer (STM32.Device.System_Clock_Frequencies.PCLK1);
-
-      --  Number of Time Quanta in one Bit Time.
-      Time_Quanta_Nr : Positive;
+      Clock_In : constant Float := Float (STM32.Device.System_Clock_Frequencies.PCLK1);
+      --  Time Quanta in one Bit Time
+      Time_Quanta : Float;
       --  Found Bit Time Quanta value.
       BTQ : Boolean := False;
    begin
       --  Assure the clock frequency is high enough.
       pragma Assert
-        (Clock_In / (Bit_Rate (Speed) * 1_000 * Time_Quanta_Prescaler'First) < Bit_Time_Quanta'First,
+        (Integer (Clock_In / (Speed * 1_000.0 *
+         Float (Time_Quanta_Prescaler'First))) < Bit_Time_Quanta'First,
          "CAN clock frequency too low for this bit rate.");
       --  Assure the clock frequency is low enough.
       pragma Assert
-        (Clock_In / (Bit_Rate (Speed) * 1_000 * Time_Quanta_Prescaler'Last) > Bit_Time_Quanta'Last,
+        (Integer (Clock_In / (Speed * 1_000.0 *
+         Float (Time_Quanta_Prescaler'Last))) > Bit_Time_Quanta'Last,
          "CAN clock frequency too high for this bit rate.");
 
-      for I in 1 .. Time_Quanta_Prescaler'Last loop
+      for I in Time_Quanta_Prescaler'First .. Time_Quanta_Prescaler'Last loop
          --  Choose the minimum divisor for the maximum number of Time Quanta.
-         case Speed is
-            when Kbps_83 =>
-               --  Bit rate 83.333 is calculated with the fraction 250/3 = 83.333,
-               --  so the value Clock_In / (Bit_Rate (Speed) * 1000 * I) turns to:
-               --  Clock_In * 3 / (250_000 * I).
-               if (Clock_In * 3 / (250_000 * I) in Bit_Time_Quanta'Range) then
-                  --  We want an integer division.
-                  if (Clock_In * 3) rem (250_000 * I) = 0 then
-                     Bit_Timing.Quanta_Prescaler := I;
-                     Time_Quanta_Nr := Clock_In * 3 / (250_000 * I);
-                     BTQ := True;
-                     exit;
-                  end if;
-               end if;
-            when others =>
-               if (Clock_In / (Bit_Rate (Speed) * 1_000 * I) in Bit_Time_Quanta'Range) then
-                  --  We want an integer division.
-                  if Clock_In rem (Bit_Rate (Speed) * 1000 * I) = 0 then
-                     Bit_Timing.Quanta_Prescaler := I;
-                     Time_Quanta_Nr := Clock_In / (Bit_Rate (Speed) * 1000 * I);
-                     BTQ := True;
-                     exit;
-                  end if;
-               end if;
-         end case;
+         Time_Quanta := Clock_In / (Speed * 1000.0 * Float (I));
+
+         --  Test if Time Quanta <= Bit_Time_Quanta'Last and if
+         --  Sample Point <= Segment_Sync_Quanta + Segment_1_Quanta'Last
+         if Integer (Time_Quanta) <= Bit_Time_Quanta'Last and
+           Integer (Time_Quanta * Sample_Point / 100.0) <=
+           (Segment_Sync_Quanta + Segment_1_Quanta'Last)
+         then
+            --  We want a division inside tolerance.
+            if abs (Float (Integer (Time_Quanta)) - Time_Quanta) /
+              Float (Integer (Time_Quanta)) * 100.0 <= Tolerance
+            then
+               Bit_Timing.Quanta_Prescaler := I;
+               BTQ := True;
+               exit;
+            end if;
+         end if;
       end loop;
 
       pragma Assert
-        (not BTQ, "Can't find an integer division factor for this bit rate.");
+        (not BTQ, "Can't find a division factor for this bit rate within tolerance.");
 
       Bit_Timing.Time_Segment_1 :=
-        Integer (Float (Time_Quanta_Nr) * Sample_Point (Protocol)) - Segment_Sync_Quanta;
+        Integer (Time_Quanta * Sample_Point / 100.0) - Segment_Sync_Quanta;
       --  Casting a float to integer rounds it to the near integer.
       Bit_Timing.Time_Segment_2 :=
-        Time_Quanta_Nr - Segment_Sync_Quanta - Bit_Timing.Time_Segment_1;
+        Integer (Time_Quanta) - Segment_Sync_Quanta - Bit_Timing.Time_Segment_1;
+
+      if Bit_Timing.Time_Segment_2 < 4 then
+         Bit_Timing.Resynch_Jump_Width := Bit_Timing.Time_Segment_2;
+      else
+         Bit_Timing.Resynch_Jump_Width := 4;
+      end if;
 
    end Calculate_Bit_Timing;
 

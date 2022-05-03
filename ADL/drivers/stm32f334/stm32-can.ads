@@ -87,20 +87,13 @@ package STM32.CAN is
    Segment_Sync_Quanta : constant Positive := 1;
    --  This is the SYNC_SEG segment, the time quanta for syncronism.
 
-   type CAN_Protocol is (CANopen, DeviceNet, Arinc_825);
-
    subtype Sample_Point_Range is Float range 50.0 .. 90.0;
    --  The sample point of the start frame (at the end of PHASE_SEG1) is taken
    --  between 50 to 90% of the Bit Time. The preferred value used by CANopen
    --  and DeviceNet is 87.5% and 75% for ARINC 825.
    --  See http://www.bittiming.can-wiki.info/#bxCAN for this calculation.
 
-   type Sample_Point_Array is array (CAN_Protocol) of Sample_Point_Range;
-
-   Sample_Point : Sample_Point_Array := (87.5, 87.5, 75.0);
-   --  Preferred percentage values for CANopen, DeviceNet and ARINC 825.
-
-   subtype Bit_Time_Quanta is Positive range 8 .. 19;
+   subtype Bit_Time_Quanta is Positive range 8 .. 25;
    --  This is the number of time quanta in one Bit Time. So for a 1 MHz bit
    --  rate and the minimum Bit_Time_Quanta = 8, the minimum prescaler input
    --  frequency is 8 MHz.
@@ -116,30 +109,19 @@ package STM32.CAN is
    --  PHASE_SEG (Segment_Sync_Quanta + Segment_1_Quanta) = 17. So the maximum
    --  value for Bit_Time_Quanta is 17 / 0.875 = 19.4 ~ 19.
 
-   subtype Bit_Rate_Range is Positive range 10 .. 1_000;
+   subtype Bit_Rate_Range is Float range 1.0 .. 1_000.0;
    --  This is the actual bit rate frequency of the CAN bus in kHz.
    --  The standard frequencies are 10, 20, 50, 83.333, 100, 125, 250, 500, 800
    --  and 1000 kHz.
 
-   type Bit_Rate_Select is
-     (Kbps_1000,
-      Kbps_800,
-      Kbps_500,
-      Kbps_250,
-      Kbps_125,
-      Kbps_100,
-      Kbps_83, --  83.333 kHz
-      Kbps_50,
-      Kbps_20,
-      Kbps_10);
-
-   type Bit_Rate_Array is array (Bit_Rate_Select) of Bit_Rate_Range;
-   Bit_Rate : Bit_Rate_Array := (1_000, 800, 500, 250, 125, 100, 83, 50, 20, 10);
+   subtype Clock_Tolerance is Float range 0.0 .. 1.5; --  in %
+   --  Clock tolerance for the bit rate in percent.
 
    procedure Calculate_Bit_Timing
-     (Speed      : in Bit_Rate_Select;
-      Protocol   : in CAN_Protocol;
-      Bit_Timing : in out Bit_Timing_Config);
+     (Speed        : in Bit_Rate_Range;
+      Sample_Point : in Sample_Point_Range;
+      Bit_Timing   : in out Bit_Timing_Config;
+      Tolerance    : in Clock_Tolerance);
    --  Automatically calculate bit timings based on requested bit rate and
    --  sample ratio.
    --  1 nominal Bit Time is defined by the time length in quanta of four time
