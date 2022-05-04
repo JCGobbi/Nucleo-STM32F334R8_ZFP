@@ -159,8 +159,8 @@ package body STM32.CAN is
    procedure Calculate_Bit_Timing
      (Speed        : in Bit_Rate_Range;
       Sample_Point : in Sample_Point_Range;
-      Bit_Timing   : in out Bit_Timing_Config;
-      Tolerance    : in Clock_Tolerance)
+      Tolerance    : in Clock_Tolerance;
+      Bit_Timing   : in out Bit_Timing_Config)
    is
       --  The CAN clock frequency comes from APB1 peripheral clock (PCLK1).
       Clock_In : constant Float := Float (STM32.Device.System_Clock_Frequencies.PCLK1);
@@ -184,15 +184,36 @@ package body STM32.CAN is
          --  Choose the minimum divisor for the maximum number of Time Quanta.
          Time_Quanta := Clock_In / (Speed * 1000.0 * Float (I));
 
+         --  Test if Time_Quanta < Bit_Time_Quanta'First
+         if Integer (Time_Quanta) < Bit_Time_Quanta'First then
+            exit;
          --  Test if Time Quanta <= Bit_Time_Quanta'Last and if
          --  Sample Point <= Segment_Sync_Quanta + Segment_1_Quanta'Last
-         if Integer (Time_Quanta) <= Bit_Time_Quanta'Last and
+         elsif Integer (Time_Quanta) <= Bit_Time_Quanta'Last and
            Integer (Time_Quanta * Sample_Point / 100.0) <=
            (Segment_Sync_Quanta + Segment_1_Quanta'Last)
          then
-            --  We want a division inside tolerance.
-            if abs (Float (Integer (Time_Quanta)) - Time_Quanta) /
-              Float (Integer (Time_Quanta)) * 100.0 <= Tolerance
+            --  Calculate time segments
+            Bit_Timing.Time_Segment_1 :=
+              Integer (Time_Quanta * Sample_Point / 100.0) - Segment_Sync_Quanta;
+            --  Casting a float to integer rounds it to the near integer.
+            Bit_Timing.Time_Segment_2 :=
+              Integer (Time_Quanta) - Segment_Sync_Quanta - Bit_Timing.Time_Segment_1;
+
+            if Bit_Timing.Time_Segment_2 < 4 then
+               Bit_Timing.Resynch_Jump_Width := Bit_Timing.Time_Segment_2;
+            else
+               Bit_Timing.Resynch_Jump_Width := 4;
+            end if;
+
+            --  We want a division that gives tolerance inside tolerance range.
+            if Tolerance >= abs (Clock_In - Float ((Segment_Sync_Quanta +
+                 Bit_Timing.Time_Segment_1 + Bit_Timing.Time_Segment_2) * I) *
+                 Speed * 1000.0) * 100.0 / Clock_In and
+              Tolerance <= Float (Bit_Timing.Time_Segment_2) /
+                           Float (2 * (13 * Integer (Time_Quanta))) and
+              Tolerance <= Float (Bit_Timing.Resynch_Jump_Width) /
+                           Float (20 * Integer (Time_Quanta))
             then
                Bit_Timing.Quanta_Prescaler := I;
                BTQ := True;
@@ -203,18 +224,6 @@ package body STM32.CAN is
 
       pragma Assert
         (not BTQ, "Can't find a division factor for this bit rate within tolerance.");
-
-      Bit_Timing.Time_Segment_1 :=
-        Integer (Time_Quanta * Sample_Point / 100.0) - Segment_Sync_Quanta;
-      --  Casting a float to integer rounds it to the near integer.
-      Bit_Timing.Time_Segment_2 :=
-        Integer (Time_Quanta) - Segment_Sync_Quanta - Bit_Timing.Time_Segment_1;
-
-      if Bit_Timing.Time_Segment_2 < 4 then
-         Bit_Timing.Resynch_Jump_Width := Bit_Timing.Time_Segment_2;
-      else
-         Bit_Timing.Resynch_Jump_Width := 4;
-      end if;
 
    end Calculate_Bit_Timing;
 

@@ -114,14 +114,28 @@ package STM32.CAN is
    --  The standard frequencies are 10, 20, 50, 83.333, 100, 125, 250, 500, 800
    --  and 1000 kHz.
 
-   subtype Clock_Tolerance is Float range 0.0 .. 1.5; --  in %
+   subtype Clock_Tolerance is Float range 0.0 .. 1.58;
    --  Clock tolerance for the bit rate in percent.
+   --  The tolerance range df for an oscillator’s frequency fosc around the
+   --  nominal frequency fnom with fosc = fnom ± df depends on the proportions
+   --  of Phase_Seg1, Phase_Seg2, SJW, and the bit time. The maximum tolerance
+   --  df is the defined by two conditions (both shall be met):
+   --
+   --           min(Phase_Seg1, Phase_Seg2)                       SJW
+   --  1. df ≤ -----------------------------         2. df ≤ -------------
+   --           2*(13*Bit_Time-Phase_Seg2)                    20*Bit_Time
+   --
+   --  The combination Prop_Seg = 1 and Phase_Seg1 = Phase_Seg2 = SJW = 4 allows
+   --  the largest possible oscillator tolerance of 1.58%.
+   --  See chapter 4 Oscillator Tolerance Range from The Configuration of the
+   --  CAN Bit Timing, Florian Hartwitch, Armin Bassemir, 6th International CAN
+   --  Conference.
 
    procedure Calculate_Bit_Timing
      (Speed        : in Bit_Rate_Range;
       Sample_Point : in Sample_Point_Range;
-      Bit_Timing   : in out Bit_Timing_Config;
-      Tolerance    : in Clock_Tolerance);
+      Tolerance    : in Clock_Tolerance;
+      Bit_Timing   : in out Bit_Timing_Config);
    --  Automatically calculate bit timings based on requested bit rate and
    --  sample ratio.
    --  1 nominal Bit Time is defined by the time length in quanta of four time
