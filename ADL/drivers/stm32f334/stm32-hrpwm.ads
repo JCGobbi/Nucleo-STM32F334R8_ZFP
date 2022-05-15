@@ -55,8 +55,9 @@
 --     ...
 
 with STM32.GPIO;     use STM32.GPIO;
+with STM32.HRTimers; use STM32.HRTimers;
 
-package STM32.HRTimers.PWM is
+package STM32.HRPWM is
    pragma Elaborate_Body;
 
    subtype Hertz is UInt32;
@@ -190,4 +191,4 @@ private
       Duty_Cycle : Percentage := 0;
    end record;
 
-end STM32.HRTimers.PWM;
+end STM32.HRPWM;

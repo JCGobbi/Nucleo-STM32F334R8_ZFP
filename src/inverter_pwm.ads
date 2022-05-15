@@ -1,8 +1,9 @@
-with STM32.GPIO;       use STM32.GPIO;
-with STM32.Timers.PWM; use STM32.Timers, STM32.Timers.PWM;
+with STM32.GPIO;   use STM32.GPIO;
+with STM32.Timers; use STM32.Timers;
+with STM32.PWM;    use STM32.PWM;
 
-with STM_Board;        use STM_Board;
-with Inverter_ADC;     use Inverter_ADC;
+with STM_Board;    use STM_Board;
+with Inverter_ADC; use Inverter_ADC;
 
 package Inverter_PWM is
 

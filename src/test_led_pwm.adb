@@ -11,12 +11,13 @@
 --
 pragma Restrictions (No_Task_Hierarchy);
 
-with STM32.Device;        use STM32.Device;
-with STM32.Timers.PWM;    use STM32.Timers, STM32.Timers.PWM;
+with STM32.Device;  use STM32.Device;
+with STM32.Timers;  use STM32.Timers;
+with STM32.PWM;     use STM32.PWM;
 
-with Sys.CPU_Clock;       use Sys;
+with Sys.CPU_Clock; use Sys;
 
-with STM_Board;           use STM_Board;
+with STM_Board;     use STM_Board;
 
 with Last_Chance_Handler; pragma Unreferenced (Last_Chance_Handler);
 --  The "last chance handler" is the user-defined routine that is called when
