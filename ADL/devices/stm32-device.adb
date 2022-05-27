@@ -387,7 +387,7 @@ package body STM32.Device is
    -- Enable_Clock --
    ------------------
 
-   --  procedure Enable_Clock (This : aliased in out CAN_Controller)
+   --  procedure Enable_Clock (This : aliased CAN_Controller)
    --  is
    --  begin
    --     if This'Address = CAN_Base then
@@ -401,7 +401,7 @@ package body STM32.Device is
    -- Reset --
    -----------
 
-   --  procedure Reset (This : aliased in out CAN_Controller) is
+   --  procedure Reset (This : aliased CAN_Controller) is
    --  begin
    --     if This'Address = STM32_SVD.CAN_Base then
    --        RCC_Periph.APB1RSTR.CANRST := True;

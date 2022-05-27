@@ -371,8 +371,8 @@ package STM32.Device is
 
    --  CAN_1 : aliased CAN_Controller with Volatile, Import, Address => CAN_Base;
 
-   --  procedure Enable_Clock (This : aliased in out CAN_Controller);
-   --  procedure Reset (This : aliased in out CAN_Controller);
+   --  procedure Enable_Clock (This : aliased CAN_Controller);
+   --  procedure Reset (This : aliased CAN_Controller);
 
    ---------
    -- I2C --
