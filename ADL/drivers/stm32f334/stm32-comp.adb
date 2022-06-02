@@ -1,5 +1,6 @@
 
 with STM32.SYSCFG;
+with Sys.Real_Time;
 
 package body STM32.COMP is
 
@@ -8,12 +9,14 @@ package body STM32.COMP is
    ------------
 
    procedure Enable (This : in out Comparator) is
-      use STM32.SYSCFG;
+      use Sys.Real_Time;
    begin
       --  Enable clock for the SYSCFG_COMP_OPAMP peripheral
-      Enable_SYSCFG_Clock;
+      STM32.SYSCFG.Enable_SYSCFG_Clock;
 
       This.CSR.COMPxEN := True;
+      --  Delay required to reach propagation delay specification.
+      Delay_Until (Clock + Microseconds (10));
    end Enable;
 
    -------------
@@ -50,11 +53,11 @@ package body STM32.COMP is
       This.CSR.COMPxINMSEL := UInt3 (Input'Enum_Rep);
    end Set_Inverting_Input_Port;
 
-   -------------------------------
-   -- Read_Inverting_Input_Port --
-   -------------------------------
+   ------------------------------
+   -- Get_Inverting_Input_Port --
+   ------------------------------
 
-   function Read_Inverting_Input_Port
+   function Get_Inverting_Input_Port
      (This : Comparator) return Inverting_Input_Port
    is
       Value : UInt4;
@@ -65,7 +68,7 @@ package body STM32.COMP is
          Value := UInt4 (This.CSR.COMPxINMSEL);
       end if;
       return Inverting_Input_Port'Val (Value);
-   end Read_Inverting_Input_Port;
+   end Get_Inverting_Input_Port;
 
    ----------------------
    -- Set_Output_Timer --
@@ -77,14 +80,14 @@ package body STM32.COMP is
       This.CSR.COMPxOUTSEL := Output'Enum_Rep;
    end Set_Output_Timer;
 
-   -----------------------
-   -- Read_Output_Timer --
-   -----------------------
+   ----------------------
+   -- Get_Output_Timer --
+   ----------------------
 
-   function Read_Output_Timer (This : Comparator) return Output_Selection is
+   function Get_Output_Timer (This : Comparator) return Output_Selection is
    begin
       return Output_Selection'Val (This.CSR.COMPxOUTSEL);
-   end Read_Output_Timer;
+   end Get_Output_Timer;
 
    -------------------------
    -- Set_Output_Polarity --
@@ -96,18 +99,18 @@ package body STM32.COMP is
       This.CSR.COMPxPOL := Output = Inverted;
    end Set_Output_Polarity;
 
-   --------------------------
-   -- Read_Output_Polarity --
-   --------------------------
+   -------------------------
+   -- Get_Output_Polarity --
+   -------------------------
 
-   function Read_Output_Polarity (This : Comparator) return Output_Polarity is
+   function Get_Output_Polarity (This : Comparator) return Output_Polarity is
    begin
       if This.CSR.COMPxPOL = True then
          return Inverted;
       else
          return Not_Inverted;
       end if;
-   end Read_Output_Polarity;
+   end Get_Output_Polarity;
 
    -------------------------
    -- Set_Output_Blanking --
@@ -116,23 +119,40 @@ package body STM32.COMP is
    procedure Set_Output_Blanking (This   : in out Comparator;
                                   Output : Output_Blanking) is
    begin
-      This.CSR.COMPx_BLANKING := Output'Enum_Rep;
+      This.CSR.COMPxBLANKING := Output'Enum_Rep;
    end Set_Output_Blanking;
 
-   --------------------------
-   -- Read_Output_Blanking --
-   --------------------------
+   -------------------------
+   -- Get_Output_Blanking --
+   -------------------------
 
-   function Read_Output_Blanking (This : Comparator) return Output_Blanking is
+   function Get_Output_Blanking (This : Comparator) return Output_Blanking is
    begin
-      return Output_Blanking'Val (This.CSR.COMPx_BLANKING);
-   end Read_Output_Blanking;
+      return Output_Blanking'Val (This.CSR.COMPxBLANKING);
+   end Get_Output_Blanking;
 
-   ----------------------------
-   -- Read_Comparator_Output --
-   ----------------------------
+   --------------------------
+   -- Configure_Comparator --
+   --------------------------
 
-   function Read_Comparator_Output
+   procedure Configure_Comparator
+     (This  : in out Comparator;
+      Param : Init_Parameters)
+   is
+   begin
+      This.CSR :=
+        (COMPxINMSEL   => Param.Input_Minus'Enum_Rep,
+         COMPxOUTSEL   => Param.Output_Timer'Enum_Rep,
+         COMPxPOL      => Param.Output_Pol = Inverted,
+         COMPxBLANKING => Param.Blanking_Source'Enum_Rep,
+         others        => <>);
+   end Configure_Comparator;
+
+   ---------------------------
+   -- Get_Comparator_Output --
+   ---------------------------
+
+   function Get_Comparator_Output
      (This : Comparator) return Comparator_Output is
    begin
       if This.CSR.COMPxOUT = True then
@@ -140,7 +160,7 @@ package body STM32.COMP is
       else
          return Low;
       end if;
-   end Read_Comparator_Output;
+   end Get_Comparator_Output;
 
    -------------------------
    -- Set_Lock_Comparator --
@@ -151,13 +171,13 @@ package body STM32.COMP is
       This.CSR.COMPxLOCK := True;
    end Set_Lock_Comparator;
 
-   --------------------------
-   -- Read_Lock_Comparator --
-   --------------------------
+   -------------------------
+   -- Get_Lock_Comparator --
+   -------------------------
 
-   function Read_Lock_Comparator (This : Comparator) return Boolean is
+   function Get_Lock_Comparator (This : Comparator) return Boolean is
    begin
       return This.CSR.COMPxLOCK;
-   end Read_Lock_Comparator;
+   end Get_Lock_Comparator;
 
 end STM32.COMP;

@@ -36,10 +36,10 @@ package STM32.COMP is
    procedure Set_Inverting_Input_Port
      (This  : in out Comparator;
       Input : Inverting_Input_Port)
-     with Post => Read_Inverting_Input_Port (This) = Input;
+     with Post => Get_Inverting_Input_Port (This) = Input;
    --  Select the source connected to the inverting input of the comparator.
 
-   function Read_Inverting_Input_Port
+   function Get_Inverting_Input_Port
      (This : Comparator) return Inverting_Input_Port;
    --  Return the source connected to the inverting input of the comparator.
 
@@ -78,10 +78,10 @@ package STM32.COMP is
    procedure Set_Output_Timer
      (This   : in out Comparator;
       Output : Output_Selection)
-     with Post => Read_Output_Timer (This) = Output;
+     with Post => Get_Output_Timer (This) = Output;
    --  Select which Timer input must be connected with the comparator output.
 
-   function Read_Output_Timer (This : Comparator) return Output_Selection;
+   function Get_Output_Timer (This : Comparator) return Output_Selection;
    --  Return which Timer input is connected with the comparator output.
 
    type Output_Polarity is
@@ -92,10 +92,10 @@ package STM32.COMP is
    procedure Set_Output_Polarity
      (This  : in out Comparator;
       Output : Output_Polarity)
-     with Post => Read_Output_Polarity (This) = Output;
+     with Post => Get_Output_Polarity (This) = Output;
    --  Used to invert the comparator output.
 
-   function Read_Output_Polarity (This : Comparator) return Output_Polarity;
+   function Get_Output_Polarity (This : Comparator) return Output_Polarity;
    --  Return the comparator output polarity.
 
    type Output_Blanking is
@@ -116,25 +116,36 @@ package STM32.COMP is
    procedure Set_Output_Blanking
      (This  : in out Comparator;
       Output : Output_Blanking)
-     with Post => Read_Output_Blanking (This) = Output;
+     with Post => Get_Output_Blanking (This) = Output;
    --  Select which Timer output controls the comparator output blanking.
 
-   function Read_Output_Blanking (This : Comparator) return Output_Blanking;
+   function Get_Output_Blanking (This : Comparator) return Output_Blanking;
    --  Return which Timer output controls the comparator output blanking.
+
+   type Init_Parameters is record
+      Input_Minus     : Inverting_Input_Port;
+      Output_Timer    : Output_Selection;
+      Output_Pol      : Output_Polarity;
+      Blanking_Source : Output_Blanking;
+   end record;
+
+   procedure Configure_Comparator
+     (This  : in out Comparator;
+      Param : in     Init_Parameters);
 
    type Comparator_Output is (Low, High);
 
-   function Read_Comparator_Output (This : Comparator) return Comparator_Output;
+   function Get_Comparator_Output (This : Comparator) return Comparator_Output;
    --  Read the comparator output:
    --  Low = non-inverting input is below inverting input,
    --  High = (non-inverting input is above inverting input
 
    procedure Set_Lock_Comparator (This : in out Comparator)
-     with Post => Read_Lock_Comparator (This) = True;
+     with Post => Get_Lock_Comparator (This) = True;
    --  Allows to have COMPx_CSR register as read-only. It can only be cleared
    --  by a system reset.
 
-   function Read_Lock_Comparator (This : Comparator) return Boolean;
+   function Get_Lock_Comparator (This : Comparator) return Boolean;
    --  Return the comparator lock bit state.
 
 private
@@ -143,7 +154,7 @@ private
 
    subtype COMPx_CSR_COMPxINMSEL_Field is HAL.UInt3;
    subtype COMPx_CSR_COMPxOUTSEL_Field is HAL.UInt4;
-   subtype COMPx_CSR_COMPx_BLANKING_Field is HAL.UInt3;
+   subtype COMPx_CSR_COMPxBLANKING_Field is HAL.UInt3;
 
    --  control and status register
    type COMPx_CSR_Register is record
@@ -164,7 +175,7 @@ private
       --  unspecified
       Reserved_16_17 : HAL.UInt2 := 16#0#;
       --  Comparator 2 blanking source
-      COMPx_BLANKING : COMPx_CSR_COMPx_BLANKING_Field := 16#0#;
+      COMPxBLANKING  : COMPx_CSR_COMPxBLANKING_Field := 16#0#;
       --  unspecified
       Reserved_21_21 : HAL.Bit := 16#0#;
       --  Comparator 1 inverting input selection
@@ -188,7 +199,7 @@ private
       Reserved_14_14 at 0 range 14 .. 14;
       COMPxPOL       at 0 range 15 .. 15;
       Reserved_16_17 at 0 range 16 .. 17;
-      COMPx_BLANKING at 0 range 18 .. 20;
+      COMPxBLANKING  at 0 range 18 .. 20;
       Reserved_21_21 at 0 range 21 .. 21;
       COMPxINMSEL_3  at 0 range 22 .. 22;
       Reserved_23_29 at 0 range 23 .. 29;
