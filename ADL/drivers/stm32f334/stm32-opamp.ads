@@ -1,7 +1,3 @@
-
---  This file provides interfaces for the operational amplifiers on the
---  STM32F3 (ARM Cortex M4F) microcontrollers from ST Microelectronics.
-
 with System; use System;
 
 package STM32.OPAMP is
@@ -21,11 +17,11 @@ package STM32.OPAMP is
    procedure Set_NI_Input_Mode
      (This  : in out Operational_Amplifier;
       Input : NI_Input_Mode)
-     with Post => Read_NI_Input_Mode (This) = Input;
+     with Post => Get_NI_Input_Mode (This) = Input;
    --  Select a calibration reference voltage on non-inverting input and
    --  disables external connections.
 
-   function Read_NI_Input_Mode
+   function Get_NI_Input_Mode
      (This : Operational_Amplifier) return NI_Input_Mode;
    --  Return the source connected to the non-inverting input of the
    --  operational amplifier.
@@ -40,14 +36,33 @@ package STM32.OPAMP is
    procedure Set_NI_Input_Port
      (This  : in out Operational_Amplifier;
       Input : NI_Input_Port)
-     with Post => Read_NI_Input_Port (This) = Input;
+     with Post => Get_NI_Input_Port (This) = Input;
    --  Select the source connected to the non-inverting input of the
    --  operational amplifier.
 
-   function Read_NI_Input_Port
+   function Get_NI_Input_Port
      (This : Operational_Amplifier) return NI_Input_Port;
    --  Return the source connected to the non-inverting input of the
    --  operational amplifier.
+
+   type NI_Sec_Input_Port is (PB14, PB0, PA7);
+
+   for NI_Sec_Input_Port use
+     (PB14 => 2#01#,
+      PB0  => 2#10#,
+      PA7  => 2#11#);
+
+   procedure Set_NI_Sec_Input_Port
+     (This  : in out Operational_Amplifier;
+      Input : NI_Sec_Input_Port)
+     with Post => Get_NI_Sec_Input_Port (This) = Input;
+   --  Select the secondary source connected to the non-inverting input
+   --  of the operational amplifier.
+
+   function Get_NI_Sec_Input_Port
+     (This : Operational_Amplifier) return NI_Sec_Input_Port;
+   --  Return the secondary source connected to the non-inverting input
+   --  of the operational amplifier.
 
    type I_Input_Port is
      (PC5_VM0,
@@ -58,45 +73,26 @@ package STM32.OPAMP is
    procedure Set_I_Input_Port
      (This  : in out Operational_Amplifier;
       Input : I_Input_Port)
-     with Post => Read_I_Input_Port (This) = Input;
+     with Post => Get_I_Input_Port (This) = Input;
    --  Select the source connected to the inverting input of the
    --  operational amplifier.
 
-   function Read_I_Input_Port
+   function Get_I_Input_Port
      (This : Operational_Amplifier) return I_Input_Port;
    --  Return the source connected to the inverting input of the
    --  operational amplifier.
 
-   type NI_Secondary_Input_Port is (PB14, PB0, PA7);
+   type I_Sec_Input_Port is (PC5_VM0, PA5_VM1);
 
-   for NI_Secondary_Input_Port use
-     (PB14 => 2#01#,
-      PB0  => 2#10#,
-      PA7  => 2#11#);
-
-   procedure Set_NI_Secondary_Input_Port
+   procedure Set_I_Sec_Input_Port
      (This  : in out Operational_Amplifier;
-      Input : NI_Secondary_Input_Port)
-     with Post => Read_NI_Secondary_Input_Port (This) = Input;
-   --  Select the secondary source connected to the non-inverting input
-   --  of the operational amplifier.
-
-   function Read_NI_Secondary_Input_Port
-     (This : Operational_Amplifier) return NI_Secondary_Input_Port;
-   --  Return the secondary source connected to the non-inverting input
-   --  of the operational amplifier.
-
-   type I_Secondary_Input_Port is (PC5_VM0, PA5_VM1);
-
-   procedure Set_I_Secondary_Input_Port
-     (This  : in out Operational_Amplifier;
-      Input : I_Secondary_Input_Port)
-     with Post => Read_I_Secondary_Input_Port (This) = Input;
+      Input : I_Sec_Input_Port)
+     with Post => Get_I_Sec_Input_Port (This) = Input;
    --  Select the secondary source connected to the inverting input of the
    --  operational amplifier.
 
-   function Read_I_Secondary_Input_Port
-     (This : Operational_Amplifier) return I_Secondary_Input_Port;
+   function Get_I_Sec_Input_Port
+     (This : Operational_Amplifier) return I_Sec_Input_Port;
    --  Return the secondary source connected to the inverting input of the
    --  operational amplifier.
 
@@ -106,49 +102,16 @@ package STM32.OPAMP is
    procedure Set_Input_Mux_Mode
      (This  : in out Operational_Amplifier;
       Input : Input_Mux_Mode)
-     with Post => Read_Input_Mux_Mode (This) = Input;
+     with Post => Get_Input_Mux_Mode (This) = Input;
    --  Select automatically the switch between the default selection
    --  (VP_SEL and VM_SEL) and the secondary selection (VPS_SEL and VMS_SEL)
    --  of the inverting and non inverting inputs of the operational amplifier.
 
-   function Read_Input_Mux_Mode
+   function Get_Input_Mux_Mode
      (This : Operational_Amplifier) return Input_Mux_Mode;
    --  Return the selection of the selection between the default and the
    --  secondary inputs of the inverting and non inverting inputs of the
    --  operational amplifier.
-
-   type Calibration_Mode_On is (Disabled, Enabled);
-   --  Enable/disable the calibration mode.
-
-   procedure Set_Calibration_Mode
-     (This  : in out Operational_Amplifier;
-      Input : Calibration_Mode_On)
-     with Post => Read_Calibration_Mode (This) = Input;
-   --  Select the calibration mode connecting VM and VP to the OPAMP
-   --  internal reference voltage.
-
-   function Read_Calibration_Mode
-     (This : Operational_Amplifier) return Calibration_Mode_On;
-   --  Return the calibration mode.
-
-   type Calibration_Value is
-     (VREFOPAMP_Is_3_3_VDDA, --  3.3%
-      VREFOPAMP_Is_10_VDDA, --  10%
-      VREFOPAMP_Is_50_VDDA, --  50%
-      VREFOPAMP_Is_90_VDDA --  90%
-      );
-   --  Offset calibration bus to generate the internal reference voltage.
-
-   procedure Set_Calibration_Value
-     (This  : in out Operational_Amplifier;
-      Input : Calibration_Value)
-     with Post => Read_Calibration_Value (This) = Input;
-   --  Select the offset calibration bus used to generate the internal
-   --  reference voltage when CALON = 1 or FORCE_VP = 1.
-
-   function Read_Calibration_Value
-     (This : Operational_Amplifier) return Calibration_Value;
-   --  Return the offset calibration bus voltage.
 
    type PGA_Mode_Gain is
      (NI_Gain_2,
@@ -182,24 +145,21 @@ package STM32.OPAMP is
    procedure Set_PGA_Mode_Gain
      (This  : in out Operational_Amplifier;
       Input : PGA_Mode_Gain)
-     with Post => Read_PGA_Mode_Gain (This) = Input;
+     with Post => Get_PGA_Mode_Gain (This) = Input;
    --  Select the gain in PGA mode.
 
-   function Read_PGA_Mode_Gain
+   function Get_PGA_Mode_Gain
      (This : Operational_Amplifier) return PGA_Mode_Gain;
    --  Return the gain in PGA mode.
 
-   type User_Trimming is (Disabled, Enabled);
-   --  Enable/disable user trimming.
-
    procedure Set_User_Trimming
-     (This  : in out Operational_Amplifier;
-      Input : User_Trimming)
-     with Post => Read_User_Trimming (This) = Input;
+     (This   : in out Operational_Amplifier;
+      Enabled : Boolean)
+     with Post => Get_User_Trimming (This) = Enabled;
    --  Enable/disable user trimming.
 
-   function Read_User_Trimming
-     (This : Operational_Amplifier) return User_Trimming;
+   function Get_User_Trimming
+     (This : Operational_Amplifier) return Boolean;
    --  Return the state of user trimming.
 
    type Differential_Pair is (NMOS, PMOS);
@@ -208,13 +168,59 @@ package STM32.OPAMP is
      (This  : in out Operational_Amplifier;
       Pair  : Differential_Pair;
       Input : UInt5)
-     with Post => Read_Offset_Trimming (This, Pair) = Input;
+     with Post => Get_Offset_Trimming (This, Pair) = Input;
    --  Select the offset trimming value for NMOS or PMOS.
 
-   function Read_Offset_Trimming
+   function Get_Offset_Trimming
      (This : Operational_Amplifier;
       Pair : Differential_Pair) return UInt5;
    --  Return the offset trimming value for NMOS or PMOS.
+
+   type Init_Parameters is record
+      Input_Minus     : I_Input_Port;
+      Input_Sec_Minus : I_Sec_Input_Port;
+      Input_Plus      : NI_Input_Port;
+      Input_Sec_Plus  : NI_Sec_Input_Port;
+      Mux_Mode        : Input_Mux_Mode;
+      PGA_Mode        : PGA_Mode_Gain;
+   end record;
+
+   procedure Configure_Opamp
+     (This  : in out Operational_Amplifier;
+      Param : Init_Parameters);
+
+   type Calibration_Mode_On is (Disabled, Enabled);
+   --  Enable/disable the calibration mode.
+
+   procedure Set_Calibration_Mode
+     (This  : in out Operational_Amplifier;
+      Input : Calibration_Mode_On)
+     with Post => Get_Calibration_Mode (This) = Input;
+   --  Select the calibration mode connecting VM and VP to the OPAMP
+   --  internal reference voltage.
+
+   function Get_Calibration_Mode
+     (This : Operational_Amplifier) return Calibration_Mode_On;
+   --  Return the calibration mode.
+
+   type Calibration_Value is
+     (VREFOPAMP_Is_3_3_VDDA, --  3.3%
+      VREFOPAMP_Is_10_VDDA, --  10%
+      VREFOPAMP_Is_50_VDDA, --  50%
+      VREFOPAMP_Is_90_VDDA --  90%
+      );
+   --  Offset calibration bus to generate the internal reference voltage.
+
+   procedure Set_Calibration_Value
+     (This  : in out Operational_Amplifier;
+      Input : Calibration_Value)
+     with Post => Get_Calibration_Value (This) = Input;
+   --  Select the offset calibration bus used to generate the internal
+   --  reference voltage when CALON = 1 or FORCE_VP = 1.
+
+   function Get_Calibration_Value
+     (This : Operational_Amplifier) return Calibration_Value;
+   --  Return the offset calibration bus voltage.
 
    procedure Calibrate (This : in out Operational_Amplifier);
    --  Calibrate the NMOS and PMOS differential pair. This routine
@@ -229,10 +235,10 @@ package STM32.OPAMP is
    procedure Set_Internal_VRef_Output
      (This  : in out Operational_Amplifier;
       Input : Internal_VRef_Output)
-     with Post => Read_Internal_VRef_Output (This) = Input;
+     with Post => Get_Internal_VRef_Output (This) = Input;
    --  Output the internal reference voltage (VREFOPAMPx).
 
-   function Read_Internal_VRef_Output
+   function Get_Internal_VRef_Output
      (This : Operational_Amplifier) return Internal_VRef_Output;
    --  Return the internal output reference voltage state.
 
@@ -240,17 +246,17 @@ package STM32.OPAMP is
      (NI_Lesser_Then_I,
       NI_Greater_Then_I);
 
-   function Read_Output_Status_Flag
+   function Get_Output_Status_Flag
      (This : Operational_Amplifier) return Output_Status_Flag;
    --  Return the output status flag when the OPAMP is used as comparator
    --  during calibration.
 
    procedure Set_Lock_OpAmp (This : in out Operational_Amplifier)
-     with Post => Read_Lock_OpAmp (This) = True;
+     with Post => Get_Lock_OpAmp (This) = True;
    --  Allows to have OPAMPx_CSR register as read-only. It can only be cleared
    --  by a system reset.
 
-   function Read_Lock_OpAmp (This : Operational_Amplifier) return Boolean;
+   function Get_Lock_OpAmp (This : Operational_Amplifier) return Boolean;
    --  Return the OPAMP lock bit state.
 
 private
