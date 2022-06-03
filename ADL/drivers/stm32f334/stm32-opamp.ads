@@ -189,18 +189,15 @@ package STM32.OPAMP is
      (This  : in out Operational_Amplifier;
       Param : Init_Parameters);
 
-   type Calibration_Mode_On is (Disabled, Enabled);
-   --  Enable/disable the calibration mode.
-
    procedure Set_Calibration_Mode
-     (This  : in out Operational_Amplifier;
-      Input : Calibration_Mode_On)
-     with Post => Get_Calibration_Mode (This) = Input;
+     (This   : in out Operational_Amplifier;
+      Enabled : Boolean)
+     with Post => Get_Calibration_Mode (This) = Enabled;
    --  Select the calibration mode connecting VM and VP to the OPAMP
    --  internal reference voltage.
 
    function Get_Calibration_Mode
-     (This : Operational_Amplifier) return Calibration_Mode_On;
+     (This : Operational_Amplifier) return Boolean;
    --  Return the calibration mode.
 
    type Calibration_Value is

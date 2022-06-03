@@ -45,11 +45,7 @@ package body STM32.COMP is
      (This  : in out Comparator;
       Input : Inverting_Input_Port) is
    begin
-      if Input'Enum_Rep > 7 then
-         This.CSR.COMPxINMSEL_3 := True;
-      else
-         This.CSR.COMPxINMSEL_3 := False;
-      end if;
+      This.CSR.COMPxINMSEL_3 := Input'Enum_Rep > 7;
       This.CSR.COMPxINMSEL := UInt3 (Input'Enum_Rep);
    end Set_Inverting_Input_Port;
 
@@ -62,7 +58,7 @@ package body STM32.COMP is
    is
       Value : UInt4;
    begin
-      if This.CSR.COMPxINMSEL_3 = True then
+      if This.CSR.COMPxINMSEL_3 then
          Value := UInt4 (This.CSR.COMPxINMSEL) + 8;
       else
          Value := UInt4 (This.CSR.COMPxINMSEL);
@@ -105,11 +101,7 @@ package body STM32.COMP is
 
    function Get_Output_Polarity (This : Comparator) return Output_Polarity is
    begin
-      if This.CSR.COMPxPOL = True then
-         return Inverted;
-      else
-         return Not_Inverted;
-      end if;
+      return Output_Polarity'Val (Boolean'Pos (This.CSR.COMPxPOL));
    end Get_Output_Polarity;
 
    -------------------------
@@ -155,11 +147,7 @@ package body STM32.COMP is
    function Get_Comparator_Output
      (This : Comparator) return Comparator_Output is
    begin
-      if This.CSR.COMPxOUT = True then
-         return High;
-      else
-         return Low;
-      end if;
+         return Comparator_Output'Val (Boolean'Pos (This.CSR.COMPxOUT));
    end Get_Comparator_Output;
 
    -------------------------

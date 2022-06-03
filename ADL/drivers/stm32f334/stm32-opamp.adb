@@ -56,11 +56,7 @@ package body STM32.OPAMP is
    function Get_NI_Input_Mode
      (This : Operational_Amplifier) return NI_Input_Mode is
    begin
-      if This.CSR.FORCE_VP = True then
-         return Calibration_Mode;
-      else
-         return Normal_Mode;
-      end if;
+      return NI_Input_Mode'Val (Boolean'Pos (This.CSR.FORCE_VP));
    end Get_NI_Input_Mode;
 
    -----------------------
@@ -145,11 +141,7 @@ package body STM32.OPAMP is
    function Get_I_Sec_Input_Port
      (This : Operational_Amplifier) return I_Sec_Input_Port is
    begin
-      if This.CSR.VMS_SEL = True then
-         return PA5_VM1;
-      else
-         return PC5_VM0;
-      end if;
+      return I_Sec_Input_Port'Val (Boolean'Pos (This.CSR.VMS_SEL));
    end Get_I_Sec_Input_Port;
 
    ------------------------
@@ -170,11 +162,7 @@ package body STM32.OPAMP is
    function Get_Input_Mux_Mode
      (This : Operational_Amplifier) return Input_Mux_Mode is
    begin
-      if This.CSR.TCM_EN = True then
-         return Automatic;
-      else
-         return Manual;
-      end if;
+      return Input_Mux_Mode'Val (Boolean'Pos (This.CSR.TCM_EN));
    end Get_Input_Mux_Mode;
 
    -----------------------
@@ -275,10 +263,10 @@ package body STM32.OPAMP is
    --------------------------
 
    procedure Set_Calibration_Mode
-     (This  : in out Operational_Amplifier;
-      Input : Calibration_Mode_On) is
+     (This    : in out Operational_Amplifier;
+      Enabled : Boolean) is
    begin
-      This.CSR.CALON := Input = Enabled;
+      This.CSR.CALON := Enabled;
    end Set_Calibration_Mode;
 
    --------------------------
@@ -286,13 +274,9 @@ package body STM32.OPAMP is
    --------------------------
 
    function Get_Calibration_Mode
-     (This : Operational_Amplifier) return Calibration_Mode_On is
+     (This : Operational_Amplifier) return Boolean is
    begin
-      if This.CSR.CALON then
-         return Enabled;
-      else
-         return Disabled;
-      end if;
+      return This.CSR.CALON;
    end Get_Calibration_Mode;
 
    ---------------------------
@@ -334,7 +318,7 @@ package body STM32.OPAMP is
 
       --  3. Connect VM and VP to the internal reference voltage by setting
       --  the CALON bit.
-      Set_Calibration_Mode (This, Input => Enabled);
+      Set_Calibration_Mode (This, Enabled => True);
 
       --  4. Set CALSEL to 11 (OPAMP internal reference = 0.9 x VDDA) for NMOS,
       --  Set CALSEL to 01 (OPAMP internal reference = 0.1 x VDDA) for PMOS.
@@ -362,8 +346,10 @@ package body STM32.OPAMP is
             --  DS9994 pg. 101 = 2 ms.
             Delay_Until (Clock + Milliseconds (2));
          end loop;
-
       end loop;
+
+      Set_User_Trimming (This, Enabled => False);
+      Set_Calibration_Mode (This, Enabled => False);
    end Calibrate;
 
    ------------------------------
@@ -384,11 +370,7 @@ package body STM32.OPAMP is
    function Get_Internal_VRef_Output
      (This : Operational_Amplifier) return Internal_VRef_Output is
    begin
-      if This.CSR.TSTREF = True then
-         return VRef_Is_Not_Output;
-      else
-         return VRef_Is_Output;
-      end if;
+      return Internal_VRef_Output'Val (Boolean'Pos (This.CSR.TSTREF));
    end Get_Internal_VRef_Output;
 
    ----------------------------
@@ -398,11 +380,7 @@ package body STM32.OPAMP is
    function Get_Output_Status_Flag
      (This : Operational_Amplifier) return Output_Status_Flag is
    begin
-      if This.CSR.OUTCAL = True then
-         return NI_Greater_Then_I;
-      else
-         return NI_Lesser_Then_I;
-      end if;
+         return Output_Status_Flag'Val (Boolean'Pos (This.CSR.OUTCAL));
    end Get_Output_Status_Flag;
 
    --------------------
