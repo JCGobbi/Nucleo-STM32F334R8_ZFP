@@ -1,4 +1,4 @@
-with System; use System;
+private with STM32_SVD.SYSCFG;
 
 package STM32.OPAMP is
 
@@ -258,80 +258,10 @@ package STM32.OPAMP is
 
 private
 
-   --  representation for OpAmp x Control and Status Registers  ----------
-
-   subtype OPAMPx_CSR_VP_SEL_Field is HAL.UInt2;
-   subtype OPAMPx_CSR_VM_SEL_Field is HAL.UInt2;
-   subtype OPAMPx_CSR_VPS_SEL_Field is HAL.UInt2;
-   subtype OPAMPx_CSR_CALSEL_Field is HAL.UInt2;
-   subtype OPAMPx_CSR_PGA_GAIN_Field is HAL.UInt4;
-   subtype OPAMPx_CSR_TRIMOFFSETP_Field is HAL.UInt5;
-   subtype OPAMPx_CSR_TRIMOFFSETN_Field is HAL.UInt5;
-
-   --  OPAMPx control register
-   type OPAMPx_CSR_Register is record
-      --  OPAMPx enable
-      OPAMPxEN     : Boolean := False;
-      --  FORCE_VP
-      FORCE_VP     : Boolean := False;
-      --  OPAMPx Non inverting input selection
-      VP_SEL       : OPAMPx_CSR_VP_SEL_Field := 16#0#;
-      --  unspecified
-      Reserved_4_4 : HAL.Bit := 16#0#;
-      --  OPAMPx inverting input selection
-      VM_SEL       : OPAMPx_CSR_VM_SEL_Field := 16#0#;
-      --  Timer controlled Mux mode enable
-      TCM_EN       : Boolean := False;
-      --  OPAMPx inverting input secondary selection
-      VMS_SEL      : Boolean := False;
-      --  OPAMPx Non inverting input secondary selection
-      VPS_SEL      : OPAMPx_CSR_VPS_SEL_Field := 16#0#;
-      --  Calibration mode enable
-      CALON        : Boolean := False;
-      --  Calibration selection
-      CALSEL       : OPAMPx_CSR_CALSEL_Field := 16#0#;
-      --  Gain in PGA mode
-      PGA_GAIN     : OPAMPx_CSR_PGA_GAIN_Field := 16#0#;
-      --  User trimming enable
-      USER_TRIM    : Boolean := False;
-      --  Offset trimming value (PMOS)
-      TRIMOFFSETP  : OPAMPx_CSR_TRIMOFFSETP_Field := 16#0#;
-      --  Offset trimming value (NMOS)
-      TRIMOFFSETN  : OPAMPx_CSR_TRIMOFFSETN_Field := 16#0#;
-      --  TSTREF
-      TSTREF       : Boolean := False;
-      --  Read-only. OPAMP x ouput status flag
-      OUTCAL       : Boolean := False;
-      --  OPAMP x lock
-      LOCK         : Boolean := False;
-   end record
-     with Volatile_Full_Access, Object_Size => 32,
-          Bit_Order => System.Low_Order_First;
-
-   for OPAMPx_CSR_Register use record
-      OPAMPxEN     at 0 range  0 .. 0;
-      FORCE_VP     at 0 range  1 .. 1;
-      VP_SEL       at 0 range  2 .. 3;
-      Reserved_4_4 at 0 range  4 .. 4;
-      VM_SEL       at 0 range  5 .. 6;
-      TCM_EN       at 0 range  7 .. 7;
-      VMS_SEL      at 0 range  8 .. 8;
-      VPS_SEL      at 0 range  9 .. 10;
-      CALON        at 0 range 11 .. 11;
-      CALSEL       at 0 range 12 .. 13;
-      PGA_GAIN     at 0 range 14 .. 17;
-      USER_TRIM    at 0 range 18 .. 18;
-      TRIMOFFSETP  at 0 range 19 .. 23;
-      TRIMOFFSETN  at 0 range 24 .. 28;
-      TSTREF       at 0 range 29 .. 29;
-      OUTCAL       at 0 range 30 .. 30;
-      LOCK         at 0 range 31 .. 31;
-   end record;
-
    --  representation for the whole Operationa Amplifier type  -----------------
 
    type Operational_Amplifier is limited record
-      CSR : OPAMPx_CSR_Register;
+      CSR : STM32_SVD.SYSCFG.OPAMP2_CSR_Register;
    end record with Volatile, Size => 1 * 32;
 
    for Operational_Amplifier use record

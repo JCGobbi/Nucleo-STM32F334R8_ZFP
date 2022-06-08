@@ -335,175 +335,175 @@ package STM32_SVD.SYSCFG is
       Reserved_9_31    at 0 range 9 .. 31;
    end record;
 
-   subtype COMP2_CSR_COMP2INMSEL_Field is HAL.UInt3;
-   subtype COMP2_CSR_COMP2OUTSEL_Field is HAL.UInt4;
-   subtype COMP2_CSR_COMP2_BLANKING_Field is HAL.UInt3;
+   subtype COMP2_CSR_INMSEL_Field is HAL.UInt3;
+   subtype COMP2_CSR_OUTSEL_Field is HAL.UInt4;
+   subtype COMP2_CSR_BLANKING_Field is HAL.UInt3;
 
    --  control and status register
    type COMP2_CSR_Register is record
       --  Comparator 2 enable
-      COMP2EN        : Boolean := False;
+      EN             : Boolean := False;
       --  unspecified
       Reserved_1_3   : HAL.UInt3 := 16#0#;
       --  Comparator 2 inverting input selection
-      COMP2INMSEL    : COMP2_CSR_COMP2INMSEL_Field := 16#0#;
+      INMSEL         : COMP2_CSR_INMSEL_Field := 16#0#;
       --  unspecified
       Reserved_7_9   : HAL.UInt3 := 16#0#;
       --  Comparator 2 output selection
-      COMP2OUTSEL    : COMP2_CSR_COMP2OUTSEL_Field := 16#0#;
+      OUTSEL         : COMP2_CSR_OUTSEL_Field := 16#0#;
       --  unspecified
       Reserved_14_14 : HAL.Bit := 16#0#;
       --  Comparator 2 output polarity
-      COMP2POL       : Boolean := False;
+      POL            : Boolean := False;
       --  unspecified
       Reserved_16_17 : HAL.UInt2 := 16#0#;
       --  Comparator 2 blanking source
-      COMP2_BLANKING : COMP2_CSR_COMP2_BLANKING_Field := 16#0#;
+      BLANKING       : COMP2_CSR_BLANKING_Field := 16#0#;
       --  unspecified
       Reserved_21_21 : HAL.Bit := 16#0#;
       --  Comparator 1 inverting input selection
-      COMP2INMSEL_3  : Boolean := False;
+      INMSEL_3       : Boolean := False;
       --  unspecified
       Reserved_23_29 : HAL.UInt7 := 16#0#;
       --  Read-only. Comparator 2 output
-      COMP2OUT       : Boolean := False;
+      OUT_k          : Boolean := False;
       --  Comparator 2 lock
-      COMP2LOCK      : Boolean := False;
+      LOCK           : Boolean := False;
    end record
      with Volatile_Full_Access, Object_Size => 32,
           Bit_Order => System.Low_Order_First;
 
    for COMP2_CSR_Register use record
-      COMP2EN        at 0 range 0 .. 0;
+      EN             at 0 range 0 .. 0;
       Reserved_1_3   at 0 range 1 .. 3;
-      COMP2INMSEL    at 0 range 4 .. 6;
+      INMSEL         at 0 range 4 .. 6;
       Reserved_7_9   at 0 range 7 .. 9;
-      COMP2OUTSEL    at 0 range 10 .. 13;
+      OUTSEL         at 0 range 10 .. 13;
       Reserved_14_14 at 0 range 14 .. 14;
-      COMP2POL       at 0 range 15 .. 15;
+      POL            at 0 range 15 .. 15;
       Reserved_16_17 at 0 range 16 .. 17;
-      COMP2_BLANKING at 0 range 18 .. 20;
+      BLANKING       at 0 range 18 .. 20;
       Reserved_21_21 at 0 range 21 .. 21;
-      COMP2INMSEL_3  at 0 range 22 .. 22;
+      INMSEL_3       at 0 range 22 .. 22;
       Reserved_23_29 at 0 range 23 .. 29;
-      COMP2OUT       at 0 range 30 .. 30;
-      COMP2LOCK      at 0 range 31 .. 31;
+      OUT_k          at 0 range 30 .. 30;
+      LOCK           at 0 range 31 .. 31;
    end record;
 
-   subtype COMP4_CSR_COMP4INMSEL_Field is HAL.UInt3;
-   subtype COMP4_CSR_COMP4OUTSEL_Field is HAL.UInt4;
-   subtype COMP4_CSR_COMP4_BLANKING_Field is HAL.UInt3;
+   subtype COMP4_CSR_INMSEL_Field is HAL.UInt3;
+   subtype COMP4_CSR_OUTSEL_Field is HAL.UInt4;
+   subtype COMP4_CSR_BLANKING_Field is HAL.UInt3;
 
    --  control and status register
    type COMP4_CSR_Register is record
       --  Comparator 4 enable
-      COMP4EN        : Boolean := False;
+      EN             : Boolean := False;
       --  unspecified
       Reserved_1_3   : HAL.UInt3 := 16#0#;
       --  Comparator 4 inverting input selection
-      COMP4INMSEL    : COMP4_CSR_COMP4INMSEL_Field := 16#0#;
+      INMSEL         : COMP4_CSR_INMSEL_Field := 16#0#;
       --  unspecified
       Reserved_7_9   : HAL.UInt3 := 16#0#;
       --  Comparator 4 output selection
-      COMP4OUTSEL    : COMP4_CSR_COMP4OUTSEL_Field := 16#0#;
+      OUTSEL         : COMP4_CSR_OUTSEL_Field := 16#0#;
       --  unspecified
       Reserved_14_14 : HAL.Bit := 16#0#;
       --  Comparator 4 output polarity
-      COMP4POL       : Boolean := False;
+      POL            : Boolean := False;
       --  unspecified
       Reserved_16_17 : HAL.UInt2 := 16#0#;
       --  Comparator 4 blanking source
-      COMP4_BLANKING : COMP4_CSR_COMP4_BLANKING_Field := 16#0#;
+      BLANKING       : COMP4_CSR_BLANKING_Field := 16#0#;
       --  unspecified
       Reserved_21_21 : HAL.Bit := 16#0#;
       --  Comparator 4 inverting input selection
-      COMP4INMSEL_3  : Boolean := False;
+      INMSEL_3       : Boolean := False;
       --  unspecified
       Reserved_23_29 : HAL.UInt7 := 16#0#;
       --  Read-only. Comparator 4 output
-      COMP4OUT       : Boolean := False;
+      OUT_k          : Boolean := False;
       --  Comparator 4 lock
-      COMP4LOCK      : Boolean := False;
+      LOCK           : Boolean := False;
    end record
      with Volatile_Full_Access, Object_Size => 32,
           Bit_Order => System.Low_Order_First;
 
    for COMP4_CSR_Register use record
-      COMP4EN        at 0 range 0 .. 0;
+      EN             at 0 range 0 .. 0;
       Reserved_1_3   at 0 range 1 .. 3;
-      COMP4INMSEL    at 0 range 4 .. 6;
+      INMSEL         at 0 range 4 .. 6;
       Reserved_7_9   at 0 range 7 .. 9;
-      COMP4OUTSEL    at 0 range 10 .. 13;
+      OUTSEL         at 0 range 10 .. 13;
       Reserved_14_14 at 0 range 14 .. 14;
-      COMP4POL       at 0 range 15 .. 15;
+      POL            at 0 range 15 .. 15;
       Reserved_16_17 at 0 range 16 .. 17;
-      COMP4_BLANKING at 0 range 18 .. 20;
+      BLANKING       at 0 range 18 .. 20;
       Reserved_21_21 at 0 range 21 .. 21;
-      COMP4INMSEL_3  at 0 range 22 .. 22;
+      INMSEL_3       at 0 range 22 .. 22;
       Reserved_23_29 at 0 range 23 .. 29;
-      COMP4OUT       at 0 range 30 .. 30;
-      COMP4LOCK      at 0 range 31 .. 31;
+      OUT_k          at 0 range 30 .. 30;
+      LOCK           at 0 range 31 .. 31;
    end record;
 
-   subtype COMP6_CSR_COMP6INMSEL_Field is HAL.UInt3;
-   subtype COMP6_CSR_COMP6OUTSEL_Field is HAL.UInt4;
-   subtype COMP6_CSR_COMP6_BLANKING_Field is HAL.UInt3;
+   subtype COMP6_CSR_INMSEL_Field is HAL.UInt3;
+   subtype COMP6_CSR_OUTSEL_Field is HAL.UInt4;
+   subtype COMP6_CSR_BLANKING_Field is HAL.UInt3;
 
    --  control and status register
    type COMP6_CSR_Register is record
       --  Comparator 6 enable
-      COMP6EN        : Boolean := False;
+      EN             : Boolean := False;
       --  unspecified
       Reserved_1_3   : HAL.UInt3 := 16#0#;
       --  Comparator 6 inverting input selection
-      COMP6INMSEL    : COMP6_CSR_COMP6INMSEL_Field := 16#0#;
+      INMSEL         : COMP6_CSR_INMSEL_Field := 16#0#;
       --  unspecified
       Reserved_7_9   : HAL.UInt3 := 16#0#;
       --  Comparator 6 output selection
-      COMP6OUTSEL    : COMP6_CSR_COMP6OUTSEL_Field := 16#0#;
+      OUTSEL         : COMP6_CSR_OUTSEL_Field := 16#0#;
       --  unspecified
       Reserved_14_14 : HAL.Bit := 16#0#;
       --  Comparator 6 output polarity
-      COMP6POL       : Boolean := False;
+      POL            : Boolean := False;
       --  unspecified
       Reserved_16_17 : HAL.UInt2 := 16#0#;
       --  Comparator 6 blanking source
-      COMP6_BLANKING : COMP6_CSR_COMP6_BLANKING_Field := 16#0#;
+      BLANKING       : COMP6_CSR_BLANKING_Field := 16#0#;
       --  unspecified
       Reserved_21_21 : HAL.Bit := 16#0#;
       --  Comparator 6 inverting input selection
-      COMP6INMSEL_3  : Boolean := False;
+      INMSEL_3       : Boolean := False;
       --  unspecified
       Reserved_23_29 : HAL.UInt7 := 16#0#;
       --  Read-only. Comparator 6 output
-      COMP6OUT       : Boolean := False;
+      OUT_k          : Boolean := False;
       --  Comparator 6 lock
-      COMP6LOCK      : Boolean := False;
+      LOCK           : Boolean := False;
    end record
      with Volatile_Full_Access, Object_Size => 32,
           Bit_Order => System.Low_Order_First;
 
    for COMP6_CSR_Register use record
-      COMP6EN        at 0 range 0 .. 0;
+      EN             at 0 range 0 .. 0;
       Reserved_1_3   at 0 range 1 .. 3;
-      COMP6INMSEL    at 0 range 4 .. 6;
+      INMSEL         at 0 range 4 .. 6;
       Reserved_7_9   at 0 range 7 .. 9;
-      COMP6OUTSEL    at 0 range 10 .. 13;
+      OUTSEL         at 0 range 10 .. 13;
       Reserved_14_14 at 0 range 14 .. 14;
-      COMP6POL       at 0 range 15 .. 15;
+      POL            at 0 range 15 .. 15;
       Reserved_16_17 at 0 range 16 .. 17;
-      COMP6_BLANKING at 0 range 18 .. 20;
+      BLANKING       at 0 range 18 .. 20;
       Reserved_21_21 at 0 range 21 .. 21;
-      COMP6INMSEL_3  at 0 range 22 .. 22;
+      INMSEL_3       at 0 range 22 .. 22;
       Reserved_23_29 at 0 range 23 .. 29;
-      COMP6OUT       at 0 range 30 .. 30;
-      COMP6LOCK      at 0 range 31 .. 31;
+      OUT_k          at 0 range 30 .. 30;
+      LOCK           at 0 range 31 .. 31;
    end record;
 
    subtype OPAMP2_CSR_VP_SEL_Field is HAL.UInt2;
    subtype OPAMP2_CSR_VM_SEL_Field is HAL.UInt2;
    subtype OPAMP2_CSR_VPS_SEL_Field is HAL.UInt2;
-   subtype OPAMP2_CSR_CAL_SEL_Field is HAL.UInt2;
+   subtype OPAMP2_CSR_CALSEL_Field is HAL.UInt2;
    subtype OPAMP2_CSR_PGA_GAIN_Field is HAL.UInt4;
    subtype OPAMP2_CSR_TRIMOFFSETP_Field is HAL.UInt5;
    subtype OPAMP2_CSR_TRIMOFFSETN_Field is HAL.UInt5;
@@ -511,7 +511,7 @@ package STM32_SVD.SYSCFG is
    --  OPAMP2 control register
    type OPAMP2_CSR_Register is record
       --  OPAMP2 enable
-      OPAMP2EN     : Boolean := False;
+      EN           : Boolean := False;
       --  FORCE_VP
       FORCE_VP     : Boolean := False;
       --  OPAMP2 Non inverting input selection
@@ -529,7 +529,7 @@ package STM32_SVD.SYSCFG is
       --  Calibration mode enable
       CALON        : Boolean := False;
       --  Calibration selection
-      CAL_SEL      : OPAMP2_CSR_CAL_SEL_Field := 16#0#;
+      CALSEL       : OPAMP2_CSR_CALSEL_Field := 16#0#;
       --  Gain in PGA mode
       PGA_GAIN     : OPAMP2_CSR_PGA_GAIN_Field := 16#0#;
       --  User trimming enable
@@ -549,7 +549,7 @@ package STM32_SVD.SYSCFG is
           Bit_Order => System.Low_Order_First;
 
    for OPAMP2_CSR_Register use record
-      OPAMP2EN     at 0 range 0 .. 0;
+      EN           at 0 range 0 .. 0;
       FORCE_VP     at 0 range 1 .. 1;
       VP_SEL       at 0 range 2 .. 3;
       Reserved_4_4 at 0 range 4 .. 4;
@@ -558,7 +558,7 @@ package STM32_SVD.SYSCFG is
       VMS_SEL      at 0 range 8 .. 8;
       VPS_SEL      at 0 range 9 .. 10;
       CALON        at 0 range 11 .. 11;
-      CAL_SEL      at 0 range 12 .. 13;
+      CALSEL       at 0 range 12 .. 13;
       PGA_GAIN     at 0 range 14 .. 17;
       USER_TRIM    at 0 range 18 .. 18;
       TRIMOFFSETP  at 0 range 19 .. 23;

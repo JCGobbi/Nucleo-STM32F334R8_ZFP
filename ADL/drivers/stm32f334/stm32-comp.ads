@@ -1,8 +1,4 @@
-
---  This file provides interfaces for the comparators on the
---  STM32F3 (ARM Cortex M4F) microcontrollers from ST Microelectronics.
-
-with System; use System;
+private with STM32_SVD.SYSCFG;
 
 package STM32.COMP is
 
@@ -150,67 +146,10 @@ package STM32.COMP is
 
 private
 
-   --  representation for Comparator 2, 4 and 6 Control and Status Registers  ----------
-
-   subtype COMPx_CSR_COMPxINMSEL_Field is HAL.UInt3;
-   subtype COMPx_CSR_COMPxOUTSEL_Field is HAL.UInt4;
-   subtype COMPx_CSR_COMPxBLANKING_Field is HAL.UInt3;
-
-   --  control and status register
-   type COMPx_CSR_Register is record
-      --  Comparator 2 enable
-      COMPxEN        : Boolean := False;
-      --  unspecified
-      Reserved_1_3   : HAL.UInt3 := 16#0#;
-      --  Comparator 2 inverting input selection
-      COMPxINMSEL    : COMPx_CSR_COMPxINMSEL_Field := 16#0#;
-      --  unspecified
-      Reserved_7_9   : HAL.UInt3 := 16#0#;
-      --  Comparator 2 output selection
-      COMPxOUTSEL    : COMPx_CSR_COMPxOUTSEL_Field := 16#0#;
-      --  unspecified
-      Reserved_14_14 : HAL.Bit := 16#0#;
-      --  Comparator 2 output polarity
-      COMPxPOL       : Boolean := False;
-      --  unspecified
-      Reserved_16_17 : HAL.UInt2 := 16#0#;
-      --  Comparator 2 blanking source
-      COMPxBLANKING  : COMPx_CSR_COMPxBLANKING_Field := 16#0#;
-      --  unspecified
-      Reserved_21_21 : HAL.Bit := 16#0#;
-      --  Comparator 1 inverting input selection
-      COMPxINMSEL_3  : Boolean := False;
-      --  unspecified
-      Reserved_23_29 : HAL.UInt7 := 16#0#;
-      --  Read-only. Comparator 2 output
-      COMPxOUT       : Boolean := False;
-      --  Comparator 2 lock
-      COMPxLOCK      : Boolean := False;
-   end record
-     with Volatile_Full_Access, Object_Size => 32,
-          Bit_Order => System.Low_Order_First;
-
-   for COMPx_CSR_Register use record
-      COMPxEN        at 0 range 0 .. 0;
-      Reserved_1_3   at 0 range 1 .. 3;
-      COMPxINMSEL    at 0 range 4 .. 6;
-      Reserved_7_9   at 0 range 7 .. 9;
-      COMPxOUTSEL    at 0 range 10 .. 13;
-      Reserved_14_14 at 0 range 14 .. 14;
-      COMPxPOL       at 0 range 15 .. 15;
-      Reserved_16_17 at 0 range 16 .. 17;
-      COMPxBLANKING  at 0 range 18 .. 20;
-      Reserved_21_21 at 0 range 21 .. 21;
-      COMPxINMSEL_3  at 0 range 22 .. 22;
-      Reserved_23_29 at 0 range 23 .. 29;
-      COMPxOUT       at 0 range 30 .. 30;
-      COMPxLOCK      at 0 range 31 .. 31;
-   end record;
-
    --  representation for the whole Comparator type  -----------------
 
    type Comparator is limited record
-      CSR : COMPx_CSR_Register;
+      CSR : STM32_SVD.SYSCFG.COMP2_CSR_Register;
    end record with Volatile, Size => 1 * 32;
 
    for Comparator use record

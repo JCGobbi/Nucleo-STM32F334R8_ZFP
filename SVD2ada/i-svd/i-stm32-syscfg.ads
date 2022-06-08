@@ -366,187 +366,187 @@ package Interfaces.STM32.SYSCFG is
       Reserved_9_31    at 0 range 9 .. 31;
    end record;
 
-   subtype COMP2_CSR_COMP2EN_Field is Interfaces.STM32.Bit;
-   subtype COMP2_CSR_COMP2INMSEL_Field is Interfaces.STM32.UInt3;
-   subtype COMP2_CSR_COMP2OUTSEL_Field is Interfaces.STM32.UInt4;
-   subtype COMP2_CSR_COMP2POL_Field is Interfaces.STM32.Bit;
-   subtype COMP2_CSR_COMP2_BLANKING_Field is Interfaces.STM32.UInt3;
-   subtype COMP2_CSR_COMP2INMSEL_3_Field is Interfaces.STM32.Bit;
-   subtype COMP2_CSR_COMP2OUT_Field is Interfaces.STM32.Bit;
-   subtype COMP2_CSR_COMP2LOCK_Field is Interfaces.STM32.Bit;
+   subtype COMP2_CSR_EN_Field is Interfaces.STM32.Bit;
+   subtype COMP2_CSR_INMSEL_Field is Interfaces.STM32.UInt3;
+   subtype COMP2_CSR_OUTSEL_Field is Interfaces.STM32.UInt4;
+   subtype COMP2_CSR_POL_Field is Interfaces.STM32.Bit;
+   subtype COMP2_CSR_BLANKING_Field is Interfaces.STM32.UInt3;
+   subtype COMP2_CSR_INMSEL_3_Field is Interfaces.STM32.Bit;
+   subtype COMP2_CSR_OUT_Field is Interfaces.STM32.Bit;
+   subtype COMP2_CSR_LOCK_Field is Interfaces.STM32.Bit;
 
    --  control and status register
    type COMP2_CSR_Register is record
       --  Comparator 2 enable
-      COMP2EN        : COMP2_CSR_COMP2EN_Field := 16#0#;
+      EN             : COMP2_CSR_EN_Field := 16#0#;
       --  unspecified
       Reserved_1_3   : Interfaces.STM32.UInt3 := 16#0#;
       --  Comparator 2 inverting input selection
-      COMP2INMSEL    : COMP2_CSR_COMP2INMSEL_Field := 16#0#;
+      INMSEL         : COMP2_CSR_INMSEL_Field := 16#0#;
       --  unspecified
       Reserved_7_9   : Interfaces.STM32.UInt3 := 16#0#;
       --  Comparator 2 output selection
-      COMP2OUTSEL    : COMP2_CSR_COMP2OUTSEL_Field := 16#0#;
+      OUTSEL         : COMP2_CSR_OUTSEL_Field := 16#0#;
       --  unspecified
       Reserved_14_14 : Interfaces.STM32.Bit := 16#0#;
       --  Comparator 2 output polarity
-      COMP2POL       : COMP2_CSR_COMP2POL_Field := 16#0#;
+      POL            : COMP2_CSR_POL_Field := 16#0#;
       --  unspecified
       Reserved_16_17 : Interfaces.STM32.UInt2 := 16#0#;
       --  Comparator 2 blanking source
-      COMP2_BLANKING : COMP2_CSR_COMP2_BLANKING_Field := 16#0#;
+      BLANKING       : COMP2_CSR_BLANKING_Field := 16#0#;
       --  unspecified
       Reserved_21_21 : Interfaces.STM32.Bit := 16#0#;
       --  Comparator 1 inverting input selection
-      COMP2INMSEL_3  : COMP2_CSR_COMP2INMSEL_3_Field := 16#0#;
+      INMSEL_3       : COMP2_CSR_INMSEL_3_Field := 16#0#;
       --  unspecified
       Reserved_23_29 : Interfaces.STM32.UInt7 := 16#0#;
       --  Read-only. Comparator 2 output
-      COMP2OUT       : COMP2_CSR_COMP2OUT_Field := 16#0#;
+      OUT_k          : COMP2_CSR_OUT_Field := 16#0#;
       --  Comparator 2 lock
-      COMP2LOCK      : COMP2_CSR_COMP2LOCK_Field := 16#0#;
+      LOCK           : COMP2_CSR_LOCK_Field := 16#0#;
    end record
      with Volatile_Full_Access, Object_Size => 32,
           Bit_Order => System.Low_Order_First;
 
    for COMP2_CSR_Register use record
-      COMP2EN        at 0 range 0 .. 0;
+      EN             at 0 range 0 .. 0;
       Reserved_1_3   at 0 range 1 .. 3;
-      COMP2INMSEL    at 0 range 4 .. 6;
+      INMSEL         at 0 range 4 .. 6;
       Reserved_7_9   at 0 range 7 .. 9;
-      COMP2OUTSEL    at 0 range 10 .. 13;
+      OUTSEL         at 0 range 10 .. 13;
       Reserved_14_14 at 0 range 14 .. 14;
-      COMP2POL       at 0 range 15 .. 15;
+      POL            at 0 range 15 .. 15;
       Reserved_16_17 at 0 range 16 .. 17;
-      COMP2_BLANKING at 0 range 18 .. 20;
+      BLANKING       at 0 range 18 .. 20;
       Reserved_21_21 at 0 range 21 .. 21;
-      COMP2INMSEL_3  at 0 range 22 .. 22;
+      INMSEL_3       at 0 range 22 .. 22;
       Reserved_23_29 at 0 range 23 .. 29;
-      COMP2OUT       at 0 range 30 .. 30;
-      COMP2LOCK      at 0 range 31 .. 31;
+      OUT_k          at 0 range 30 .. 30;
+      LOCK           at 0 range 31 .. 31;
    end record;
 
-   subtype COMP4_CSR_COMP4EN_Field is Interfaces.STM32.Bit;
-   subtype COMP4_CSR_COMP4INMSEL_Field is Interfaces.STM32.UInt3;
-   subtype COMP4_CSR_COMP4OUTSEL_Field is Interfaces.STM32.UInt4;
-   subtype COMP4_CSR_COMP4POL_Field is Interfaces.STM32.Bit;
-   subtype COMP4_CSR_COMP4_BLANKING_Field is Interfaces.STM32.UInt3;
-   subtype COMP4_CSR_COMP4INMSEL_3_Field is Interfaces.STM32.Bit;
-   subtype COMP4_CSR_COMP4OUT_Field is Interfaces.STM32.Bit;
-   subtype COMP4_CSR_COMP4LOCK_Field is Interfaces.STM32.Bit;
+   subtype COMP4_CSR_EN_Field is Interfaces.STM32.Bit;
+   subtype COMP4_CSR_INMSEL_Field is Interfaces.STM32.UInt3;
+   subtype COMP4_CSR_OUTSEL_Field is Interfaces.STM32.UInt4;
+   subtype COMP4_CSR_POL_Field is Interfaces.STM32.Bit;
+   subtype COMP4_CSR_BLANKING_Field is Interfaces.STM32.UInt3;
+   subtype COMP4_CSR_INMSEL_3_Field is Interfaces.STM32.Bit;
+   subtype COMP4_CSR_OUT_Field is Interfaces.STM32.Bit;
+   subtype COMP4_CSR_LOCK_Field is Interfaces.STM32.Bit;
 
    --  control and status register
    type COMP4_CSR_Register is record
       --  Comparator 4 enable
-      COMP4EN        : COMP4_CSR_COMP4EN_Field := 16#0#;
+      EN             : COMP4_CSR_EN_Field := 16#0#;
       --  unspecified
       Reserved_1_3   : Interfaces.STM32.UInt3 := 16#0#;
       --  Comparator 4 inverting input selection
-      COMP4INMSEL    : COMP4_CSR_COMP4INMSEL_Field := 16#0#;
+      INMSEL         : COMP4_CSR_INMSEL_Field := 16#0#;
       --  unspecified
       Reserved_7_9   : Interfaces.STM32.UInt3 := 16#0#;
       --  Comparator 4 output selection
-      COMP4OUTSEL    : COMP4_CSR_COMP4OUTSEL_Field := 16#0#;
+      OUTSEL         : COMP4_CSR_OUTSEL_Field := 16#0#;
       --  unspecified
       Reserved_14_14 : Interfaces.STM32.Bit := 16#0#;
       --  Comparator 4 output polarity
-      COMP4POL       : COMP4_CSR_COMP4POL_Field := 16#0#;
+      POL            : COMP4_CSR_POL_Field := 16#0#;
       --  unspecified
       Reserved_16_17 : Interfaces.STM32.UInt2 := 16#0#;
       --  Comparator 4 blanking source
-      COMP4_BLANKING : COMP4_CSR_COMP4_BLANKING_Field := 16#0#;
+      BLANKING       : COMP4_CSR_BLANKING_Field := 16#0#;
       --  unspecified
       Reserved_21_21 : Interfaces.STM32.Bit := 16#0#;
       --  Comparator 4 inverting input selection
-      COMP4INMSEL_3  : COMP4_CSR_COMP4INMSEL_3_Field := 16#0#;
+      INMSEL_3       : COMP4_CSR_INMSEL_3_Field := 16#0#;
       --  unspecified
       Reserved_23_29 : Interfaces.STM32.UInt7 := 16#0#;
       --  Read-only. Comparator 4 output
-      COMP4OUT       : COMP4_CSR_COMP4OUT_Field := 16#0#;
+      OUT_k          : COMP4_CSR_OUT_Field := 16#0#;
       --  Comparator 4 lock
-      COMP4LOCK      : COMP4_CSR_COMP4LOCK_Field := 16#0#;
+      LOCK           : COMP4_CSR_LOCK_Field := 16#0#;
    end record
      with Volatile_Full_Access, Object_Size => 32,
           Bit_Order => System.Low_Order_First;
 
    for COMP4_CSR_Register use record
-      COMP4EN        at 0 range 0 .. 0;
+      EN             at 0 range 0 .. 0;
       Reserved_1_3   at 0 range 1 .. 3;
-      COMP4INMSEL    at 0 range 4 .. 6;
+      INMSEL         at 0 range 4 .. 6;
       Reserved_7_9   at 0 range 7 .. 9;
-      COMP4OUTSEL    at 0 range 10 .. 13;
+      OUTSEL         at 0 range 10 .. 13;
       Reserved_14_14 at 0 range 14 .. 14;
-      COMP4POL       at 0 range 15 .. 15;
+      POL            at 0 range 15 .. 15;
       Reserved_16_17 at 0 range 16 .. 17;
-      COMP4_BLANKING at 0 range 18 .. 20;
+      BLANKING       at 0 range 18 .. 20;
       Reserved_21_21 at 0 range 21 .. 21;
-      COMP4INMSEL_3  at 0 range 22 .. 22;
+      INMSEL_3       at 0 range 22 .. 22;
       Reserved_23_29 at 0 range 23 .. 29;
-      COMP4OUT       at 0 range 30 .. 30;
-      COMP4LOCK      at 0 range 31 .. 31;
+      OUT_k          at 0 range 30 .. 30;
+      LOCK           at 0 range 31 .. 31;
    end record;
 
-   subtype COMP6_CSR_COMP6EN_Field is Interfaces.STM32.Bit;
-   subtype COMP6_CSR_COMP6INMSEL_Field is Interfaces.STM32.UInt3;
-   subtype COMP6_CSR_COMP6OUTSEL_Field is Interfaces.STM32.UInt4;
-   subtype COMP6_CSR_COMP6POL_Field is Interfaces.STM32.Bit;
-   subtype COMP6_CSR_COMP6_BLANKING_Field is Interfaces.STM32.UInt3;
-   subtype COMP6_CSR_COMP6INMSEL_3_Field is Interfaces.STM32.Bit;
-   subtype COMP6_CSR_COMP6OUT_Field is Interfaces.STM32.Bit;
-   subtype COMP6_CSR_COMP6LOCK_Field is Interfaces.STM32.Bit;
+   subtype COMP6_CSR_EN_Field is Interfaces.STM32.Bit;
+   subtype COMP6_CSR_INMSEL_Field is Interfaces.STM32.UInt3;
+   subtype COMP6_CSR_OUTSEL_Field is Interfaces.STM32.UInt4;
+   subtype COMP6_CSR_POL_Field is Interfaces.STM32.Bit;
+   subtype COMP6_CSR_BLANKING_Field is Interfaces.STM32.UInt3;
+   subtype COMP6_CSR_INMSEL_3_Field is Interfaces.STM32.Bit;
+   subtype COMP6_CSR_OUT_Field is Interfaces.STM32.Bit;
+   subtype COMP6_CSR_LOCK_Field is Interfaces.STM32.Bit;
 
    --  control and status register
    type COMP6_CSR_Register is record
       --  Comparator 6 enable
-      COMP6EN        : COMP6_CSR_COMP6EN_Field := 16#0#;
+      EN             : COMP6_CSR_EN_Field := 16#0#;
       --  unspecified
       Reserved_1_3   : Interfaces.STM32.UInt3 := 16#0#;
       --  Comparator 6 inverting input selection
-      COMP6INMSEL    : COMP6_CSR_COMP6INMSEL_Field := 16#0#;
+      INMSEL         : COMP6_CSR_INMSEL_Field := 16#0#;
       --  unspecified
       Reserved_7_9   : Interfaces.STM32.UInt3 := 16#0#;
       --  Comparator 6 output selection
-      COMP6OUTSEL    : COMP6_CSR_COMP6OUTSEL_Field := 16#0#;
+      OUTSEL         : COMP6_CSR_OUTSEL_Field := 16#0#;
       --  unspecified
       Reserved_14_14 : Interfaces.STM32.Bit := 16#0#;
       --  Comparator 6 output polarity
-      COMP6POL       : COMP6_CSR_COMP6POL_Field := 16#0#;
+      POL            : COMP6_CSR_POL_Field := 16#0#;
       --  unspecified
       Reserved_16_17 : Interfaces.STM32.UInt2 := 16#0#;
       --  Comparator 6 blanking source
-      COMP6_BLANKING : COMP6_CSR_COMP6_BLANKING_Field := 16#0#;
+      BLANKING       : COMP6_CSR_BLANKING_Field := 16#0#;
       --  unspecified
       Reserved_21_21 : Interfaces.STM32.Bit := 16#0#;
       --  Comparator 6 inverting input selection
-      COMP6INMSEL_3  : COMP6_CSR_COMP6INMSEL_3_Field := 16#0#;
+      INMSEL_3       : COMP6_CSR_INMSEL_3_Field := 16#0#;
       --  unspecified
       Reserved_23_29 : Interfaces.STM32.UInt7 := 16#0#;
       --  Read-only. Comparator 6 output
-      COMP6OUT       : COMP6_CSR_COMP6OUT_Field := 16#0#;
+      OUT_k          : COMP6_CSR_OUT_Field := 16#0#;
       --  Comparator 6 lock
-      COMP6LOCK      : COMP6_CSR_COMP6LOCK_Field := 16#0#;
+      LOCK           : COMP6_CSR_LOCK_Field := 16#0#;
    end record
      with Volatile_Full_Access, Object_Size => 32,
           Bit_Order => System.Low_Order_First;
 
    for COMP6_CSR_Register use record
-      COMP6EN        at 0 range 0 .. 0;
+      EN             at 0 range 0 .. 0;
       Reserved_1_3   at 0 range 1 .. 3;
-      COMP6INMSEL    at 0 range 4 .. 6;
+      INMSEL         at 0 range 4 .. 6;
       Reserved_7_9   at 0 range 7 .. 9;
-      COMP6OUTSEL    at 0 range 10 .. 13;
+      OUTSEL         at 0 range 10 .. 13;
       Reserved_14_14 at 0 range 14 .. 14;
-      COMP6POL       at 0 range 15 .. 15;
+      POL            at 0 range 15 .. 15;
       Reserved_16_17 at 0 range 16 .. 17;
-      COMP6_BLANKING at 0 range 18 .. 20;
+      BLANKING       at 0 range 18 .. 20;
       Reserved_21_21 at 0 range 21 .. 21;
-      COMP6INMSEL_3  at 0 range 22 .. 22;
+      INMSEL_3       at 0 range 22 .. 22;
       Reserved_23_29 at 0 range 23 .. 29;
-      COMP6OUT       at 0 range 30 .. 30;
-      COMP6LOCK      at 0 range 31 .. 31;
+      OUT_k          at 0 range 30 .. 30;
+      LOCK           at 0 range 31 .. 31;
    end record;
 
-   subtype OPAMP2_CSR_OPAMP2EN_Field is Interfaces.STM32.Bit;
+   subtype OPAMP2_CSR_EN_Field is Interfaces.STM32.Bit;
    subtype OPAMP2_CSR_FORCE_VP_Field is Interfaces.STM32.Bit;
    subtype OPAMP2_CSR_VP_SEL_Field is Interfaces.STM32.UInt2;
    subtype OPAMP2_CSR_VM_SEL_Field is Interfaces.STM32.UInt2;
@@ -554,7 +554,7 @@ package Interfaces.STM32.SYSCFG is
    subtype OPAMP2_CSR_VMS_SEL_Field is Interfaces.STM32.Bit;
    subtype OPAMP2_CSR_VPS_SEL_Field is Interfaces.STM32.UInt2;
    subtype OPAMP2_CSR_CALON_Field is Interfaces.STM32.Bit;
-   subtype OPAMP2_CSR_CAL_SEL_Field is Interfaces.STM32.UInt2;
+   subtype OPAMP2_CSR_CALSEL_Field is Interfaces.STM32.UInt2;
    subtype OPAMP2_CSR_PGA_GAIN_Field is Interfaces.STM32.UInt4;
    subtype OPAMP2_CSR_USER_TRIM_Field is Interfaces.STM32.Bit;
    subtype OPAMP2_CSR_TRIMOFFSETP_Field is Interfaces.STM32.UInt5;
@@ -566,7 +566,7 @@ package Interfaces.STM32.SYSCFG is
    --  OPAMP2 control register
    type OPAMP2_CSR_Register is record
       --  OPAMP2 enable
-      OPAMP2EN     : OPAMP2_CSR_OPAMP2EN_Field := 16#0#;
+      EN           : OPAMP2_CSR_EN_Field := 16#0#;
       --  FORCE_VP
       FORCE_VP     : OPAMP2_CSR_FORCE_VP_Field := 16#0#;
       --  OPAMP2 Non inverting input selection
@@ -584,7 +584,7 @@ package Interfaces.STM32.SYSCFG is
       --  Calibration mode enable
       CALON        : OPAMP2_CSR_CALON_Field := 16#0#;
       --  Calibration selection
-      CAL_SEL      : OPAMP2_CSR_CAL_SEL_Field := 16#0#;
+      CALSEL       : OPAMP2_CSR_CALSEL_Field := 16#0#;
       --  Gain in PGA mode
       PGA_GAIN     : OPAMP2_CSR_PGA_GAIN_Field := 16#0#;
       --  User trimming enable
@@ -604,7 +604,7 @@ package Interfaces.STM32.SYSCFG is
           Bit_Order => System.Low_Order_First;
 
    for OPAMP2_CSR_Register use record
-      OPAMP2EN     at 0 range 0 .. 0;
+      EN           at 0 range 0 .. 0;
       FORCE_VP     at 0 range 1 .. 1;
       VP_SEL       at 0 range 2 .. 3;
       Reserved_4_4 at 0 range 4 .. 4;
@@ -613,7 +613,7 @@ package Interfaces.STM32.SYSCFG is
       VMS_SEL      at 0 range 8 .. 8;
       VPS_SEL      at 0 range 9 .. 10;
       CALON        at 0 range 11 .. 11;
-      CAL_SEL      at 0 range 12 .. 13;
+      CALSEL       at 0 range 12 .. 13;
       PGA_GAIN     at 0 range 14 .. 17;
       USER_TRIM    at 0 range 18 .. 18;
       TRIMOFFSETP  at 0 range 19 .. 23;

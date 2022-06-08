@@ -1,5 +1,4 @@
 with STM32.SYSCFG;
-
 with Sys.Real_Time;
 
 package body STM32.OPAMP is
@@ -14,7 +13,7 @@ package body STM32.OPAMP is
       --  Enable clock for the SYSCFG_COMP_OPAMP peripheral
       STM32.SYSCFG.Enable_SYSCFG_Clock;
 
-      This.CSR.OPAMPxEN := True;
+      This.CSR.EN := True;
       --  Delay 5 us for OPAMP startup time. See DS9994 Rev 9 chapter 6.3.22
       --  Operational amplifier characteristics.
       Delay_Until (Clock + Microseconds (5));
@@ -26,7 +25,7 @@ package body STM32.OPAMP is
 
    procedure Disable (This : in out Operational_Amplifier) is
    begin
-      This.CSR.OPAMPxEN := False;
+      This.CSR.EN := False;
    end Disable;
 
    -------------
@@ -35,7 +34,7 @@ package body STM32.OPAMP is
 
    function Enabled (This : Operational_Amplifier) return Boolean is
    begin
-      return This.CSR.OPAMPxEN;
+      return This.CSR.EN;
    end Enabled;
 
    -----------------------

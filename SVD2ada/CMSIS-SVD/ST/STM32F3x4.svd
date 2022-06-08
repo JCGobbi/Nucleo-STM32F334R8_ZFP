@@ -20058,7 +20058,7 @@ xs:noNamespaceSchemaLocation="CMSIS-SVD_Schema_1_1.xsd">
           <resetValue>0x00000000</resetValue>
           <fields>
             <field>
-              <name>OPAMP2EN</name>
+              <name>EN</name>
               <description>OPAMP2 enable</description>
               <bitOffset>0</bitOffset>
               <bitWidth>1</bitWidth>
@@ -20119,7 +20119,7 @@ xs:noNamespaceSchemaLocation="CMSIS-SVD_Schema_1_1.xsd">
               <access>read-write</access>
             </field>
             <field>
-              <name>CAL_SEL</name>
+              <name>CALSEL</name>
               <description>Calibration selection</description>
               <bitOffset>12</bitOffset>
               <bitWidth>2</bitWidth>
@@ -20187,14 +20187,14 @@ xs:noNamespaceSchemaLocation="CMSIS-SVD_Schema_1_1.xsd">
           <resetValue>0x00000000</resetValue>
           <fields>
             <field>
-              <name>COMP2EN</name>
+              <name>EN</name>
               <description>Comparator 2 enable</description>
               <bitOffset>0</bitOffset>
               <bitWidth>1</bitWidth>
               <access>read-write</access>
             </field>
             <field>
-              <name>COMP2INMSEL</name>
+              <name>INMSEL</name>
               <description>Comparator 2 inverting input
               selection</description>
               <bitOffset>4</bitOffset>
@@ -20202,7 +20202,7 @@ xs:noNamespaceSchemaLocation="CMSIS-SVD_Schema_1_1.xsd">
               <access>read-write</access>
             </field>
             <field>
-              <name>COMP2OUTSEL</name>
+              <name>OUTSEL</name>
               <description>Comparator 2 output
               selection</description>
               <bitOffset>10</bitOffset>
@@ -20210,7 +20210,7 @@ xs:noNamespaceSchemaLocation="CMSIS-SVD_Schema_1_1.xsd">
               <access>read-write</access>
             </field>
             <field>
-              <name>COMP2POL</name>
+              <name>POL</name>
               <description>Comparator 2 output
               polarity</description>
               <bitOffset>15</bitOffset>
@@ -20218,7 +20218,7 @@ xs:noNamespaceSchemaLocation="CMSIS-SVD_Schema_1_1.xsd">
               <access>read-write</access>
             </field>
             <field>
-              <name>COMP2_BLANKING</name>
+              <name>BLANKING</name>
               <description>Comparator 2 blanking
               source</description>
               <bitOffset>18</bitOffset>
@@ -20226,7 +20226,7 @@ xs:noNamespaceSchemaLocation="CMSIS-SVD_Schema_1_1.xsd">
               <access>read-write</access>
             </field>
             <field>
-              <name>COMP2INMSEL_3</name>
+              <name>INMSEL_3</name>
               <description>Comparator 1 inverting input
               selection</description>
               <bitOffset>22</bitOffset>
@@ -20234,14 +20234,14 @@ xs:noNamespaceSchemaLocation="CMSIS-SVD_Schema_1_1.xsd">
               <access>read-write</access>
             </field>
             <field>
-              <name>COMP2OUT</name>
+              <name>OUT</name>
               <description>Comparator 2 output</description>
               <bitOffset>30</bitOffset>
               <bitWidth>1</bitWidth>
               <access>read-only</access>
             </field>
             <field>
-              <name>COMP2LOCK</name>
+              <name>LOCK</name>
               <description>Comparator 2 lock</description>
               <bitOffset>31</bitOffset>
               <bitWidth>1</bitWidth>
@@ -20258,14 +20258,14 @@ xs:noNamespaceSchemaLocation="CMSIS-SVD_Schema_1_1.xsd">
           <resetValue>0x00000000</resetValue>
           <fields>
             <field>
-              <name>COMP4EN</name>
+              <name>EN</name>
               <description>Comparator 4 enable</description>
               <bitOffset>0</bitOffset>
               <bitWidth>1</bitWidth>
               <access>read-write</access>
             </field>
             <field>
-              <name>COMP4INMSEL</name>
+              <name>INMSEL</name>
               <description>Comparator 4 inverting input
               selection</description>
               <bitOffset>4</bitOffset>
@@ -20273,7 +20273,7 @@ xs:noNamespaceSchemaLocation="CMSIS-SVD_Schema_1_1.xsd">
               <access>read-write</access>
             </field>
             <field>
-              <name>COMP4OUTSEL</name>
+              <name>OUTSEL</name>
               <description>Comparator 4 output
               selection</description>
               <bitOffset>10</bitOffset>
@@ -20281,7 +20281,7 @@ xs:noNamespaceSchemaLocation="CMSIS-SVD_Schema_1_1.xsd">
               <access>read-write</access>
             </field>
             <field>
-              <name>COMP4POL</name>
+              <name>POL</name>
               <description>Comparator 4 output
               polarity</description>
               <bitOffset>15</bitOffset>
@@ -20289,7 +20289,7 @@ xs:noNamespaceSchemaLocation="CMSIS-SVD_Schema_1_1.xsd">
               <access>read-write</access>
             </field>
             <field>
-              <name>COMP4_BLANKING</name>
+              <name>BLANKING</name>
               <description>Comparator 4 blanking
               source</description>
               <bitOffset>18</bitOffset>
@@ -20297,7 +20297,7 @@ xs:noNamespaceSchemaLocation="CMSIS-SVD_Schema_1_1.xsd">
               <access>read-write</access>
             </field>
             <field>
-              <name>COMP4INMSEL_3</name>
+              <name>INMSEL_3</name>
               <description>Comparator 4 inverting input
               selection</description>
               <bitOffset>22</bitOffset>
@@ -20305,14 +20305,14 @@ xs:noNamespaceSchemaLocation="CMSIS-SVD_Schema_1_1.xsd">
               <access>read-write</access>
             </field>
             <field>
-              <name>COMP4OUT</name>
+              <name>OUT</name>
               <description>Comparator 4 output</description>
               <bitOffset>30</bitOffset>
               <bitWidth>1</bitWidth>
               <access>read-only</access>
             </field>
             <field>
-              <name>COMP4LOCK</name>
+              <name>LOCK</name>
               <description>Comparator 4 lock</description>
               <bitOffset>31</bitOffset>
               <bitWidth>1</bitWidth>
@@ -20329,14 +20329,14 @@ xs:noNamespaceSchemaLocation="CMSIS-SVD_Schema_1_1.xsd">
           <resetValue>0x00000000</resetValue>
           <fields>
             <field>
-              <name>COMP6EN</name>
+              <name>EN</name>
               <description>Comparator 6 enable</description>
               <bitOffset>0</bitOffset>
               <bitWidth>1</bitWidth>
               <access>read-write</access>
             </field>
             <field>
-              <name>COMP6INMSEL</name>
+              <name>INMSEL</name>
               <description>Comparator 6 inverting input
               selection</description>
               <bitOffset>4</bitOffset>
@@ -20344,7 +20344,7 @@ xs:noNamespaceSchemaLocation="CMSIS-SVD_Schema_1_1.xsd">
               <access>read-write</access>
             </field>
             <field>
-              <name>COMP6OUTSEL</name>
+              <name>OUTSEL</name>
               <description>Comparator 6 output
               selection</description>
               <bitOffset>10</bitOffset>
@@ -20352,7 +20352,7 @@ xs:noNamespaceSchemaLocation="CMSIS-SVD_Schema_1_1.xsd">
               <access>read-write</access>
             </field>
             <field>
-              <name>COMP6POL</name>
+              <name>POL</name>
               <description>Comparator 6 output
               polarity</description>
               <bitOffset>15</bitOffset>
@@ -20360,7 +20360,7 @@ xs:noNamespaceSchemaLocation="CMSIS-SVD_Schema_1_1.xsd">
               <access>read-write</access>
             </field>
             <field>
-              <name>COMP6_BLANKING</name>
+              <name>BLANKING</name>
               <description>Comparator 6 blanking
               source</description>
               <bitOffset>18</bitOffset>
@@ -20368,7 +20368,7 @@ xs:noNamespaceSchemaLocation="CMSIS-SVD_Schema_1_1.xsd">
               <access>read-write</access>
             </field>
             <field>
-              <name>COMP6INMSEL_3</name>
+              <name>INMSEL_3</name>
               <description>Comparator 6 inverting input
               selection</description>
               <bitOffset>22</bitOffset>
@@ -20376,14 +20376,14 @@ xs:noNamespaceSchemaLocation="CMSIS-SVD_Schema_1_1.xsd">
               <access>read-write</access>
             </field>
             <field>
-              <name>COMP6OUT</name>
+              <name>OUT</name>
               <description>Comparator 6 output</description>
               <bitOffset>30</bitOffset>
               <bitWidth>1</bitWidth>
               <access>read-only</access>
             </field>
             <field>
-              <name>COMP6LOCK</name>
+              <name>LOCK</name>
               <description>Comparator 6 lock</description>
               <bitOffset>31</bitOffset>
               <bitWidth>1</bitWidth>
