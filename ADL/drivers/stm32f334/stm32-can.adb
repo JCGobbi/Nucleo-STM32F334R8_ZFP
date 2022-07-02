@@ -34,8 +34,6 @@ with STM32.Device;
 
 package body STM32.CAN is
 
-   use Sys.Real_Time;
-
    ---------------
    -- Reset_CAN --
    ---------------
@@ -53,7 +51,7 @@ package body STM32.CAN is
 
    procedure Set_Init_Mode
      (This    : in out CAN_Controller;
-      Enabled : in     Boolean)
+      Enabled : Boolean)
    is
       Deadline : constant Time := Clock + Default_Timeout;
       Success : Boolean;
@@ -105,7 +103,7 @@ package body STM32.CAN is
 
    procedure Set_Sleep_Mode
      (This    : in out CAN_Controller;
-      Enabled : in     Boolean)
+      Enabled : Boolean)
    is
       Deadline : constant Time := Clock + Default_Timeout;
       Success : Boolean;
@@ -157,10 +155,10 @@ package body STM32.CAN is
    --------------------------
 
    procedure Calculate_Bit_Timing
-     (Speed        : in Bit_Rate_Range;
-      Sample_Point : in Sample_Point_Range;
-      Tolerance    : in Clock_Tolerance;
-      Bit_Timing   : in out Bit_Timing_Config)
+     (Speed        : Bit_Rate_Range;
+      Sample_Point : Sample_Point_Range;
+      Tolerance    : Clock_Tolerance;
+      Bit_Timing   : out Bit_Timing_Config)
    is
       --  The CAN clock frequency comes from APB1 peripheral clock (PCLK1).
       Clock_In : constant Float := Float (STM32.Device.System_Clock_Frequencies.PCLK1);
@@ -233,7 +231,7 @@ package body STM32.CAN is
 
    procedure Configure_Bit_Timing
      (This          : in out CAN_Controller;
-      Timing_Config : in     Bit_Timing_Config)
+      Timing_Config : Bit_Timing_Config)
    is
    begin
       This.BTR :=
@@ -254,7 +252,7 @@ package body STM32.CAN is
 
    procedure Set_Operating_Mode
      (This : in out CAN_Controller;
-      Mode : in     Operating_Mode)
+      Mode : Operating_Mode)
    is
    begin
       case Mode is
@@ -282,14 +280,14 @@ package body STM32.CAN is
 
    procedure Configure
      (This                : in out CAN_Controller;
-      Mode                : in     Operating_Mode;
-      Time_Triggered      : in     Boolean;
-      Auto_Bus_Off        : in     Boolean;
-      Auto_Wakeup         : in     Boolean;
-      Auto_Retransmission : in     Boolean;
-      Rx_FIFO_Locked      : in     Boolean;
-      Tx_FIFO_Prio        : in     Boolean;
-      Timing_Config       : in     Bit_Timing_Config)
+      Mode                : Operating_Mode;
+      Time_Triggered      : Boolean;
+      Auto_Bus_Off        : Boolean;
+      Auto_Wakeup         : Boolean;
+      Auto_Retransmission : Boolean;
+      Rx_FIFO_Locked      : Boolean;
+      Tx_FIFO_Prio        : Boolean;
+      Timing_Config       : Bit_Timing_Config)
    is
    begin
       Wakeup (This);
@@ -322,9 +320,9 @@ package body STM32.CAN is
    ---------------
 
    procedure Write_FxR
-     (X    : in Filter_Bank_Nr;
-      FxR1 : in UInt32;
-      FxR2 : in UInt32)
+     (X    : Filter_Bank_Nr;
+      FxR1 : UInt32;
+      FxR2 : UInt32)
    is
    begin
       case X is
@@ -377,8 +375,8 @@ package body STM32.CAN is
    ---------------------------
 
    procedure Set_Filter_Activation
-     (Bank_Nr : in Filter_Bank_Nr;
-      Enabled : in Boolean)
+     (Bank_Nr : Filter_Bank_Nr;
+      Enabled : Boolean)
    is
    begin
       CAN1.FA1R.FACT.Arr (Bank_Nr) := Enabled;
@@ -389,8 +387,8 @@ package body STM32.CAN is
    ----------------------
 
    procedure Set_Filter_Scale
-     (Bank_Nr : in Filter_Bank_Nr;
-      Mode    : in Mode_Scale)
+     (Bank_Nr : Filter_Bank_Nr;
+      Mode    : Mode_Scale)
    is
    begin
       case Mode is
@@ -406,8 +404,8 @@ package body STM32.CAN is
    ---------------------
 
    procedure Set_Filter_Mode
-     (Bank_Nr : in Filter_Bank_Nr;
-      Mode    : in Mode_Scale)
+     (Bank_Nr : Filter_Bank_Nr;
+      Mode    : Mode_Scale)
    is
    begin
       case Mode is
@@ -423,8 +421,8 @@ package body STM32.CAN is
    -------------------------
 
    procedure Set_Fifo_Assignment
-     (Bank_Nr : in Filter_Bank_Nr;
-      Fifo    : in Fifo_Nr)
+     (Bank_Nr : Filter_Bank_Nr;
+      Fifo    : Fifo_Nr)
    is
    begin
       case Fifo is
@@ -440,8 +438,8 @@ package body STM32.CAN is
    ----------------------
 
    procedure Configure_Filter
-     (This        : in out CAN_Controller;
-      Bank_Config : in     CAN_Filter_Bank)
+     (This        : CAN_Controller;
+      Bank_Config : CAN_Filter_Bank)
    is
       pragma Unreferenced (This);
       Nr       : constant Filter_Bank_Nr := Bank_Config.Bank_Nr;
@@ -478,7 +476,7 @@ package body STM32.CAN is
    --------------------------
 
    procedure Set_Slave_Start_Bank
-     (Bank_Nr : in Filter_Bank_Nr)
+     (Bank_Nr : Filter_Bank_Nr)
    is
    begin
       CAN1.FMR.CAN2SB := UInt6 (Bank_Nr);
@@ -497,7 +495,7 @@ package body STM32.CAN is
 
    procedure Release_Fifo
      (This : in out CAN_Controller;
-      Fifo : in     Fifo_Nr)
+      Fifo : Fifo_Nr)
    is
    begin
       case Fifo is
@@ -564,10 +562,10 @@ package body STM32.CAN is
 
    procedure Receive_Message
      (This    : in out CAN_Controller;
-      Fifo    : in     Fifo_Nr;
-      Message :    out CAN_Message;
-      Success :    out Boolean;
-      Timeout : in     Time_Span := Default_Timeout)
+      Fifo    : Fifo_Nr;
+      Message : out CAN_Message;
+      Success : out Boolean;
+      Timeout : Time_Span := Default_Timeout)
    is
       Deadline : constant Time := Clock + Timeout;
    begin
@@ -600,9 +598,9 @@ package body STM32.CAN is
    -----------------------
 
    procedure Get_Empty_Mailbox
-     (This        : in out CAN_Controller;
-      Mailbox     :    out Mailbox_Type;
-      Empty_Found :    out Boolean)
+     (This        : CAN_Controller;
+      Mailbox     : out Mailbox_Type;
+      Empty_Found : out Boolean)
    is
    begin
       for Mbx in Mailbox_Type'Range loop
@@ -618,7 +616,7 @@ package body STM32.CAN is
 
    procedure Transmission_Request
      (This    : in out CAN_Controller;
-      Mailbox : in     Mailbox_Type)
+      Mailbox : Mailbox_Type)
    is
    begin
       case Mailbox is
@@ -705,8 +703,8 @@ package body STM32.CAN is
 
    procedure Write_Tx_Message
      (This    : in out CAN_Controller;
-      Message : in     CAN_Message;
-      Mailbox : in     Mailbox_Type)
+      Message : CAN_Message;
+      Mailbox : Mailbox_Type)
    is
    begin
       case Mailbox is
@@ -748,9 +746,9 @@ package body STM32.CAN is
 
    procedure Transmit_Message
      (This    : in out CAN_Controller;
-      Message : in     CAN_Message;
-      Success :    out Boolean;
-      Timeout : in     Time_Span := Default_Timeout)
+      Message : CAN_Message;
+      Success : out Boolean;
+      Timeout : Time_Span := Default_Timeout)
    is
       Mailbox  : Mailbox_Type;
       Deadline : constant Time := Clock + Timeout;

@@ -35,7 +35,7 @@
 with System;
 
 private with STM32_SVD.CAN;
-with Sys.Real_Time;
+with Sys.Real_Time; use Sys.Real_Time;
 
 package STM32.CAN is
 
@@ -67,7 +67,7 @@ package STM32.CAN is
    subtype Resynch_Quanta is Positive range 1 .. 4;
    --  These bits define the maximum number of time quanta the CAN hardware is
    --  allowed to lengthen or shorten a bit to perform the resynchronization.
-   --  This is the SJW. The preferred value used for CANopen and DeviceNet is 1.
+   --  This is the SJW.
    subtype Segment_1_Quanta is Positive range 1 .. 16;
    --  Defines the location of the sample point (number of time quanta).
    --  It includes the PROP_SEG and PHASE_SEG1 of the CAN standard.
@@ -78,7 +78,7 @@ package STM32.CAN is
    --  These bits define the length of a time quanta.
 
    type Bit_Timing_Config is record
-      Resynch_Jump_Width : Resynch_Quanta := 1;
+      Resynch_Jump_Width : Resynch_Quanta;
       Time_Segment_1     : Segment_1_Quanta;
       Time_Segment_2     : Segment_2_Quanta;
       Quanta_Prescaler   : Time_Quanta_Prescaler;
@@ -132,10 +132,10 @@ package STM32.CAN is
    --  Conference.
 
    procedure Calculate_Bit_Timing
-     (Speed        : in Bit_Rate_Range;
-      Sample_Point : in Sample_Point_Range;
-      Tolerance    : in Clock_Tolerance;
-      Bit_Timing   : in out Bit_Timing_Config);
+     (Speed        : Bit_Rate_Range;
+      Sample_Point : Sample_Point_Range;
+      Tolerance    : Clock_Tolerance;
+      Bit_Timing   : out Bit_Timing_Config);
    --  Automatically calculate bit timings based on requested bit rate and
    --  sample ratio.
    --  1 nominal Bit Time is defined by the time length in quanta of four time
@@ -149,7 +149,7 @@ package STM32.CAN is
 
    procedure Configure_Bit_Timing
      (This          : in out CAN_Controller;
-      Timing_Config : in     Bit_Timing_Config)
+      Timing_Config : Bit_Timing_Config)
      with Pre => Is_Init_Mode (This);
 
    type Operating_Mode is
@@ -160,19 +160,19 @@ package STM32.CAN is
 
    procedure Set_Operating_Mode
      (This : in out CAN_Controller;
-      Mode : in     Operating_Mode)
+      Mode : Operating_Mode)
      with Pre => Is_Init_Mode (This);
 
    procedure Configure
      (This                : in out CAN_Controller;
-      Mode                : in     Operating_Mode;
-      Time_Triggered      : in     Boolean;
-      Auto_Bus_Off        : in     Boolean;
-      Auto_Wakeup         : in     Boolean;
-      Auto_Retransmission : in     Boolean;
-      Rx_FIFO_Locked      : in     Boolean;
-      Tx_FIFO_Prio        : in     Boolean;
-      Timing_Config       : in     Bit_Timing_Config);
+      Mode                : Operating_Mode;
+      Time_Triggered      : Boolean;
+      Auto_Bus_Off        : Boolean;
+      Auto_Wakeup         : Boolean;
+      Auto_Retransmission : Boolean;
+      Rx_FIFO_Locked      : Boolean;
+      Tx_FIFO_Prio        : Boolean;
+      Timing_Config       : Bit_Timing_Config);
 
    procedure Enter_Filter_Init_Mode;
 
@@ -183,6 +183,8 @@ package STM32.CAN is
    subtype Standard_Id is UInt11;
    subtype Extended_Id is UInt18;
 
+   --  The description of the filters bellow is in the RM0364 rev 4 chapter
+   --  30.7.4 Identifier filtering.
    type Filter_32 is record
       Std_ID : Standard_Id;
       Ext_ID : Extended_Id;
@@ -215,6 +217,7 @@ package STM32.CAN is
    end record;
 
    subtype Filter_Bank_Nr is Natural range 0 .. 13;
+   --  Because there is only one bxCAN.
 
    type Fifo_Nr is (FIFO_0, FIFO_1);
 
@@ -297,17 +300,17 @@ package STM32.CAN is
    end record;
 
    procedure Configure_Filter
-     (This        : in out CAN_Controller;
-      Bank_Config : in     CAN_Filter_Bank);
+     (This        : CAN_Controller;
+      Bank_Config : CAN_Filter_Bank);
 
    procedure Set_Filter_Activation
-     (Bank_Nr : in Filter_Bank_Nr;
-      Enabled : in Boolean);
+     (Bank_Nr : Filter_Bank_Nr;
+      Enabled : Boolean);
 
    function Get_Slave_Start_Bank return Filter_Bank_Nr;
 
    procedure Set_Slave_Start_Bank
-     (Bank_Nr : in Filter_Bank_Nr)
+     (Bank_Nr : Filter_Bank_Nr)
      with Post => Bank_Nr = Get_Slave_Start_Bank;
 
    subtype Data_Length_Type is UInt4 range 0 .. 8;
@@ -325,35 +328,34 @@ package STM32.CAN is
 
    procedure Release_Fifo
      (This : in out CAN_Controller;
-      Fifo : in     Fifo_Nr);
+      Fifo : Fifo_Nr);
 
    function Nof_Msg_In_Fifo
      (This : CAN_Controller;
       Fifo : Fifo_Nr)
       return UInt2;
 
-   Default_Timeout : constant Sys.Real_Time.Time_Span :=
-      Sys.Real_Time.Milliseconds (100);
+   Default_Timeout : constant Time_Span := Milliseconds (100);
 
    procedure Receive_Message
      (This    : in out CAN_Controller;
-      Fifo    : in     Fifo_Nr;
-      Message :    out CAN_Message;
-      Success :    out Boolean;
-      Timeout : in     Sys.Real_Time.Time_Span := Default_Timeout);
+      Fifo    : Fifo_Nr;
+      Message : out CAN_Message;
+      Success : out Boolean;
+      Timeout : Time_Span := Default_Timeout);
 
    type Mailbox_Type is (Mailbox_0, Mailbox_1, Mailbox_2);
 
    procedure Transmit_Message
      (This    : in out CAN_Controller;
-      Message : in     CAN_Message;
-      Success :    out Boolean;
-      Timeout : in     Sys.Real_Time.Time_Span := Default_Timeout);
+      Message : CAN_Message;
+      Success : out Boolean;
+      Timeout : Time_Span := Default_Timeout);
 
    procedure Get_Empty_Mailbox
-     (This        : in out CAN_Controller;
-      Mailbox     :    out Mailbox_Type;
-      Empty_Found :    out Boolean);
+     (This        : CAN_Controller;
+      Mailbox     : out Mailbox_Type;
+      Empty_Found : out Boolean);
 
    function Transmission_Successful
      (This    : CAN_Controller;
@@ -362,7 +364,7 @@ package STM32.CAN is
 
    procedure Transmission_Request
      (This    : in out CAN_Controller;
-      Mailbox : in     Mailbox_Type)
+      Mailbox : Mailbox_Type)
     with Inline;
 
    function Transmission_OK
@@ -382,27 +384,6 @@ package STM32.CAN is
       Mailbox : Mailbox_Type)
       return Boolean
     with Inline;
-
---  #define CAN_IT_TME  ((uint32_t)CAN_IER_TMEIE)   /*!< Transmit mailbox empty interrupt */
---
---  /* Receive Interrupts */
---  #define CAN_IT_FMP0 ((uint32_t)CAN_IER_FMPIE0)  /*!< FIFO 0 message pending interrupt */
---  #define CAN_IT_FF0  ((uint32_t)CAN_IER_FFIE0)   /*!< FIFO 0 full interrupt            */
---  #define CAN_IT_FOV0 ((uint32_t)CAN_IER_FOVIE0)  /*!< FIFO 0 overrun interrupt         */
---  #define CAN_IT_FMP1 ((uint32_t)CAN_IER_FMPIE1)  /*!< FIFO 1 message pending interrupt */
---  #define CAN_IT_FF1  ((uint32_t)CAN_IER_FFIE1)   /*!< FIFO 1 full interrupt            */
---  #define CAN_IT_FOV1 ((uint32_t)CAN_IER_FOVIE1)  /*!< FIFO 1 overrun interrupt         */
---
---  /* Operating Mode Interrupts */
---  #define CAN_IT_WKU  ((uint32_t)CAN_IER_WKUIE)  /*!< Wake-up interrupt           */
---  #define CAN_IT_SLK  ((uint32_t)CAN_IER_SLKIE)  /*!< Sleep acknowledge interrupt */
---
---  /* Error Interrupts */
---  #define CAN_IT_EWG  ((uint32_t)CAN_IER_EWGIE) /*!< Error warning interrupt   */
---  #define CAN_IT_EPV  ((uint32_t)CAN_IER_EPVIE) /*!< Error passive interrupt   */
---  #define CAN_IT_BOF  ((uint32_t)CAN_IER_BOFIE) /*!< Bus-off interrupt         */
---  #define CAN_IT_LEC  ((uint32_t)CAN_IER_LECIE) /*!< Last error code interrupt */
---  #define CAN_IT_ERR  ((uint32_t)CAN_IER_ERRIE) /*!< Error Interrupt           */
 
    type CAN_Interrupt is
       (Sleep_Acknowledge,
@@ -490,8 +471,8 @@ package STM32.CAN is
 
    procedure Write_Tx_Message
      (This    : in out CAN_Controller;
-      Message : in     CAN_Message;
-      Mailbox : in     Mailbox_Type)
+      Message : CAN_Message;
+      Mailbox : Mailbox_Type)
      with Pre => Is_Empty (This, Mailbox);
 
 private
@@ -500,11 +481,11 @@ private
 
    procedure Set_Init_Mode
      (This    : in out CAN_Controller;
-      Enabled : in     Boolean);
+      Enabled : Boolean);
 
    procedure Set_Sleep_Mode
      (This    : in out CAN_Controller;
-      Enabled : in     Boolean);
+      Enabled : Boolean);
 
    type Filter_Union (Mode : Mode_Scale := Mask32) is record
       case Mode is
@@ -538,24 +519,24 @@ private
    end record;
 
    procedure Write_FxR
-     (X    : in Filter_Bank_Nr;
-      FxR1 : in UInt32;
-      FxR2 : in UInt32)
+     (X    : Filter_Bank_Nr;
+      FxR1 : UInt32;
+      FxR2 : UInt32)
      with Pre => Is_Filter_Init_Mode;
 
    procedure Set_Filter_Scale
-     (Bank_Nr : in Filter_Bank_Nr;
-      Mode    : in Mode_Scale)
+     (Bank_Nr : Filter_Bank_Nr;
+      Mode    : Mode_Scale)
      with Pre => Is_Filter_Init_Mode;
 
    procedure Set_Filter_Mode
-     (Bank_Nr : in Filter_Bank_Nr;
-      Mode    : in Mode_Scale)
+     (Bank_Nr : Filter_Bank_Nr;
+      Mode    : Mode_Scale)
      with Pre => Is_Filter_Init_Mode;
 
    procedure Set_Fifo_Assignment
-     (Bank_Nr : in Filter_Bank_Nr;
-      Fifo    : in Fifo_Nr)
+     (Bank_Nr : Filter_Bank_Nr;
+      Fifo    : Fifo_Nr)
      with Pre => Is_Filter_Init_Mode;
 
 end STM32.CAN;
