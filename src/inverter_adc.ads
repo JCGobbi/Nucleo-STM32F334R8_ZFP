@@ -25,7 +25,7 @@ package Inverter_ADC is
    subtype Battery_V_Range is Voltage range (Battery_V * 0.85) .. (Battery_V * 1.2);
    --  Battery voltage tolerance is Battery_V -15% to +20% (10.2 to 14.4 V).
 
-   Battery_Relation : Float := 10_000.0 / 90_900.0; -- 10 kΩ / 90.9 kΩ
+   Battery_Relation : Float := 10_000.0 / (100_000.0 + 10_000.0);
    --  Resistive relation between the measured ADC input and the battery
    --  voltage. This depends on the electronic circuitry.
 
@@ -43,7 +43,7 @@ package Inverter_ADC is
    subtype Output_V_Range is Voltage range (Output_V * 0.9) .. (Output_V * 1.1);
    --  AC ouput voltage tolerance is Output_V ± 10%.
 
-   Output_Relation : Float :=  10_000.0 / 90_900.0; -- 10 kΩ / 90.9 kΩ
+   Output_Relation : Float := 10_000.0 / (100_000.0 + 10_000.0);
    --  Resistive relation between the measured ADC input and the AC output
    --  voltage. This depends on the electronic circuitry.
 
