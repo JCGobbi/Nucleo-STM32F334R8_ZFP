@@ -7,7 +7,6 @@ with Sys.Real_Time; use Sys.Real_Time;
 with Sys.Int.Names;
 
 with STM_Board;     use STM_Board;
-with Inverter_ADC;  use Inverter_ADC;
 with Inverter_PWM;  use Inverter_PWM;
 
 with Last_Chance_Handler; pragma Unreferenced (Last_Chance_Handler);
@@ -51,7 +50,7 @@ begin
    PWM_Frequency_Hz := 30_000.0;
 
    --  Select gain = 1.0 to see only sine table sinusoid
-   Sine_Gain := 1.0;
+   Set_Sine_Gain (1.0);
 
    --  Disable PWM gate drivers because some gate drivers enable with
    --  low level.
@@ -76,7 +75,6 @@ begin
 
    --  Enter steady state
    loop
-      --  null;
       Set_Toggle (Green_LED);
       Delay_Until (Clock + Seconds (2));
    end loop;

@@ -1,8 +1,6 @@
 with STM32.Device; use STM32.Device;
 with STM32.Timers; use STM32.Timers;
 
-with Inverter_PWM;
-
 package body Inverter_ADC is
 
    procedure Initialize_ADC_Timer;

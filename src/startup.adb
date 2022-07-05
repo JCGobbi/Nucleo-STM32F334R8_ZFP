@@ -72,7 +72,7 @@ package body Startup is
       end if;
 
       --  Select gain = 1.0 to see only sine table sinusoid
-      Sine_Gain := 1.0;
+      Set_Sine_Gain (1.0);
 
       --  Initialize sensors ADC
       Initialize_ADC;
@@ -112,10 +112,10 @@ package body Startup is
       end loop;
 
       --  Enable PWM gate drivers
-      Inverter_PWM.Set_PWM_Gate_Power (True);
+      Set_PWM_Gate_Power (True);
 
       --  Start generating the sinusoid
-      Inverter_PWM.Start_PWM;
+      Start_PWM;
 
    end Start_Inverter;
 
