@@ -216,11 +216,12 @@ package body Inverter_ADC is
             end if;
 
             --  Calculate the new Sine_Gain based on battery voltage
-            Sine_Gain := Battery_Gain;
+            --  Sine_Gain := Battery_Gain;
+            --  Actually is disabled because there is no signal at the ADC.
 
-            --  Testing the 5 kHz output with 1 Hz LED blinking. Because there
-            --  are three regular channel conversions, this frequency will be
-            --  three times greater. Get out this in the final project.
+            --  Testing the 5 kHz output with 1 Hz LED blinking. Because
+            --  there are three regular channel conversions, this frequency
+            --  will be three times greater.
             --  if Counter = 2_500 then
             --     Set_Toggle (Green_LED);
             --     Counter := 0;
