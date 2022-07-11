@@ -1,7 +1,5 @@
-with STM32.Device;  use STM32;
-
-with Sys.CPU_Clock; use Sys;
-with Sys.Int.Names;
+with Sys.CPU_Clock;
+with Sys.Int.Names; use Sys;
 with Sys.Real_Time; use Sys.Real_Time;
 
 with STM_Board;     use STM_Board;
@@ -79,9 +77,6 @@ package body Startup is
 
       --  Do not start while the battery voltage is outside maximum and minimum
       --  Wait_Until_V_Battery;
-
-      --  Set PWM generator (TIM1) clock source to 144 MHz
-      Device.Select_Clock_Source (PWM_Timer, Device.PLLCLK);
 
       --  Disable PWM gate drivers because some gate drivers enable with
       --  low level.

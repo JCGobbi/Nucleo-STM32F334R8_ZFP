@@ -1,4 +1,5 @@
-with HAL; use HAL;
+with HAL;          use HAL;
+with STM32.Device; use STM32.Device;
 
 package body Inverter_PWM is
 
@@ -15,6 +16,9 @@ package body Inverter_PWM is
              when Edge   => Up,
              when Center => Center_Aligned2);
    begin
+      --  Set PWM generator (TIM1) clock source to 144 MHz
+      Select_Clock_Source (PWM_Timer, PLLCLK);
+
       Configure_PWM_Timer (Generator => PWM_Timer_Ref,
                            Frequency => UInt32 (Frequency));
 
