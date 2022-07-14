@@ -102,8 +102,9 @@ package Inverter_PWM is
    subtype Gain_Range is Float range 0.0 .. 1.0;
    --  For correcting battery voltage and AC output variation.
 
-   procedure Set_Sine_Gain (Value : Gain_Range);
-   --  Securelly sets the value of the sine wave gain.
+   procedure Set_Sine_Gain (Value : Gain_Range)
+     with Inline;
+   --  Sets the value of the sine wave gain.
 
    procedure Set_Duty_Cycle
       (This      : PWM_Phase;
