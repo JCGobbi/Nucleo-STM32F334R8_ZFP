@@ -65,24 +65,24 @@ package body STM32.COMP is
       return Inverting_Input_Port'Val (Value);
    end Get_Inverting_Input_Port;
 
-   ----------------------
-   -- Set_Output_Timer --
-   ----------------------
+   -------------------
+   -- Select_Output --
+   -------------------
 
-   procedure Set_Output_Timer (This   : in out Comparator;
-                               Output : Output_Selection) is
+   procedure Select_Output (This   : in out Comparator;
+                            Output : Output_Selection) is
    begin
       This.CSR.OUTSEL := Output'Enum_Rep;
-   end Set_Output_Timer;
+   end Select_Output;
 
-   ----------------------
-   -- Get_Output_Timer --
-   ----------------------
+   --------------------------
+   -- Get_Output_Selection --
+   --------------------------
 
-   function Get_Output_Timer (This : Comparator) return Output_Selection is
+   function Get_Output_Selection (This : Comparator) return Output_Selection is
    begin
       return Output_Selection'Val (This.CSR.OUTSEL);
-   end Get_Output_Timer;
+   end Get_Output_Selection;
 
    -------------------------
    -- Set_Output_Polarity --
@@ -133,7 +133,7 @@ package body STM32.COMP is
    begin
       This.CSR :=
         (INMSEL   => Param.Input_Minus'Enum_Rep,
-         OUTSEL   => Param.Output_Timer'Enum_Rep,
+         OUTSEL   => Param.Output_Sel'Enum_Rep,
          POL      => Param.Output_Pol = Inverted,
          BLANKING => Param.Blanking_Source'Enum_Rep,
          others        => <>);

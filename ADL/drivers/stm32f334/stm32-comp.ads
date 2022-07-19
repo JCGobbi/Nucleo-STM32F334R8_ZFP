@@ -71,13 +71,13 @@ package STM32.COMP is
       Option_11     => 2#1010#,
       Option_12     => 2#1011#);
 
-   procedure Set_Output_Timer
+   procedure Select_Output
      (This   : in out Comparator;
       Output : Output_Selection)
-     with Post => Get_Output_Timer (This) = Output;
+     with Post => Get_Output_Selection (This) = Output;
    --  Select which Timer input must be connected with the comparator output.
 
-   function Get_Output_Timer (This : Comparator) return Output_Selection;
+   function Get_Output_Selection (This : Comparator) return Output_Selection;
    --  Return which Timer input is connected with the comparator output.
 
    type Output_Polarity is
@@ -120,7 +120,7 @@ package STM32.COMP is
 
    type Init_Parameters is record
       Input_Minus     : Inverting_Input_Port;
-      Output_Timer    : Output_Selection;
+      Output_Sel      : Output_Selection;
       Output_Pol      : Output_Polarity;
       Blanking_Source : Output_Blanking;
    end record;
