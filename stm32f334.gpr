@@ -12,18 +12,18 @@ project STM32F334 is
    for Exec_Dir use "exec";
    for Create_Missing_Dirs use "True";
 
-   -- Executable files to choose:
-   -- test_led_pwm.adb, test_led_rt, demo_inverter.adb, main.adb
+   --  Executable files to choose:
+   --  test_led_pwm.adb, test_led_rt, demo_inverter.adb, main.adb
    for Main use ("main.adb");
 
    --  Target architecture
-   for Target use "arm-eabi";   
+   for Target use "arm-eabi";
 
    --  Generic ZFP run-time compatible with our MCU:
    --  Use this if you are using the runtime from the Adacore ARM Community compiler
-   -- for Runtime ("Ada") use "zfp-cortex-m4f";
+   --  for Runtime ("Ada") use "zfp-cortex-m4f";
 
-   -- Use this if you want to compile the runtime
+   --  Use this if you want to compile the runtime
    for Runtime ("Ada") use Project'Project_Dir & "ADL/runtime/zfp-cortex-m4f";
 
    package Compiler renames Ada_Drivers_Library.Compiler;
