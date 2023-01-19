@@ -33,6 +33,8 @@ SECTIONS
     KEEP (*(.vectors))
     *(.text .text.* .gnu.linkonce.t*)
     *(.gnu.warning)
+    KEEP (*(.init))
+    KEEP (*(.fini))
   } > FLASH
 
   .ARM.extab   : { *(.ARM.extab* .gnu.linkonce.armextab.*) } > FLASH
