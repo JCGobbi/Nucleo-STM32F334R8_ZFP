@@ -42,7 +42,7 @@ library project Ada_Drivers_Library is
               & Callgraph_Switch;
       end case;
 
-      for Default_Switches ("ada") use Compiler'Default_Switches ("Ada") &
+      for Default_Switches ("Ada") use Compiler'Default_Switches ("Ada") &
         Callgraph_Switch &
         Build_Checks_Switches &
         ("-g",       --  Debug info
@@ -219,9 +219,9 @@ library project Ada_Drivers_Library is
    Has_ZFP_Runtime                := "True";              -- From board definition
    Has_Ravenscar_SFP_Runtime      := "True";              -- From board definition
    Has_Ravenscar_Full_Runtime     := "True";              -- From board definition
-   Runtime_Profile                := "zfp";               -- From user input
+   Runtime_Profile                := "light";               -- From user input
    Runtime_Name_Suffix            := "cortex-m4f";        -- From board definition
-   Runtime_Name                   := "zfp-cortex-m4f";    -- From user input
+   Runtime_Name                   := "light-cortex-m4f";    -- From user input
    Use_Startup_Gen                := "True";              -- From user input
    Has_Custom_Memory_Area_1       := "False";             -- From user input
    Boot_Memory                    := "flash";             -- From user input
