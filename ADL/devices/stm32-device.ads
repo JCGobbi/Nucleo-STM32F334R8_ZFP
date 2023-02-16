@@ -418,7 +418,7 @@ package STM32.Device is
 
    --  SPI_1 : aliased SPI_Port (Internal_SPI_1'Access);
 
-   --  SPI_1_DMA : aliased SPI_Port_DMA (Internal_SPI_1'Access);
+   --  --  SPI_1_DMA : aliased SPI_Port_DMA (Internal_SPI_1'Access);
 
    --  procedure Enable_Clock (This : SPI_Port'Class);
    --  procedure Reset (This : SPI_Port'Class);
