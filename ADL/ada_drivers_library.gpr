@@ -9,7 +9,7 @@ library project Ada_Drivers_Library is
 
    --  Target architecture and runtime
    Target := Project'Target;
-   for Runtime ("Ada") use Project'Runtime ("Ada");
+   --  for Runtime ("Ada") use Project'Runtime ("Ada");
 
    --  Callgraph info is not available on all architectures
    Callgraph_Switch := ();
