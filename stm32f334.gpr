@@ -13,7 +13,7 @@ project STM32F334 is
    for Create_Missing_Dirs use "True";
 
    --  Executable files to choose:
-   --  test_led_pwm.adb, test_led_rt, demo_inverter.adb, main.adb
+   --  test_led_pwm.adb, test_led_rt.adb, demo_inverter.adb, main.adb
    for Main use ("main.adb");
 
    --  Target architecture
@@ -29,7 +29,10 @@ project STM32F334 is
    package Compiler renames Ada_Drivers_Library.Compiler;
    
    package Builder is
-      for Executable ("main.adb") use "main";
+      for Executable ("test_led_pwm.adb") use "led_pwm";
+      for Executable ("test_led_rt.adb") use "led_rt";
+      for Executable ("demo_inverter.adb") use "demo_inverter";
+      for Executable ("main.adb") use "inverter";
       for Executable_Suffix use ".elf";
    end Builder;
 
