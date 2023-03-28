@@ -38045,7 +38045,7 @@ xs:noNamespaceSchemaLocation="CMSIS-SVD_Schema_1_1.xsd">
         <usage>registers</usage>
       </addressBlock>
       <interrupt>
-        <name>HRTIM_TIMB</name>
+        <name>HRTIM1_TIMB</name>
         <description>HRTIM1 timer B interrupt</description>
         <value>69</value>
       </interrupt>
@@ -45542,7 +45542,7 @@ xs:noNamespaceSchemaLocation="CMSIS-SVD_Schema_1_1.xsd">
         <usage>registers</usage>
       </addressBlock>
       <interrupt>
-        <name>HRTIM_TIME</name>
+        <name>HRTIM1_TIME</name>
         <description>HRTIM1 timer E interrupt</description>
         <value>72</value>
       </interrupt>

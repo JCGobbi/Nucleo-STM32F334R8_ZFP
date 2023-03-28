@@ -1,5 +1,5 @@
 --
---  Copyright (C) 2022, AdaCore
+--  Copyright (C) 2023, AdaCore
 --
 
 pragma Style_Checks (Off);
@@ -147,7 +147,7 @@ package Ada.Interrupts.Names is
    HRTIM1_TIMA_Interrupt         : constant Interrupt_ID := 68;
 
    --  HRTIM1 timer B interrupt
-   HRTIM_TIMB_Interrupt          : constant Interrupt_ID := 69;
+   HRTIM1_TIMB_Interrupt         : constant Interrupt_ID := 69;
 
    --  HRTIM1 timer C interrupt
    HRTIM1_TIMC_Interrupt         : constant Interrupt_ID := 70;
@@ -156,7 +156,7 @@ package Ada.Interrupts.Names is
    HRTIM1_TIMD_Interrupt         : constant Interrupt_ID := 71;
 
    --  HRTIM1 timer E interrupt
-   HRTIM_TIME_Interrupt          : constant Interrupt_ID := 72;
+   HRTIM1_TIME_Interrupt         : constant Interrupt_ID := 72;
 
    --  HRTIM1 fault interrupt
    HRTIM1_FLT_Interrupt          : constant Interrupt_ID := 73;

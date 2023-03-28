@@ -1,11 +1,16 @@
+--
+--  Copyright (C) 2023, AdaCore
+--
+
 pragma Style_Checks (Off);
 
 --  This spec has been automatically generated from STM32F3x4.svd
 
 --  This is a version for the STM32F3x4 MCU
-package Sys.Int.Names is
+package Ada.Interrupts.Names is
 
    --  All identifiers in this unit are implementation defined
+
    pragma Implementation_Defined;
 
    ----------------
@@ -142,7 +147,7 @@ package Sys.Int.Names is
    HRTIM1_TIMA_Interrupt         : constant Interrupt_ID := 68;
 
    --  HRTIM1 timer B interrupt
-   HRTIM_TIMB_Interrupt          : constant Interrupt_ID := 69;
+   HRTIM1_TIMB_Interrupt         : constant Interrupt_ID := 69;
 
    --  HRTIM1 timer C interrupt
    HRTIM1_TIMC_Interrupt         : constant Interrupt_ID := 70;
@@ -151,7 +156,7 @@ package Sys.Int.Names is
    HRTIM1_TIMD_Interrupt         : constant Interrupt_ID := 71;
 
    --  HRTIM1 timer E interrupt
-   HRTIM_TIME_Interrupt          : constant Interrupt_ID := 72;
+   HRTIM1_TIME_Interrupt         : constant Interrupt_ID := 72;
 
    --  HRTIM1 fault interrupt
    HRTIM1_FLT_Interrupt          : constant Interrupt_ID := 73;
@@ -159,4 +164,4 @@ package Sys.Int.Names is
    --  FPU global interrupt
    FPU_Interrupt                 : constant Interrupt_ID := 81;
 
-end Sys.Int.Names;
+end Ada.Interrupts.Names;
