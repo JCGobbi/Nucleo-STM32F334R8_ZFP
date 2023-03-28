@@ -7,7 +7,7 @@ pragma Style_Checks (Off);
 --  This spec has been automatically generated from STM32F3x4.svd
 
 --  This is a version for the STM32F3x4 MCU
-package Ada.Interrupts.Names is
+package Sys.Int.Names is
 
    --  All identifiers in this unit are implementation defined
 
@@ -164,4 +164,4 @@ package Ada.Interrupts.Names is
    --  FPU global interrupt
    FPU_Interrupt                 : constant Interrupt_ID := 81;
 
-end Ada.Interrupts.Names;
+end Sys.Int.Names;
