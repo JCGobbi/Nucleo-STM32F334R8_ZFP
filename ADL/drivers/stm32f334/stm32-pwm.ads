@@ -113,6 +113,7 @@ package STM32.PWM is
       Point                    : GPIO_Point;
       Complementary_Point      : GPIO_Point;
       PWM_AF                   : GPIO_Alternate_Function;
+      Complementary_PWM_AF     : GPIO_Alternate_Function;
       Polarity                 : Timer_Output_Compare_Polarity;
       Idle_State               : Timer_Capture_Compare_State;
       Complementary_Polarity   : Timer_Output_Compare_Polarity;

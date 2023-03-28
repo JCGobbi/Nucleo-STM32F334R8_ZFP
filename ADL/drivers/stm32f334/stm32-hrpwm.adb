@@ -113,6 +113,7 @@ package body STM32.HRPWM is
       Point                    : GPIO_Point;
       Complementary_Point      : GPIO_Point;
       PWM_AF                   : GPIO_Alternate_Function;
+      Complementary_PWM_AF     : GPIO_Alternate_Function;
       Polarity                 : Channel_Output_Polarity;
       Idle_State               : Boolean;
       Complementary_Polarity   : Channel_Output_Polarity;
@@ -127,7 +128,7 @@ package body STM32.HRPWM is
       Enable_Clock (Complementary_Point);
 
       Configure_PWM_GPIO (Point, PWM_AF, AF_Speed);
-      Configure_PWM_GPIO (Complementary_Point, PWM_AF, AF_Speed);
+      Configure_PWM_GPIO (Complementary_Point, Complementary_PWM_AF, AF_Speed);
 
       Configure_Channel_Output
         (This.Generator.all,

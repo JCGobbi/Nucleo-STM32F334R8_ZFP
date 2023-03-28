@@ -22,15 +22,17 @@ package STM_Board is
    PWM_Interrupt : constant String := "__TIM1_UP_TIM16_handler";
    --  TIM1_UP_TIM16 interrupt vector
 
-   PWM_A_Channel : Timer_Channel renames Channel_1;
-   PWM_A_H_Pin   : GPIO_Point renames PA8;
-   PWM_A_L_Pin   : GPIO_Point renames PA7;
-   PWM_A_GPIO_AF : STM32.GPIO_Alternate_Function renames GPIO_AF_TIM1_6;
+   PWM_A_Channel   : Timer_Channel renames Channel_1;
+   PWM_A_H_Pin     : GPIO_Point renames PA8;
+   PWM_A_H_GPIO_AF : STM32.GPIO_Alternate_Function renames GPIO_AF_TIM1_6;
+   PWM_A_L_Pin     : GPIO_Point renames PA7;
+   PWM_A_L_GPIO_AF : STM32.GPIO_Alternate_Function renames GPIO_AF_TIM1_6;
 
-   PWM_B_Channel : Timer_Channel renames Channel_2;
-   PWM_B_H_Pin   : GPIO_Point renames PA9;
-   PWM_B_L_Pin   : GPIO_Point renames PB0;
-   PWM_B_GPIO_AF : STM32.GPIO_Alternate_Function renames GPIO_AF_TIM1_6;
+   PWM_B_Channel   : Timer_Channel renames Channel_2;
+   PWM_B_H_Pin     : GPIO_Point renames PA9;
+   PWM_B_H_GPIO_AF : STM32.GPIO_Alternate_Function renames GPIO_AF_TIM1_6;
+   PWM_B_L_Pin     : GPIO_Point renames PB0;
+   PWM_B_L_GPIO_AF : STM32.GPIO_Alternate_Function renames GPIO_AF_TIM1_6;
 
    PWM_Gate_Power : GPIO_Point renames PA11;
    --  Output for the FET/IGBT gate drivers.
@@ -96,38 +98,31 @@ package STM_Board is
    --  Initialize GPIO inputs and outputs.
 
    function Read_Input (This : GPIO_Point) return Boolean
-   with
-      Pre => Is_Initialized;
+     with Pre => Is_Initialized;
    --  Read the specified input.
 
    procedure Turn_On (This : in out GPIO_Point)
-   with
-      Pre => Is_Initialized and (This /= PWM_Gate_Power);
+     with Pre => Is_Initialized and (This /= PWM_Gate_Power);
    --  Turns ON the specified output.
 
    procedure Turn_Off (This : in out GPIO_Point)
-   with
-      Pre => Is_Initialized and (This /= PWM_Gate_Power);
+     with Pre => Is_Initialized and (This /= PWM_Gate_Power);
    --  Turns OFF the specified output.
 
    procedure Set_Toggle (This : in out GPIO_Point)
-   with
-      Pre => Is_Initialized and (This /= PWM_Gate_Power);
+     with Pre => Is_Initialized and (This /= PWM_Gate_Power);
    --  Toggle the specified output.
 
    procedure All_LEDs_Off
-   with
-      Pre => Is_Initialized;
+     with Pre => Is_Initialized;
    --  Turns OFF all LEDs.
 
    procedure All_LEDs_On
-   with
-      Pre => Is_Initialized;
+     with Pre => Is_Initialized;
    --  Turns ON all LEDs.
 
    procedure Toggle_LEDs (These : in out GPIO_Points)
-   with
-      Pre => Is_Initialized;
+     with Pre => Is_Initialized;
    --  Toggle the specified LEDs.
 
    function Is_Initialized return Boolean;

@@ -100,6 +100,7 @@ package STM32.HRPWM is
       Point                    : GPIO_Point;
       Complementary_Point      : GPIO_Point;
       PWM_AF                   : GPIO_Alternate_Function;
+      Complementary_PWM_AF     : GPIO_Alternate_Function;
       Polarity                 : Channel_Output_Polarity;
       Idle_State               : Boolean;
       Complementary_Polarity   : Channel_Output_Polarity;

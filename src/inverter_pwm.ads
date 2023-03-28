@@ -183,23 +183,26 @@ private
    Modulators : array (PWM_Phase'Range) of PWM_Modulator;
 
    type Gate_Setting is record
-      Channel   : Timer_Channel;
-      Pin_H     : GPIO_Point;
-      Pin_L     : GPIO_Point;
-      Pin_AF    : STM32.GPIO_Alternate_Function;
+      Channel  : Timer_Channel;
+      Pin_H    : GPIO_Point;
+      Pin_H_AF : STM32.GPIO_Alternate_Function;
+      Pin_L    : GPIO_Point;
+      Pin_L_AF : STM32.GPIO_Alternate_Function;
    end record;
 
    type Gate_Settings is array (PWM_Phase'Range) of Gate_Setting;
 
    Gate_Phase_Settings : constant Gate_Settings :=
-      (A => Gate_Setting'(Channel => PWM_A_Channel,
-                          Pin_H   => PWM_A_H_Pin,
-                          Pin_L   => PWM_A_L_Pin,
-                          Pin_AF  => PWM_A_GPIO_AF),
-       B => Gate_Setting'(Channel => PWM_B_Channel,
-                          Pin_H   => PWM_B_H_Pin,
-                          Pin_L   => PWM_B_L_Pin,
-                          Pin_AF  => PWM_B_GPIO_AF));
+      (A => Gate_Setting'(Channel  => PWM_A_Channel,
+                          Pin_H    => PWM_A_H_Pin,
+                          Pin_H_AF => PWM_A_H_GPIO_AF,
+                          Pin_L    => PWM_A_L_Pin,
+                          Pin_L_AF => PWM_A_L_GPIO_AF),
+       B => Gate_Setting'(Channel  => PWM_B_Channel,
+                          Pin_H    => PWM_B_H_Pin,
+                          Pin_H_AF => PWM_B_H_GPIO_AF,
+                          Pin_L    => PWM_B_L_Pin,
+                          Pin_L_AF => PWM_B_L_GPIO_AF));
 
    Counter : Integer := 0;
    --  For testing the output.
