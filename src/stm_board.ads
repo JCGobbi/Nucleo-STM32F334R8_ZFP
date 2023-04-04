@@ -42,7 +42,7 @@ package STM_Board is
    ------------------------------
 
    Sensor_ADC : constant access Analog_To_Digital_Converter := ADC_1'Access;
-   Sensor_Trigger_Event : External_Events_Regular_Group := Timer6_TRGO_Event;
+   Sensor_Trigger_Event : External_Events_Regular_Group renames Timer6_TRGO_Event;
    Sensor_ADC_Interrupt : constant String := "__ADC1_2_handler";
    --  This interrupt vector is declared inside crt0.S file.
 
