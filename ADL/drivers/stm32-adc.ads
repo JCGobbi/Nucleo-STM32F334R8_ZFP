@@ -101,14 +101,12 @@ package STM32.ADC is
    --  This is the ideal value, likely not the actual
 
    procedure Enable (This : in out Analog_To_Digital_Converter) with
-     Pre => not Enabled (This) and
-            not Conversion_Started (This) and
+     Pre => not Conversion_Started (This) and
             not Injected_Conversion_Started (This),
      Post => Enabled (This);
 
    procedure Disable (This : in out Analog_To_Digital_Converter) with
-     Pre => Enabled (This) and
-            not Conversion_Started (This) and
+     Pre => not Conversion_Started (This) and
             not Injected_Conversion_Started (This),
      Post => not Enabled (This);
 
