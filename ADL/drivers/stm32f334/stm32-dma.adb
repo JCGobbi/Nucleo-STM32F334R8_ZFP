@@ -734,21 +734,6 @@ package body STM32.DMA is
         (Get_Stream (This, Stream).CR.MSIZE);
    end Memory_Data_Width;
 
-   ----------------------
-   -- Selected_Channel --
-   ----------------------
-
-   function Selected_Channel
-     (This : DMA_Controller;  Stream : DMA_Stream_Selector)
-      return DMA_Channel_Selector
-   is
-   begin
-      if Get_Stream (This, Stream).CR.EN = True then
-         return DMA_Channel_Selector'Val (DMA_Stream_Selector'Pos (Stream));
-      end if;
-      return Channel_0;
-   end Selected_Channel;
-
    --------------------
    -- Operating_Mode --
    --------------------

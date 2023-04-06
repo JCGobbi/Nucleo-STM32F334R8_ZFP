@@ -101,6 +101,11 @@ package STM32.DMA with SPARK_Mode => Off is
       Stream_5,
       Stream_6,
       Stream_7);
+   --  See RM0364, section 11.3.3, for the DMA request mapping tables that say
+   --  which channels can connect to which devices. With this device, what would
+   --  be called channels (hardware requests from peripherals) are simply
+   --  logically ORed before entering the DMA. So the actual channels are called
+   --  streams.
 
    procedure Enable
      (This   : DMA_Controller;
@@ -130,7 +135,6 @@ package STM32.DMA with SPARK_Mode => Off is
          not Enabled (This, Stream)                               and
          Operating_Mode (This, Stream) = Normal_Mode              and
          Current_Items_Number (This, Stream) = 0                  and
-         Selected_Channel (This, Stream) = Channel_1              and
          Transfer_Direction (This, Stream) = Peripheral_To_Memory and
          not Circular_Mode (This, Stream)                         and
          Memory_Data_Width (This, Stream) = Bytes                 and
@@ -353,21 +357,6 @@ package STM32.DMA with SPARK_Mode => Off is
       return Boolean
      with Inline;
 
-   type DMA_Channel_Selector is
-     (Channel_0,
-      Channel_1,
-      Channel_2,
-      Channel_3,
-      Channel_4,
-      Channel_5,
-      Channel_6,
-      Channel_7);
-
-   function Selected_Channel
-     (This : DMA_Controller;  Stream : DMA_Stream_Selector)
-      return DMA_Channel_Selector
-     with Inline;
-
    type DMA_Data_Transfer_Direction is
      (Peripheral_To_Memory,
       Memory_To_Peripheral,
@@ -439,13 +428,6 @@ package STM32.DMA with SPARK_Mode => Off is
       --  some are only referenced depending on the values for others. Note,
       --  however, that the default values specified do not represent a valid
       --  configuration as a whole.
-
-      Channel : DMA_Channel_Selector := DMA_Channel_Selector'First;
-      --  The channel in the multiplexed connections of controllers, streams,
-      --  and peripherals. It is vital to note that not all peripherals can
-      --  be connected to all streams. The possibilities are organized by
-      --  channels, per controller, as specified by the ST Micro Reference
-      --  Manual RM0364 rev 4 Section 11.3.2 "DMA Request Mapping" tables.
 
       Direction : DMA_Data_Transfer_Direction := DMA_Data_Transfer_Direction'First;
 
