@@ -150,17 +150,17 @@ package body STM32.HRTimers is
       HRTIM_Master_Periph.MCR := UInt32_To_MCR (MCR_Value);
    end Disable;
 
-   ------------------------
-   -- Set_Preload_Enable --
-   ------------------------
+   --------------------------
+   -- Set_Register_Preload --
+   --------------------------
 
-   procedure Set_Preload_Enable
-     (This   : in out HRTimer_Master;
-      Enable : Boolean)
+   procedure Set_Register_Preload
+     (This    : in out HRTimer_Master;
+      Enabled : Boolean)
    is
    begin
-      This.MCR.PREEN := Enable;
-   end Set_Preload_Enable;
+      This.MCR.PREEN := Enabled;
+   end Set_Register_Preload;
 
    -------------------------
    -- Configure_Prescaler --
@@ -283,6 +283,60 @@ package body STM32.HRTimers is
       This.MPER.MPER := Period;
    end Configure;
 
+   ----------------------------------
+   -- Compute_Prescaler_and_Period --
+   ----------------------------------
+
+   procedure Compute_Prescaler_And_Period
+     (This                : HRTimer_Master;
+      Requested_Frequency : UInt32;
+      Prescaler           : out HRTimer_Prescaler;
+      Period              : out UInt32)
+   is
+      Max_Prescaler      : constant HRTimer_Prescaler := HRTimer_Prescaler'Last;
+      Max_Period         : constant := 16#FFFF#; --  UInt16'Last
+      Prescaler_Enum     : UInt8; --  Counter for HRTimer_Prescaler'Enum_Rep
+      fHRCK              : UInt32; --  High frequency into HRTIM
+      Hardware_Frequency : UInt32; --  fHRTIM
+      CK_CNT             : UInt32; --  fHRCK after prescaler
+   begin
+
+      Hardware_Frequency := STM32.Device.Get_Clock_Frequency (This);
+
+      if Requested_Frequency > Hardware_Frequency then
+         raise Invalid_Request with "Frequency too high";
+      end if;
+
+      --  fHRCK is the high-resolution equivalent clock into HRTIM and all
+      --  subsequent clocks are derived and synchronous with this source.
+      --  Considering the fHRTIM clock period division by 32, it is equivalent
+      --  to a frequency of fHRCK = 144 x 32 = 4.608 GHz. The HRtimer
+      --  resolutions is tHRCK = 1 / fHRCK = 217 ps.
+      fHRCK := Hardware_Frequency * 32;
+
+      --  We use a numeric prescaler value to calculate the Hardware_Frequency
+      --  division considering that the clock prescaler is a power of 2 of this
+      --  value, as are the HRTimer_Prescaler discrete values.
+      Prescaler_Enum := 0;
+      loop
+         --  Compute the Counter's clock
+         CK_CNT := fHRCK / UInt32 (2**Integer (Prescaler_Enum));
+         --  Determine the CK_CNT periods to achieve the requested frequency
+         Period := CK_CNT / Requested_Frequency;
+
+         exit when ((Period <= Max_Period) or
+                      (Prescaler_Enum > Max_Prescaler'Enum_Rep));
+
+         Prescaler_Enum := Prescaler_Enum + 1;
+      end loop;
+
+      if Prescaler_Enum > Max_Prescaler'Enum_Rep then
+         raise Invalid_Request with "Frequency too low";
+      end if;
+
+      Prescaler := HRTimer_Prescaler'Val (Prescaler_Enum);
+   end Compute_Prescaler_And_Period;
+
    --------------------------------
    -- Set_Counter_Operating_Mode --
    --------------------------------
@@ -383,30 +437,27 @@ package body STM32.HRTimers is
    procedure Set_Compare_Value
      (This    : in out HRTimer_Master;
       Compare : HRTimer_Compare_Number;
-      Value   : in out UInt16)
+      Value   : UInt16)
    is
       pragma Unreferenced (This);
 
       --  The minimum value for timer compare is 3 periods of fHRTIM clock,
-      --  that is  0x60 if CKPSC[2:0] = 0, 0x30 if CKPSC[2:0] = 1, 0x18 if
+      --  that is 0x60 if CKPSC[2:0] = 0, 0x30 if CKPSC[2:0] = 1, 0x18 if
       --  CKPSC[2:0] = 2,... See chapter 21.5.8 at pg. 724 in RM0364 rev. 4.
       Prescaler : constant UInt3 := HRTIM_Master_Periph.MCR.CKPSC;
       Pre_Value : constant UInt16 := UInt16 (2 ** Natural (Prescaler));
       Min_Value : constant UInt16 := 16#60# / Pre_Value;
+      Final_Value : constant UInt16 := UInt16'Max (Value, Min_Value);
    begin
-      if Value > Min_Value then
-         Value := Min_Value;
-      end if;
-
       case Compare is
          when Compare_1 =>
-            HRTIM_Master_Periph.MCMP1R.MCMP1 := Value;
+            HRTIM_Master_Periph.MCMP1R.MCMP1 := Final_Value;
          when Compare_2 =>
-            HRTIM_Master_Periph.MCMP2R.MCMP2 := Value;
+            HRTIM_Master_Periph.MCMP2R.MCMP2 := Final_Value;
          when Compare_3 =>
-            HRTIM_Master_Periph.MCMP3R.MCMP3 := Value;
+            HRTIM_Master_Periph.MCMP3R.MCMP3 := Final_Value;
          when Compare_4 =>
-            HRTIM_Master_Periph.MCMP4R.MCMP4 := Value;
+            HRTIM_Master_Periph.MCMP4R.MCMP4 := Final_Value;
       end case;
    end Set_Compare_Value;
 
@@ -956,7 +1007,7 @@ package body STM32.HRTimers is
       Prescaler_Enum     : UInt8; --  Counter for HRTimer_Prescaler'Enum_Rep
       fHRCK              : UInt32; --  High frequency into HRTIM
       Hardware_Frequency : UInt32; --  fHRTIM
-      CK_CNT             : UInt32;
+      CK_CNT             : UInt32; --  fHRCK after prescaler
    begin
 
       Hardware_Frequency := STM32.Device.Get_Clock_Frequency (This);
@@ -1592,7 +1643,7 @@ package body STM32.HRTimers is
 
    procedure Configure_Deadtime
      (This          : in out HRTimer_Channel;
-      Prescaler     : UInt3;
+      Prescaler     : HRTimer_Deadtime_Prescaler;
       Rising_Value  : UInt9;
       Rising_Sign   : HRTimer_Deadtime_Sign := Positive_Sign;
       Falling_Value : UInt9;
@@ -1602,7 +1653,7 @@ package body STM32.HRTimers is
       --  The deadtime (generator) time after the prescaler is defined by
       --  tDTG = tHRTIM / 8 * 2 ** DTPRSC. For tHRTIM = 1/144 MHz and
       --  DTPRSC = 0, tDTG = 868 ps; DTPRSC = 1, tDTG = 1.736 ns; and so on.
-      This.DTxR.DTPRSC := Prescaler;
+      This.DTxR.DTPRSC := Prescaler'Enum_Rep;
 
       --  Two deadtimes can be defined in relationship with the rising edge
       --  and the falling edge of the Output 1 reference waveform.
@@ -1716,6 +1767,28 @@ package body STM32.HRTimers is
       Lock.Falling_Sign := This.DTxR.DTFSLKx;
       return Lock;
    end Read_Deadtime_Lock;
+
+   ------------------------------
+   -- Set_Channel_Output_State --
+   ------------------------------
+
+   procedure Set_Channel_Output_State
+     (This  : in out HRTimer_Channel;
+      Out_1 : Output_State;
+      Out_2 : Output_State)
+   is
+   begin
+      if Out_1 = Low then
+         This.RSTx1R := This.RSTx1R or 16#01#;
+      else
+         This.SETx1R := This.SETx1R or 16#01#;
+      end if;
+      if Out_2 = Low then
+         This.RSTx2R := This.RSTx2R or 16#01#;
+      else
+         This.SETx2R := This.SETx2R or 16#01#;
+      end if;
+   end Set_Channel_Output_State;
 
    ------------------------------------
    -- Configure_Channel_Output_Event --
