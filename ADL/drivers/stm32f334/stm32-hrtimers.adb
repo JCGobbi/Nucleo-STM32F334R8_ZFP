@@ -1812,6 +1812,52 @@ package body STM32.HRTimers is
    end Configure_Channel_Output_Event;
 
    ------------------------------
+   -- Set_Channel_Output_Event --
+   ------------------------------
+
+   procedure Set_Channel_Output_Event
+     (This       : in out HRTimer_Channel;
+      Output     : HRTimer_Channel_Output;
+      Event      : Output_Event;
+      Event_Type : Output_Event_Type;
+      Enabled    : Boolean)
+   is
+   begin
+      case Output is
+         when Output_1 =>
+            case Event_Type is
+               when Reset_Event =>
+                  if Enabled then
+                     This.RSTx1R := This.RSTx1R or 2 ** Event'Enum_Rep;
+                  else
+                     This.RSTx1R := This.RSTx1R and not (2 ** Event'Enum_Rep);
+                  end if;
+               when Set_Event =>
+                  if Enabled then
+                     This.SETx1R := This.SETx1R or 2 ** Event'Enum_Rep;
+                  else
+                     This.SETx1R := This.SETx1R and not (2 ** Event'Enum_Rep);
+                  end if;
+            end case;
+         when Output_2 =>
+            case Event_Type is
+               when Reset_Event =>
+                  if Enabled then
+                     This.RSTx2R := This.RSTx2R or 2 ** Event'Enum_Rep;
+                  else
+                     This.RSTx2R := This.RSTx2R and not (2 ** Event'Enum_Rep);
+                  end if;
+               when Set_Event =>
+                  if Enabled then
+                     This.SETx2R := This.SETx2R or 2 ** Event'Enum_Rep;
+                  else
+                     This.SETx2R := This.SETx2R and not (2 ** Event'Enum_Rep);
+                  end if;
+            end case;
+      end case;
+   end Set_Channel_Output_Event;
+
+   ------------------------------
    -- Configure_External_Event --
    ------------------------------
 
