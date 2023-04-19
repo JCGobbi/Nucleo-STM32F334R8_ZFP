@@ -1811,11 +1811,11 @@ package body STM32.HRTimers is
       end case;
    end Configure_Channel_Output_Event;
 
-   ------------------------------
-   -- Set_Channel_Output_Event --
-   ------------------------------
+   ------------------------------------
+   -- Configure_Channel_Output_Event --
+   ------------------------------------
 
-   procedure Set_Channel_Output_Event
+   procedure Configure_Channel_Output_Event
      (This       : in out HRTimer_Channel;
       Output     : HRTimer_Channel_Output;
       Event      : Output_Event;
@@ -1855,7 +1855,7 @@ package body STM32.HRTimers is
                   end if;
             end case;
       end case;
-   end Set_Channel_Output_Event;
+   end Configure_Channel_Output_Event;
 
    ------------------------------
    -- Configure_External_Event --
@@ -3138,19 +3138,44 @@ package body STM32.HRTimers is
    ---------------------------
 
    procedure Configure_ADC_Trigger
-     (Output : ADC_Trigger_Output;
-      Source : ADC_Trigger_Source)
+     (Output  : ADC_Trigger_Output;
+      Source  : ADC_Trigger_Source;
+      Enabled : Boolean)
    is
    begin
       case Output is
          when ADC_Trigger_1 =>
-            HRTimer_Common_Periph.ADC1R := 2 ** Source'Enum_Rep;
+            if Enabled then
+               HRTimer_Common_Periph.ADC1R :=
+                 HRTimer_Common_Periph.ADC1R or 2 ** Source'Enum_Rep;
+            else
+               HRTimer_Common_Periph.ADC1R :=
+                 HRTimer_Common_Periph.ADC1R and not (2 ** Source'Enum_Rep);
+            end if;
          when ADC_Trigger_2 =>
-            HRTimer_Common_Periph.ADC2R := 2 ** Source'Enum_Rep;
+            if Enabled then
+               HRTimer_Common_Periph.ADC2R :=
+                 HRTimer_Common_Periph.ADC2R or 2 ** Source'Enum_Rep;
+            else
+               HRTimer_Common_Periph.ADC2R :=
+                 HRTimer_Common_Periph.ADC2R and not (2 ** Source'Enum_Rep);
+            end if;
          when ADC_Trigger_3 =>
-            HRTimer_Common_Periph.ADC3R := 2 ** Source'Enum_Rep;
+            if Enabled then
+               HRTimer_Common_Periph.ADC3R :=
+                 HRTimer_Common_Periph.ADC3R or 2 ** Source'Enum_Rep;
+            else
+               HRTimer_Common_Periph.ADC3R :=
+                 HRTimer_Common_Periph.ADC3R and not (2 ** Source'Enum_Rep);
+            end if;
          when ADC_Trigger_4 =>
-            HRTimer_Common_Periph.ADC4R := 2 ** Source'Enum_Rep;
+            if Enabled then
+               HRTimer_Common_Periph.ADC4R :=
+                 HRTimer_Common_Periph.ADC4R or 2 ** Source'Enum_Rep;
+            else
+               HRTimer_Common_Periph.ADC4R :=
+                 HRTimer_Common_Periph.ADC4R and not (2 ** Source'Enum_Rep);
+            end if;
       end case;
    end Configure_ADC_Trigger;
 
