@@ -136,6 +136,54 @@ package body STM32.ADC is
       return Data_Alignment
    is ((if This.CFGR.ALIGN then Left_Aligned else Right_Aligned));
 
+   -------------------------------
+   -- Configure_Regular_Trigger --
+   -------------------------------
+
+   procedure Configure_Regular_Trigger
+     (This       : in out Analog_To_Digital_Converter;
+      Continuous : Boolean;
+      Trigger    : Regular_Channel_Conversion_Trigger)
+   is
+   begin
+      This.CFGR.CONT := Continuous;
+
+      if Trigger.Enabler = Trigger_Disabled then
+         This.CFGR.EXTSEL := 0;
+         This.CFGR.EXTEN := 0;
+      else
+         This.CFGR.EXTSEL := External_Events_Regular_Group'Enum_Rep (Trigger.Event);
+         This.CFGR.EXTEN := External_Trigger'Enum_Rep (Trigger.Enabler);
+      end if;
+   end Configure_Regular_Trigger;
+
+   -------------------------------
+   -- Configure_Regular_Channel --
+   -------------------------------
+
+   procedure Configure_Regular_Channel
+     (This        : in out Analog_To_Digital_Converter;
+      Channel     : Analog_Input_Channel;
+      Rank        : Regular_Channel_Rank;
+      Sample_Time : Channel_Sampling_Times)
+   is
+   begin
+      Set_Sampling_Time (This, Channel, Sample_Time);
+      Set_Sequence_Position (This, Channel, Rank);
+   end Configure_Regular_Channel;
+
+   -----------------------------------
+   -- Configure_Regular_Channel_Nbr --
+   -----------------------------------
+
+   procedure Configure_Regular_Channel_Nbr
+     (This  : in out Analog_To_Digital_Converter;
+      Number : UInt4)
+   is
+   begin
+      This.SQR1.L := Number;
+   end Configure_Regular_Channel_Nbr;
+
    -----------------------------------
    -- Configure_Regular_Conversions --
    -----------------------------------
@@ -195,6 +243,60 @@ package body STM32.ADC is
    function Scan_Mode_Enabled (This : Analog_To_Digital_Converter)
                                return Boolean
      is (This.SQR1.L /= UInt4 (0));
+
+   --------------------------------
+   -- Configure_Injected_Trigger --
+   --------------------------------
+
+   procedure Configure_Injected_Trigger
+     (This          : in out Analog_To_Digital_Converter;
+      AutoInjection : Boolean;
+      Trigger       : Injected_Channel_Conversion_Trigger)
+   is
+   begin
+      --  Injected channels cannot be converted continuously. The only
+      --  exception is when an injected channel is configured to be converted
+      --  automatically after regular channels in continuous mode. See note in
+      --  RM 13.3.5, pg 390, and "Auto-injection" section on pg 392.
+      This.CFGR.JAUTO := AutoInjection;
+
+      if Trigger.Enabler = Trigger_Disabled then
+         This.JSQR.JEXTEN := 0;
+         This.JSQR.JEXTSEL := 0;
+      else
+         This.JSQR.JEXTEN := External_Trigger'Enum_Rep (Trigger.Enabler);
+         This.JSQR.JEXTSEL := External_Events_Injected_Group'Enum_Rep (Trigger.Event);
+      end if;
+   end Configure_Injected_Trigger;
+
+   --------------------------------
+   -- Configure_Injected_Channel --
+   --------------------------------
+
+   procedure Configure_Injected_Channel
+     (This        : in out Analog_To_Digital_Converter;
+      Channel     : Analog_Input_Channel;
+      Rank        : Injected_Channel_Rank;
+      Sample_Time : Channel_Sampling_Times;
+      Offset      : Injected_Data_Offset)
+   is
+   begin
+      Set_Sampling_Time (This, Channel, Sample_Time);
+      Set_Injected_Channel_Sequence_Position (This, Channel, Rank);
+      Set_Injected_Channel_Offset (This, Channel, Rank, Offset);
+   end Configure_Injected_Channel;
+
+   ------------------------------------
+   -- Configure_Injected_Channel_Nbr --
+   ------------------------------------
+
+   procedure Configure_Injected_Channel_Nbr
+     (This   : in out Analog_To_Digital_Converter;
+      Number : UInt2)
+   is
+   begin
+      This.JSQR.JL := Number;
+   end Configure_Injected_Channel_Nbr;
 
    ------------------------------------
    -- Configure_Injected_Conversions --
@@ -308,38 +410,6 @@ package body STM32.ADC is
       ADC_Common_Periph.CCR.MDMA    := DMA_Mode'Enum_Rep;
       ADC_Common_Periph.CCR.CKMODE  := Clock_Mode'Enum_Rep;
    end Configure_Common_Properties;
-
-   -------------------------------
-   -- Configure_Regular_Channel --
-   -------------------------------
-
-   procedure Configure_Regular_Channel
-     (This        : in out Analog_To_Digital_Converter;
-      Channel     : Analog_Input_Channel;
-      Rank        : Regular_Channel_Rank;
-      Sample_Time : Channel_Sampling_Times)
-   is
-   begin
-      Set_Sampling_Time (This, Channel, Sample_Time);
-      Set_Sequence_Position (This, Channel, Rank);
-   end Configure_Regular_Channel;
-
-   --------------------------------
-   -- Configure_Injected_Channel --
-   --------------------------------
-
-   procedure Configure_Injected_Channel
-     (This        : in out Analog_To_Digital_Converter;
-      Channel     : Analog_Input_Channel;
-      Rank        : Injected_Channel_Rank;
-      Sample_Time : Channel_Sampling_Times;
-      Offset      : Injected_Data_Offset)
-   is
-   begin
-      Set_Sampling_Time (This, Channel, Sample_Time);
-      Set_Injected_Channel_Sequence_Position (This, Channel, Rank);
-      Set_Injected_Channel_Offset (This, Channel, Rank, Offset);
-   end Configure_Injected_Channel;
 
    ----------------------
    -- Start_Conversion --

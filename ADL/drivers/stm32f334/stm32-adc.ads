@@ -205,10 +205,25 @@ package STM32.ADC is
    Software_Triggered : constant Regular_Channel_Conversion_Trigger
      := (Enabler => Trigger_Disabled);
 
+   procedure Configure_Regular_Trigger
+     (This       : in out Analog_To_Digital_Converter;
+      Continuous : Boolean;
+      Trigger    : Regular_Channel_Conversion_Trigger);
+
    type Regular_Channel_Conversion is record
       Channel     : Analog_Input_Channel;
       Sample_Time : Channel_Sampling_Times;
    end record;
+
+   procedure Configure_Regular_Channel
+     (This        : in out Analog_To_Digital_Converter;
+      Channel     : Analog_Input_Channel;
+      Rank        : Regular_Channel_Rank;
+      Sample_Time : Channel_Sampling_Times);
+
+   procedure Configure_Regular_Channel_Nbr
+     (This   : in out Analog_To_Digital_Converter;
+      Number : UInt4);
 
    type Regular_Channel_Conversions is
      array (Regular_Channel_Rank range <>) of Regular_Channel_Conversion;
@@ -293,6 +308,14 @@ package STM32.ADC is
    Software_Triggered_Injected : constant Injected_Channel_Conversion_Trigger
      := (Enabler => Trigger_Disabled);
 
+   procedure Configure_Injected_Trigger
+     (This          : in out Analog_To_Digital_Converter;
+      AutoInjection : Boolean;
+      Trigger       : Injected_Channel_Conversion_Trigger)
+     with Pre => (if AutoInjection then Trigger = Software_Triggered_Injected) and
+                 (if AutoInjection then
+                   not Discontinuous_Mode_Injected_Enabled (This));
+
    subtype Injected_Data_Offset is UInt12;
 
    type Injected_Channel_Conversion is record
@@ -300,6 +323,17 @@ package STM32.ADC is
       Sample_Time : Channel_Sampling_Times;
       Offset      : Injected_Data_Offset := 0;
    end record;
+
+   procedure Configure_Injected_Channel
+     (This        : in out Analog_To_Digital_Converter;
+      Channel     : Analog_Input_Channel;
+      Rank        : Injected_Channel_Rank;
+      Sample_Time : Channel_Sampling_Times;
+      Offset      : Injected_Data_Offset);
+
+   procedure Configure_Injected_Channel_Nbr
+     (This   : in out Analog_To_Digital_Converter;
+      Number : UInt2);
 
    type Injected_Channel_Conversions is
      array (Injected_Channel_Rank range <>) of Injected_Channel_Conversion;
@@ -800,19 +834,6 @@ private
    --  The RM, section 13.3.6, says stabilization times are required. These
    --  values are specified in the datasheets, eg section 5.3.20, pg 129,
    --  and section 5.3.21, pg 134, of the STM32F405/7xx, DocID022152 Rev 4.
-
-   procedure Configure_Regular_Channel
-     (This        : in out Analog_To_Digital_Converter;
-      Channel     : Analog_Input_Channel;
-      Rank        : Regular_Channel_Rank;
-      Sample_Time : Channel_Sampling_Times);
-
-   procedure Configure_Injected_Channel
-     (This        : in out Analog_To_Digital_Converter;
-      Channel     : Analog_Input_Channel;
-      Rank        : Injected_Channel_Rank;
-      Sample_Time : Channel_Sampling_Times;
-      Offset      : Injected_Data_Offset);
 
    procedure Enable_VBat_Connection with
      Post => VBat_Enabled;
