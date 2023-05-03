@@ -90,14 +90,11 @@ package STM32.HRTimers is
    --  fHRCK = 4.608 GHz with resolution 217 ps. See RM0364 rev 4 Chapter 21.3.3
    --  "Clocks".
 
-   type HRTimer_Prescaler_Array is array (HRTimer_Prescaler) of UInt16;
-   HRTimer_Prescaler_Value : HRTimer_Prescaler_Array := (1, 2, 4, 8, 16, 32, 64, 128);
-
    procedure Configure_Prescaler
      (This        : in out HRTimer_Master;
       Prescaler   : HRTimer_Prescaler)
      with Pre => not Enabled (This),
-     Post => Current_Prescaler (This) = HRTimer_Prescaler_Value (Prescaler);
+     Post => Current_Prescaler (This) = Prescaler;
    --  The actual prescaler value is (2 ** Prescaler). The counter clock
    --  equivalent frequency (fCOUNTER) is equal to fHRCK / 2 ** CKPSC[2:0].
    --  It is mandatory to have the same prescaling factors for all timers
@@ -105,7 +102,7 @@ package STM32.HRTimers is
    --  identical CKPSC[2:0] values if master timer is controlling HRTIM_CHA1 or
    --  HRTIM_CHA2 outputs).
 
-   function Current_Prescaler (This : HRTimer_Master) return UInt16;
+   function Current_Prescaler (This : HRTimer_Master) return HRTimer_Prescaler;
 
    type Synchronization_Input_Source is
      (Disabled,
@@ -208,7 +205,7 @@ package STM32.HRTimers is
       Prescaler : HRTimer_Prescaler;
       Period    : UInt16)
      with Pre => not Enabled (This),
-          Post => Current_Prescaler (This) = HRTimer_Prescaler_Value (Prescaler) and
+          Post => Current_Prescaler (This) = Prescaler and
                   Current_Period (This) = Period;
 
    procedure Compute_Prescaler_And_Period
@@ -266,7 +263,7 @@ package STM32.HRTimers is
       Period      : UInt16;
       Repetitions : UInt8)
      with Pre => not Enabled (This),
-          Post => Current_Prescaler (This) = HRTimer_Prescaler_Value (Prescaler) and
+          Post => Current_Prescaler (This) = Prescaler and
                   Current_Period (This) = Period and
                   Current_Repetition_Counter (This) = Repetitions;
 
@@ -420,7 +417,7 @@ package STM32.HRTimers is
      (This        : in out HRTimer_Channel;
       Prescaler   : HRTimer_Prescaler)
      with Pre => not Enabled (This),
-       Post => Current_Prescaler (This) = HRTimer_Prescaler_Value (Prescaler);
+       Post => Current_Prescaler (This) = Prescaler;
    --  The actual prescaler value is (2 ** Prescaler). For clock prescaling ratios
    --  below 32 (CKPSC[2:0] < 5), the least significant bits of the counter and
    --  capture registers are not significant. The least significant bits cannot
@@ -431,7 +428,7 @@ package STM32.HRTimers is
    --  identical CKPSC[2:0] values if master timer is controlling HRTIM_CHA1 or
    --  HRTIM_CHA2 outputs).
 
-   function Current_Prescaler (This : HRTimer_Channel) return UInt16;
+   function Current_Prescaler (This : HRTimer_Channel) return HRTimer_Prescaler;
 
    procedure Set_PushPull_Mode (This : in out HRTimer_Channel; Mode : Boolean)
      with Pre => not Enabled (This);
@@ -563,7 +560,7 @@ package STM32.HRTimers is
       Prescaler : HRTimer_Prescaler;
       Period    : UInt16)
      with Pre => not Enabled (This),
-          Post => Current_Prescaler (This) = HRTimer_Prescaler_Value (Prescaler) and
+          Post => Current_Prescaler (This) = Prescaler and
                   Current_Period (This) = Period;
 
    procedure Compute_Prescaler_And_Period
@@ -627,7 +624,7 @@ package STM32.HRTimers is
       Period      : UInt16;
       Repetitions : UInt8)
      with Pre => not Enabled (This),
-          Post => Current_Prescaler (This) = HRTimer_Prescaler_Value (Prescaler) and
+          Post => Current_Prescaler (This) = Prescaler and
                   Current_Period (This) = Period and
                   Current_Repetition_Counter (This) = Repetitions;
 
@@ -1545,13 +1542,10 @@ package STM32.HRTimers is
       External_Event_8,
       OnChip_Event_Rising_Edge);
 
-   type Burst_Mode_Trigger_List is
-     array (Natural range <>) of Burst_Mode_Trigger_Event;
-
    procedure Configure_Burst_Mode_Trigger
-     (Triggers : Burst_Mode_Trigger_List;
-      Enable   : Boolean);
-   --  Enable/disable one or several burst mode triggers.
+     (Trigger : Burst_Mode_Trigger_Event;
+      Enabled : Boolean);
+   --  Enable/disable each burst mode trigger.
 
    procedure Set_Burst_Mode_Compare (Value : UInt16)
      with Pre => (if (HRTIM_Common_Periph.BMCR.BMCLK = 2#1010# and
