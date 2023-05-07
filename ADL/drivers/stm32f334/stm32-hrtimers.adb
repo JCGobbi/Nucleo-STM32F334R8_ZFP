@@ -226,11 +226,11 @@ package body STM32.HRTimers is
       This.MCR.DACSYNC := Trigger'Enum_Rep;
    end Configure_DAC_Synchronization_Trigger;
 
-   ----------------------------
-   -- Configure_Timer_Update --
-   ----------------------------
+   ---------------------------------------
+   -- Configure_Register_Preload_Update --
+   ---------------------------------------
 
-   procedure Configure_Timer_Update
+   procedure Configure_Register_Preload_Update
      (This       : in out HRTimer_Master;
       Repetition : Boolean;
       Burst_DMA  : Burst_DMA_Update_Mode)
@@ -238,7 +238,7 @@ package body STM32.HRTimers is
    begin
       This.MCR.MREPU := Repetition;
       This.MCR.BRSTDMA := Burst_DMA'Enum_Rep;
-   end Configure_Timer_Update;
+   end Configure_Register_Preload_Update;
 
    -------------------------
    -- Set_HalfPeriod_Mode --
@@ -913,11 +913,11 @@ package body STM32.HRTimers is
       end case;
    end Configure_Comparator_AutoDelayed_Mode;
 
-   ----------------------
-   -- Set_Timer_Update --
-   ----------------------
+   ---------------------------------------
+   -- Configure_Register_Preload_Update --
+   ---------------------------------------
 
-   procedure Set_Timer_Update
+   procedure Configure_Register_reload_Update
      (This   : in out HRTimer_Channel;
       Event  : HRTimer_Update_Event;
       Enable : Boolean)
@@ -941,7 +941,7 @@ package body STM32.HRTimers is
          when Master_Update =>
             This.TIMxCR.MSTU := Enable;
       end case;
-   end Set_Timer_Update;
+   end Configure_Register_reload_Update;
 
    ----------------------------
    -- Set_Update_Gating_Mode --
