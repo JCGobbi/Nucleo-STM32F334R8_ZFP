@@ -240,9 +240,9 @@ package STM32.HRTimers is
    function Current_Counter (This : HRTimer_Master) return UInt16;
 
    procedure Set_Repetition_Counter
-     (This : in out HRTimer_Master;
-      Value : UInt8)
-     with Post => Current_Repetition_Counter (This) = Value;
+     (This        : in out HRTimer_Master;
+      Repetitions : UInt8)
+     with Post => Current_Repetition_Counter (This) = Repetitions;
    --  The repetition period value for the master counter. It  holds either
    --  the content of the preload register or the content of the active
    --  register if preload is disabled.
@@ -251,21 +251,12 @@ package STM32.HRTimers is
 
    procedure Configure_Repetition_Counter
      (This        : in out HRTimer_Master;
-      Counter     : UInt8;
+      Repetitions : UInt8;
       Interrupt   : Boolean;
-      DMA_Request : Boolean);
+      DMA_Request : Boolean)
+     with Post => Current_Repetition_Counter (This) = Repetitions;
    --  Defines the repetition period and whether the master timer starts
    --  Interrupt and/or DMA requests at the end of repetition.
-
-   procedure Configure
-     (This        : in out HRTimer_Master;
-      Prescaler   : HRTimer_Prescaler;
-      Period      : UInt16;
-      Repetitions : UInt8)
-     with Pre => not Enabled (This),
-          Post => Current_Prescaler (This) = Prescaler and
-                  Current_Period (This) = Period and
-                  Current_Repetition_Counter (This) = Repetitions;
 
    type HRTimer_Compare_Number is
      (Compare_1,
@@ -407,8 +398,8 @@ package STM32.HRTimers is
    function Enabled (This : HRTimer_Channel) return Boolean;
 
    procedure Set_Register_Preload
-     (This   : in out HRTimer_Channel;
-      Enable : Boolean);
+     (This    : in out HRTimer_Channel;
+      Enabled : Boolean);
    --  Enables the registers preload mechanism and defines whether the write
    --  accesses to the memory mapped registers are done into HRTIM active or
    --  preload registers.
@@ -500,9 +491,9 @@ package STM32.HRTimers is
       Master_Update);
 
    procedure Configure_Register_Preload_Update
-     (This   : in out HRTimer_Channel;
-      Event  : HRTimer_Update_Event;
-      Enable : Boolean)
+     (This    : in out HRTimer_Channel;
+      Event   : HRTimer_Update_Event;
+      Enabled : Boolean)
      with Pre => (if This'Address = HRTIM_TIMA_Base then Event /= TimerA_Update
                   elsif This'Address = HRTIM_TIMB_Base then Event /= TimerB_Update
                   elsif This'Address = HRTIM_TIMC_Base then Event /= TimerC_Update
@@ -594,8 +585,9 @@ package STM32.HRTimers is
    function Current_Counter (This : HRTimer_Channel) return UInt16;
 
    procedure Set_Repetition_Counter
-     (This : in out HRTimer_Channel;  Value : UInt8)
-     with Post => Current_Repetition_Counter (This) = Value;
+     (This        : in out HRTimer_Channel;
+      Repetitions : UInt8)
+     with Post => Current_Repetition_Counter (This) = Repetitions;
    --  The repetition counter is initialized with the content of the HRTIM_REPxR
    --  register when the timer is enabled (TXCEN bit set). Once the timer has
    --  been enabled, any time the counter is cleared, either due to a reset
@@ -617,16 +609,6 @@ package STM32.HRTimers is
    --  event or due to a counter roll-over, the repetition counter is decreased.
    --  When it reaches zero, a REP interrupt or a DMA request is issued if
    --  enabled (REPIE and REPDE bits in the HRTIM_DIER register).
-
-   procedure Configure
-     (This        : in out HRTimer_Channel;
-      Prescaler   : HRTimer_Prescaler;
-      Period      : UInt16;
-      Repetitions : UInt8)
-     with Pre => not Enabled (This),
-          Post => Current_Prescaler (This) = Prescaler and
-                  Current_Period (This) = Period and
-                  Current_Repetition_Counter (This) = Repetitions;
 
    type Counter_Reset_Event is
      (Timer_Update,
@@ -1461,22 +1443,24 @@ package STM32.HRTimers is
       Prescaler_fHRTIM_Clock);
 
    type Burst_Mode_Prescaler is
-     (No_Division,
-      fHRTIM_Over_2,
-      fHRTIM_Over_4,
-      fHRTIM_Over_8,
-      fHRTIM_Over_16,
-      fHRTIM_Over_32,
-      fHRTIM_Over_64,
-      fHRTIM_Over_128,
-      fHRTIM_Over_256,
-      fHRTIM_Over_512,
-      fHRTIM_Over_1024,
-      fHRTIM_Over_2048,
-      fHRTIM_Over_4096,
-      fHRTIM_Over_8192,
-      fHRTIM_Over_16384,
-      fHRTIM_Over_32768);
+     (Div_1,
+      Div_2,
+      Div_4,
+      Div_8,
+      Div_16,
+      Div_32,
+      Div_64,
+      Div_128,
+      Div_256,
+      Div_512,
+      Div_1024,
+      Div_2048,
+      Div_4096,
+      Div_8192,
+      Div_16384,
+      Div_32768);
+   --  Defines the prescaling ratio of the fHRTIM clock for the burst mode
+   --  controller.
 
    procedure Enable_Burst_Mode
      with Pre => HRTIM_Common_Periph.BMPER.BMPER /= 16#0000#,
@@ -1499,6 +1483,10 @@ package STM32.HRTimers is
       Clock_Source   : Burst_Mode_Clock_Source;
       Prescaler      : Burst_Mode_Prescaler;
       Preload_Enable : Boolean);
+   --  The burst mode controller counter can be clocked by several sources:
+   --  Masterr timer and HRTIM A..E reset/roll-over events, general purpose
+   --  timers or the fHRTIM clock prescaled by a factor. See UM0364 rev 4
+   --  chapter 21.3.13 Burst mode controller at section Burst mode clock.
 
    procedure Configure_HRTimer_Burst_Mode
      (Counter : HRTimer;

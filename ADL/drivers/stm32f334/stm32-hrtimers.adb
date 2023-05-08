@@ -388,10 +388,10 @@ package body STM32.HRTimers is
    ----------------------------
 
    procedure Set_Repetition_Counter
-     (This : in out HRTimer_Master;
-      Value : UInt8) is
+     (This        : in out HRTimer_Master;
+      Repetitions : UInt8) is
    begin
-      This.MREP.MREP := Value;
+      This.MREP.MREP := Repetitions;
    end Set_Repetition_Counter;
 
    --------------------------------
@@ -410,31 +410,15 @@ package body STM32.HRTimers is
 
    procedure Configure_Repetition_Counter
      (This        : in out HRTimer_Master;
-      Counter     : UInt8;
+      Repetitions : UInt8;
       Interrupt   : Boolean;
       DMA_Request : Boolean)
    is
    begin
-      This.MREP.MREP := Counter;
+      This.MREP.MREP := Repetitions;
       This.MDIER.MREPIE := Interrupt;
       This.MDIER.MREPDE := DMA_Request;
    end Configure_Repetition_Counter;
-
-   ---------------
-   -- Configure --
-   ---------------
-
-   procedure Configure
-     (This        : in out HRTimer_Master;
-      Prescaler   : HRTimer_Prescaler;
-      Period      : UInt16;
-      Repetitions : UInt8)
-   is
-   begin
-      This.MCR.CKPSC := Prescaler'Enum_Rep;
-      This.MPER.MPER := Period;
-      This.MREP.MREP := Repetitions;
-   end Configure;
 
    -----------------------
    -- Set_Compare_Value --
@@ -827,16 +811,16 @@ package body STM32.HRTimers is
       return False;
    end Enabled;
 
-   -----------------------------
-   -- Set_Register_Preloade --
-   -----------------------------
+   --------------------------
+   -- Set_Register_Preload --
+   --------------------------
 
    procedure Set_Register_Preload
-     (This   : in out HRTimer_Channel;
-      Enable : Boolean)
+     (This    : in out HRTimer_Channel;
+      Enabled : Boolean)
    is
    begin
-      This.TIMxCR.PREEN := Enable;
+      This.TIMxCR.PREEN := Enabled;
    end Set_Register_Preload;
 
    -------------------------
@@ -917,31 +901,31 @@ package body STM32.HRTimers is
    -- Configure_Register_Preload_Update --
    ---------------------------------------
 
-   procedure Configure_Register_reload_Update
-     (This   : in out HRTimer_Channel;
-      Event  : HRTimer_Update_Event;
-      Enable : Boolean)
+   procedure Configure_Register_Preload_Update
+     (This    : in out HRTimer_Channel;
+      Event   : HRTimer_Update_Event;
+      Enabled : Boolean)
    is
    begin
       case Event is
          when Repetition_Counter_Reset =>
-            This.TIMxCR.TxREPU := Enable;
+            This.TIMxCR.TxREPU := Enabled;
          when Counter_Reset =>
-            This.TIMxCR.TxRSTU := Enable;
+            This.TIMxCR.TxRSTU := Enabled;
          when TimerA_Update =>
-            This.TIMxCR.TAU := Enable;
+            This.TIMxCR.TAU := Enabled;
          when TimerB_Update =>
-            This.TIMxCR.TBU := Enable;
+            This.TIMxCR.TBU := Enabled;
          when TimerC_Update =>
-            This.TIMxCR.TCU := Enable;
+            This.TIMxCR.TCU := Enabled;
          when TimerD_Update =>
-            This.TIMxCR.TDU := Enable;
+            This.TIMxCR.TDU := Enabled;
          when TimerE_Update =>
-            This.TIMxCR.TEU := Enable;
+            This.TIMxCR.TEU := Enabled;
          when Master_Update =>
-            This.TIMxCR.MSTU := Enable;
+            This.TIMxCR.MSTU := Enabled;
       end case;
-   end Configure_Register_reload_Update;
+   end Configure_Register_Preload_Update;
 
    ----------------------------
    -- Set_Update_Gating_Mode --
@@ -1099,9 +1083,11 @@ package body STM32.HRTimers is
    ----------------------------
 
    procedure Set_Repetition_Counter
-     (This : in out HRTimer_Channel; Value : UInt8) is
+     (This        : in out HRTimer_Channel;
+      Repetitions : UInt8)
+   is
    begin
-      This.REPxR.REPx := Value;
+      This.REPxR.REPx := Repetitions;
    end Set_Repetition_Counter;
 
    --------------------------------
@@ -1128,22 +1114,6 @@ package body STM32.HRTimers is
       This.TIMxDIER.REPIE := Interrupt;
       This.TIMxDIER.REPDE := DMA_Request;
    end Configure_Repetition_Counter;
-
-   ---------------
-   -- Configure --
-   ---------------
-
-   procedure Configure
-     (This        : in out HRTimer_Channel;
-      Prescaler   : HRTimer_Prescaler;
-      Period      : UInt16;
-      Repetitions : UInt8)
-   is
-   begin
-      This.TIMxCR.CKPSCx := Prescaler'Enum_Rep;
-      This.PERxR.PERx := Period;
-      This.REPxR.REPx := Repetitions;
-   end Configure;
 
    -----------------------------
    -- Set_Counter_Reset_Event --
