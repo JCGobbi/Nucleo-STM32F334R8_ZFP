@@ -283,7 +283,8 @@ package body STM32.HRPWM is
       Hardware_Frequency : UInt32;
 
       Period    : constant UInt16 := Current_Period (This.Generator.all) + 1;
-      Prescalar : constant UInt16 := Current_Prescaler (This.Generator.all) + 1;
+      Prescalar : constant UInt16 :=
+        2 ** (Current_Prescaler (This.Generator.all)'Enum_Rep);
    begin
 
       Hardware_Frequency := Get_Clock_Frequency (This.Generator.all);
