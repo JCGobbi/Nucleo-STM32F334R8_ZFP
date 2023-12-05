@@ -131,12 +131,10 @@ package body STM32.COMP is
       Param : Init_Parameters)
    is
    begin
-      This.CSR :=
-        (INMSEL   => Param.Input_Minus'Enum_Rep,
-         OUTSEL   => Param.Output_Sel'Enum_Rep,
-         POL      => Param.Output_Pol = Inverted,
-         BLANKING => Param.Blanking_Source'Enum_Rep,
-         others        => <>);
+      Set_Inverting_Input_Port (This, Param.Input_Minus);
+      Select_Output (This, Param.Output_Sel);
+      Set_Output_Polarity (This, Param.Output_Pol);
+      Set_Output_Blanking (This, Param.Blanking_Source);
    end Configure_Comparator;
 
    ---------------------------
