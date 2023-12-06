@@ -1,4 +1,4 @@
-project ZFP is
+project Light is
 
    for Languages use ("Ada", "Asm_CPP");
    for Create_Missing_Dirs use "True";
@@ -91,4 +91,4 @@ project ZFP is
       for Interrupt("81") use "FPU";
    end Device_Configuration;
 
-end ZFP;
+end Light;
