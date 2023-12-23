@@ -1,6 +1,6 @@
 obj/
 exec/
-ADL/obj_lib_Production
-ADL/obj_Production
-ADL/obj_lib_Debug
-ADL/obj_Debug
+obj_lib_Production
+obj_Production
+obj_lib_Debug
+obj_Debug
