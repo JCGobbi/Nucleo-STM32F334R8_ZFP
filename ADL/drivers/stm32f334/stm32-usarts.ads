@@ -95,6 +95,11 @@ package STM32.USARTs is
    subtype Baud_Rates is UInt32;
 
    procedure Set_Baud_Rate (This : in out USART;  To : Baud_Rates);
+   --  There is no fractional baud rate generator. When OVER8 = 0 (16x
+   --  oversampling), USARTDIV [15:0] = BRR [15:0] = fCK/baud rate. When
+   --  OVER8 = 1 (8x oversampling), USARTDIV [15:0] = 2*fCK/baud rate but
+   --  BRR [15:4] = USARTDIV [15:4] and BRR [3:0] = USARTDIV [3:0] shifted 1 bit
+   --  to the right, so BRR [3] = 0.
 
    type Oversampling_Modes is (Oversampling_By_8, Oversampling_By_16);
    --  oversampling by 16 is the default

@@ -146,21 +146,23 @@ package body STM32.USARTs is
    is
       Clock        : constant UInt32 := APB_Clock (This);
       Over_By_8    : constant Boolean := This.Periph.CR1.OVER8;
-      Int_Scale    : constant UInt32 := (if Over_By_8 then 2 else 4);
-      Int_Divider  : constant UInt32 := (25 * Clock) / (Int_Scale * To);
-      Frac_Divider : constant UInt32 := Int_Divider rem 100;
+      Int_Scale    : constant UInt32 := (if Over_By_8 then 2 else 1);
+      --  Rounding instead of truncating.
+      Int_Divider  : constant UInt32 := (10 * Int_Scale * Clock + 5) / (10 * To);
+      --  There is no fractional divider, so the actual Frac_Divider is the
+      --  4 LSB of Int_Divider.
+      Frac_Divider : constant UInt32 := Int_Divider and 16#000F#;
    begin
-      --  the integer part of the divi
       if Over_By_8 then
          This.Periph.BRR.DIV_Fraction :=
-           BRR_DIV_Fraction_Field (((Frac_Divider * 8) + 50) / 100 mod 8);
+           BRR_DIV_Fraction_Field (Shift_Right (Frac_Divider, 1));
       else
          This.Periph.BRR.DIV_Fraction :=
-           BRR_DIV_Fraction_Field (((Frac_Divider * 16) + 50) / 100 mod 16);
+           BRR_DIV_Fraction_Field (Frac_Divider);
       end if;
 
       This.Periph.BRR.DIV_Mantissa :=
-        BRR_DIV_Mantissa_Field (Int_Divider / 100);
+        BRR_DIV_Mantissa_Field (Shift_Right (Int_Divider, 4));
    end Set_Baud_Rate;
 
    ---------------------------
