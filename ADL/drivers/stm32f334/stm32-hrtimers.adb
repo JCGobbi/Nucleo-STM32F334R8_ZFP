@@ -171,7 +171,7 @@ package body STM32.HRTimers is
       Prescaler   : HRTimer_Prescaler)
    is
    begin
-      This.MCR.CKPSC := HRTimer_Prescaler'Pos (Prescaler);
+      This.MCR.CKPSC := Prescaler'Enum_Rep;
    end Configure_Prescaler;
 
    -----------------------
@@ -285,7 +285,7 @@ package body STM32.HRTimers is
    end Configure;
 
    ----------------------------------
-   -- Compute_Prescaler_and_Period --
+   -- Compute_Prescaler_And_Period --
    ----------------------------------
 
    procedure Compute_Prescaler_And_Period
@@ -316,7 +316,7 @@ package body STM32.HRTimers is
 
       loop
          --  Compute the Counter's clock
-         CK_CNT := fHRCK / Prescaler_Enum'Enum_Rep;
+         CK_CNT := fHRCK / UInt32 (2 ** Prescaler_Enum'Enum_Rep);
          --  Determine the CK_CNT periods to achieve the requested frequency
          Period := CK_CNT / Requested_Frequency;
 

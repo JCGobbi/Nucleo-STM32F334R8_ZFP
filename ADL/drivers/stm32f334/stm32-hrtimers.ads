@@ -91,14 +91,14 @@ package STM32.HRTimers is
    --  "Clocks".
 
    for HRTimer_Prescaler use
-     (Div_1   => 1,
-      Div_2   => 2,
-      Div_4   => 4,
-      Div_8   => 8,
-      Div_16  => 16,
-      Div_32  => 32,
-      Div_64  => 64,
-      Div_128 => 128);
+     (Div_1   => 2#000#,
+      Div_2   => 2#001#,
+      Div_4   => 2#010#,
+      Div_8   => 2#011#,
+      Div_16  => 2#100#,
+      Div_32  => 2#101#,
+      Div_64  => 2#110#,
+      Div_128 => 2#111#);
 
    procedure Configure_Prescaler
      (This        : in out HRTimer_Master;
