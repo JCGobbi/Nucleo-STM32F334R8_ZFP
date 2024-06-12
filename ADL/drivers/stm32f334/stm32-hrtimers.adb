@@ -419,22 +419,17 @@ package body STM32.HRTimers is
       Compare : HRTimer_Compare_Number;
       Value   : UInt16)
    is
-      --  The minimum value for timer compare is 3 periods of fHRTIM clock,
-      --  that is 0x60 if CKPSC[2:0] = 0, 0x30 if CKPSC[2:0] = 1, 0x18 if
-      --  CKPSC[2:0] = 2,... See chapter 21.5.8 at pg. 724 in RM0364 rev. 4.
-      Prescaler : constant UInt16 := Current_Prescaler (This)'Enum_Rep;
-      Min_Value : constant UInt16 := 16#60# / Prescaler;
-      Final_Value : constant UInt16 := UInt16'Max (Value, Min_Value);
+      pragma Unreferenced (This);
    begin
       case Compare is
          when Compare_1 =>
-            HRTIM_Master_Periph.MCMP1R.MCMP1 := Final_Value;
+            HRTIM_Master_Periph.MCMP1R.MCMP1 := Value;
          when Compare_2 =>
-            HRTIM_Master_Periph.MCMP2R.MCMP2 := Final_Value;
+            HRTIM_Master_Periph.MCMP2R.MCMP2 := Value;
          when Compare_3 =>
-            HRTIM_Master_Periph.MCMP3R.MCMP3 := Final_Value;
+            HRTIM_Master_Periph.MCMP3R.MCMP3 := Value;
          when Compare_4 =>
-            HRTIM_Master_Periph.MCMP4R.MCMP4 := Final_Value;
+            HRTIM_Master_Periph.MCMP4R.MCMP4 := Value;
       end case;
    end Set_Compare_Value;
 
@@ -1122,22 +1117,17 @@ package body STM32.HRTimers is
       Compare : HRTimer_Compare_Number;
       Value   : UInt16)
    is
-      --  The minimum value for timer compare is 3 periods of fHRTIM clock,
-      --  that is  0x60 if CKPSC[2:0] = 0, 0x30 if CKPSC[2:0] = 1, 0x18 if
-      --  CKPSC[2:0] = 2,... See chapter 21.5.8 at pg. 724 in RM0364 rev. 4.
-      Prescaler : constant UInt16 := Current_Prescaler (This)'Enum_Rep;
-      Min_Value : constant UInt16 := 16#60# / Prescaler;
-      Final_Value : constant UInt16 := UInt16'Max (Value, Min_Value);
+      pragma Unreferenced (This);
    begin
       case Compare is
          when Compare_1 =>
-            This.CMP1xR.CMP1x := Final_Value;
+            This.CMP1xR.CMP1x := Value;
          when Compare_2 =>
-            This.CMP2xR.CMP2x := Final_Value;
+            This.CMP2xR.CMP2x := Value;
          when Compare_3 =>
-            This.CMP3xR.CMP3x := Final_Value;
+            This.CMP3xR.CMP3x := Value;
          when Compare_4 =>
-            This.CMP4xR.CMP4x := Final_Value;
+            This.CMP4xR.CMP4x := Value;
       end case;
    end Set_Compare_Value;
 
