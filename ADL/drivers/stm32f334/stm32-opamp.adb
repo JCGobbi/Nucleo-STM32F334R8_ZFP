@@ -55,7 +55,7 @@ package body STM32.OPAMP is
    function Get_NI_Input_Mode
      (This : Operational_Amplifier) return NI_Input_Mode is
    begin
-      return NI_Input_Mode'Val (Boolean'Pos (This.CSR.FORCE_VP));
+      return NI_Input_Mode'Enum_Val (Boolean'Pos (This.CSR.FORCE_VP));
    end Get_NI_Input_Mode;
 
    -----------------------
@@ -76,7 +76,7 @@ package body STM32.OPAMP is
    function Get_NI_Input_Port
      (This : Operational_Amplifier) return NI_Input_Port is
    begin
-      return NI_Input_Port'Val (This.CSR.VP_SEL);
+      return NI_Input_Port'Enum_Val (This.CSR.VP_SEL);
    end Get_NI_Input_Port;
 
    ---------------------------
@@ -98,7 +98,7 @@ package body STM32.OPAMP is
    function Get_NI_Sec_Input_Port
      (This : Operational_Amplifier) return NI_Sec_Input_Port is
    begin
-      return NI_Sec_Input_Port'Val (This.CSR.VPS_SEL);
+      return NI_Sec_Input_Port'Enum_Val (This.CSR.VPS_SEL);
    end Get_NI_Sec_Input_Port;
 
    ----------------------
@@ -119,7 +119,7 @@ package body STM32.OPAMP is
    function Get_I_Input_Port
      (This : Operational_Amplifier) return I_Input_Port is
    begin
-      return I_Input_Port'Val (This.CSR.VM_SEL);
+      return I_Input_Port'Enum_Val (This.CSR.VM_SEL);
    end Get_I_Input_Port;
 
    --------------------------
@@ -140,7 +140,7 @@ package body STM32.OPAMP is
    function Get_I_Sec_Input_Port
      (This : Operational_Amplifier) return I_Sec_Input_Port is
    begin
-      return I_Sec_Input_Port'Val (Boolean'Pos (This.CSR.VMS_SEL));
+      return I_Sec_Input_Port'Enum_Val (Boolean'Pos (This.CSR.VMS_SEL));
    end Get_I_Sec_Input_Port;
 
    ------------------------
@@ -161,7 +161,7 @@ package body STM32.OPAMP is
    function Get_Input_Mux_Mode
      (This : Operational_Amplifier) return Input_Mux_Mode is
    begin
-      return Input_Mux_Mode'Val (Boolean'Pos (This.CSR.TCM_EN));
+      return Input_Mux_Mode'Enum_Val (Boolean'Pos (This.CSR.TCM_EN));
    end Get_Input_Mux_Mode;
 
    -----------------------
@@ -182,7 +182,7 @@ package body STM32.OPAMP is
    function Get_PGA_Mode_Gain
      (This : Operational_Amplifier) return PGA_Mode_Gain is
    begin
-      return PGA_Mode_Gain'Val (This.CSR.PGA_GAIN);
+      return PGA_Mode_Gain'Enum_Val (This.CSR.PGA_GAIN);
    end Get_PGA_Mode_Gain;
 
    -----------------------
@@ -294,7 +294,7 @@ package body STM32.OPAMP is
    function Get_Calibration_Value
      (This : Operational_Amplifier) return Calibration_Value is
    begin
-      return Calibration_Value'Val (This.CSR.CALSEL);
+      return Calibration_Value'Enum_Val (This.CSR.CALSEL);
    end Get_Calibration_Value;
 
    ---------------
@@ -367,7 +367,7 @@ package body STM32.OPAMP is
    function Get_Internal_VRef_Output
      (This : Operational_Amplifier) return Internal_VRef_Output is
    begin
-      return Internal_VRef_Output'Val (Boolean'Pos (This.CSR.TSTREF));
+      return Internal_VRef_Output'Enum_Val (Boolean'Pos (This.CSR.TSTREF));
    end Get_Internal_VRef_Output;
 
    ----------------------------
@@ -377,7 +377,7 @@ package body STM32.OPAMP is
    function Get_Output_Status_Flag
      (This : Operational_Amplifier) return Output_Status_Flag is
    begin
-         return Output_Status_Flag'Val (Boolean'Pos (This.CSR.OUTCAL));
+         return Output_Status_Flag'Enum_Val (Boolean'Pos (This.CSR.OUTCAL));
    end Get_Output_Status_Flag;
 
    --------------------

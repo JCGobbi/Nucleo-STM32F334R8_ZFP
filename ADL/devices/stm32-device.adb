@@ -377,7 +377,7 @@ package body STM32.Device is
    --  is
    --  begin
    --     if This'Address = USART1_Base then
-   --        return USART_Clock_Source'Val (RCC_Periph.CFGR3.USART1SW);
+   --        return USART_Clock_Source'Enum_Val (RCC_Periph.CFGR3.USART1SW);
    --     else
    --        raise Unknown_Device;
    --     end if;
@@ -578,7 +578,7 @@ package body STM32.Device is
    --  is
    --     pragma Unreferenced (This);
    --  begin
-   --     return RTC_Clock_Source'Val (RCC_Periph.BDCR.RTCSEL);
+   --     return RTC_Clock_Source'Enum_Val (RCC_Periph.BDCR.RTCSEL);
    --  end Read_Clock_Source;
 
    ------------------
@@ -826,7 +826,7 @@ package body STM32.Device is
    function System_Clock_Frequencies return RCC_System_Clocks
    is
       Source : constant SYSCLK_Clock_Source :=
-        SYSCLK_Clock_Source'Val (RCC_Periph.CFGR.SWS);
+        SYSCLK_Clock_Source'Enum_Val (RCC_Periph.CFGR.SWS);
       --  Get System Clock Mux
       PLLCLK : UInt32;
       --  PLL output

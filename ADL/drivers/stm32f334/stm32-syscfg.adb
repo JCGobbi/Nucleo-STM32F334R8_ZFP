@@ -149,7 +149,7 @@ package body STM32.SYSCFG is
    procedure Clear_External_Interrupt (Pin : GPIO_Pin) is
       use STM32.EXTI;
    begin
-      Clear_External_Interrupt (External_Line_Number'Val (GPIO_Pin'Pos (Pin)));
+      Clear_External_Interrupt (External_Line_Number'Enum_Val (GPIO_Pin'Pos (Pin)));
    end Clear_External_Interrupt;
 
 end STM32.SYSCFG;

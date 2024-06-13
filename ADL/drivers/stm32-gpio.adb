@@ -94,7 +94,7 @@ package body STM32.GPIO is
    function Pin_IO_Mode (This : GPIO_Point) return Pin_IO_Modes is
       Index : constant GPIO_Pin_Index := GPIO_Pin'Pos (This.Pin);
    begin
-      return Pin_IO_Modes'Val (This.Periph.MODER.Arr (Index));
+      return Pin_IO_Modes'Enum_Val (This.Periph.MODER.Arr (Index));
    end Pin_IO_Mode;
 
    --------------
@@ -435,7 +435,7 @@ package body STM32.GPIO is
      (This : GPIO_Point) return EXTI.External_Line_Number
    is
    begin
-      return EXTI.External_Line_Number'Val (GPIO_Pin'Pos (This.Pin));
+      return EXTI.External_Line_Number'Enum_Val (GPIO_Pin'Pos (This.Pin));
    end Interrupt_Line_Number;
 
    -----------------------
@@ -447,7 +447,7 @@ package body STM32.GPIO is
       Trigger : EXTI.External_Triggers)
    is
       use STM32.EXTI;
-      Line : constant External_Line_Number := External_Line_Number'Val (GPIO_Pin'Pos (This.Pin));
+      Line : constant External_Line_Number := External_Line_Number'Enum_Val (GPIO_Pin'Pos (This.Pin));
       use STM32.SYSCFG;
    begin
       Enable_SYSCFG_Clock;

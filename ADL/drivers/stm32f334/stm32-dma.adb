@@ -711,7 +711,7 @@ package body STM32.DMA is
       return DMA_Data_Transfer_Widths
    is
    begin
-      return DMA_Data_Transfer_Widths'Val
+      return DMA_Data_Transfer_Widths'Enum_Val
         (Get_Stream (This, Stream).CR.PSIZE);
    end Peripheral_Data_Width;
 
@@ -724,7 +724,7 @@ package body STM32.DMA is
       return DMA_Data_Transfer_Widths
    is
    begin
-      return DMA_Data_Transfer_Widths'Val
+      return DMA_Data_Transfer_Widths'Enum_Val
         (Get_Stream (This, Stream).CR.MSIZE);
    end Memory_Data_Width;
 
@@ -754,7 +754,7 @@ package body STM32.DMA is
       return DMA_Priority_Level
    is
    begin
-      return DMA_Priority_Level'Val (Get_Stream (This, Stream).CR.PL);
+      return DMA_Priority_Level'Enum_Val (Get_Stream (This, Stream).CR.PL);
    end Priority;
 
    ---------------

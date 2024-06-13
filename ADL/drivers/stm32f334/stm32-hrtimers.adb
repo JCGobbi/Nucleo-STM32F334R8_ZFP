@@ -181,7 +181,7 @@ package body STM32.HRTimers is
    function Current_Prescaler (This : HRTimer_Master) return HRTimer_Prescaler
    is
    begin
-      return HRTimer_Prescaler'Val (This.MCR.CKPSC);
+      return HRTimer_Prescaler'Enum_Val (This.MCR.CKPSC);
    end Current_Prescaler;
 
    -------------------------------------
@@ -824,7 +824,7 @@ package body STM32.HRTimers is
    function Current_Prescaler (This : HRTimer_Channel) return HRTimer_Prescaler
    is
    begin
-      return HRTimer_Prescaler'Val (This.TIMxCR.CKPSCx);
+      return HRTimer_Prescaler'Enum_Val (This.TIMxCR.CKPSCx);
    end Current_Prescaler;
 
    -----------------------
@@ -2197,7 +2197,7 @@ package body STM32.HRTimers is
       Protection : Delayed_Idle_Protection;
    begin
       Protection.Enabled := This.OUTxR.DLYPRTEN;
-      Protection.Value := Delayed_Idle_Protection_Enum'Val (This.OUTxR.DLYPRT);
+      Protection.Value := Delayed_Idle_Protection_Enum'Enum_Val (This.OUTxR.DLYPRT);
       return Protection;
    end Current_Delayed_Idle_Protection;
 
