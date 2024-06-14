@@ -122,6 +122,8 @@ package STM32_SVD.ADC is
       Reserved_11_31 at 0 range 11 .. 31;
    end record;
 
+   subtype CR_ADVREGEN_Field is HAL.UInt2;
+
    --  control register
    type CR_Register is record
       --  ADEN
@@ -139,9 +141,7 @@ package STM32_SVD.ADC is
       --  unspecified
       Reserved_6_27 : HAL.UInt22 := 16#0#;
       --  ADVREGEN
-      ADVREGEN      : Boolean := False;
-      --  DEEPPWD
-      DEEPPWD       : Boolean := False;
+      ADVREGEN      : CR_ADVREGEN_Field := 16#0#;
       --  ADCALDIF
       ADCALDIF      : Boolean := False;
       --  ADCAL
@@ -158,8 +158,7 @@ package STM32_SVD.ADC is
       ADSTP         at 0 range 4 .. 4;
       JADSTP        at 0 range 5 .. 5;
       Reserved_6_27 at 0 range 6 .. 27;
-      ADVREGEN      at 0 range 28 .. 28;
-      DEEPPWD       at 0 range 29 .. 29;
+      ADVREGEN      at 0 range 28 .. 29;
       ADCALDIF      at 0 range 30 .. 30;
       ADCAL         at 0 range 31 .. 31;
    end record;
@@ -831,17 +830,46 @@ package STM32_SVD.ADC is
       Reserved_19_31 at 0 range 19 .. 31;
    end record;
 
-   subtype DIFSEL_DIFSEL_1_15_Field is HAL.UInt15;
-   subtype DIFSEL_DIFSEL_16_18_Field is HAL.UInt3;
-
    --  Differential Mode Selection Register 2
    type DIFSEL_Register is record
       --  unspecified
       Reserved_0_0   : HAL.Bit := 16#0#;
-      --  Differential mode for channels 15 to 1
-      DIFSEL_1_15    : DIFSEL_DIFSEL_1_15_Field := 16#0#;
-      --  Read-only. Differential mode for channels 18 to 16
-      DIFSEL_16_18   : DIFSEL_DIFSEL_16_18_Field := 16#0#;
+      --  Differential mode for channel 1
+      DIFSEL_1       : Boolean := False;
+      --  Differential mode for channel 2
+      DIFSEL_2       : Boolean := False;
+      --  Differential mode for channel 3
+      DIFSEL_3       : Boolean := False;
+      --  Differential mode for channel 4
+      DIFSEL_4       : Boolean := False;
+      --  Differential mode for channel 5
+      DIFSEL_5       : Boolean := False;
+      --  Differential mode for channel 6
+      DIFSEL_6       : Boolean := False;
+      --  Differential mode for channel 7
+      DIFSEL_7       : Boolean := False;
+      --  Differential mode for channel 8
+      DIFSEL_8       : Boolean := False;
+      --  Differential mode for channel 9
+      DIFSEL_9       : Boolean := False;
+      --  Differential mode for channel 10
+      DIFSEL_10      : Boolean := False;
+      --  Differential mode for channel 11
+      DIFSEL_11      : Boolean := False;
+      --  Differential mode for channel 12
+      DIFSEL_12      : Boolean := False;
+      --  Differential mode for channel 13
+      DIFSEL_13      : Boolean := False;
+      --  Differential mode for channel 14
+      DIFSEL_14      : Boolean := False;
+      --  Differential mode for channel 15
+      DIFSEL_15      : Boolean := False;
+      --  Read-only. Differential mode for channel 16
+      DIFSEL_16      : Boolean := False;
+      --  Read-only. Differential mode for channel 17
+      DIFSEL_17      : Boolean := False;
+      --  Read-only. Differential mode for channel 18
+      DIFSEL_18      : Boolean := False;
       --  unspecified
       Reserved_19_31 : HAL.UInt13 := 16#0#;
    end record
@@ -850,8 +878,24 @@ package STM32_SVD.ADC is
 
    for DIFSEL_Register use record
       Reserved_0_0   at 0 range 0 .. 0;
-      DIFSEL_1_15    at 0 range 1 .. 15;
-      DIFSEL_16_18   at 0 range 16 .. 18;
+      DIFSEL_1       at 0 range 1 .. 1;
+      DIFSEL_2       at 0 range 2 .. 2;
+      DIFSEL_3       at 0 range 3 .. 3;
+      DIFSEL_4       at 0 range 4 .. 4;
+      DIFSEL_5       at 0 range 5 .. 5;
+      DIFSEL_6       at 0 range 6 .. 6;
+      DIFSEL_7       at 0 range 7 .. 7;
+      DIFSEL_8       at 0 range 8 .. 8;
+      DIFSEL_9       at 0 range 9 .. 9;
+      DIFSEL_10      at 0 range 10 .. 10;
+      DIFSEL_11      at 0 range 11 .. 11;
+      DIFSEL_12      at 0 range 12 .. 12;
+      DIFSEL_13      at 0 range 13 .. 13;
+      DIFSEL_14      at 0 range 14 .. 14;
+      DIFSEL_15      at 0 range 15 .. 15;
+      DIFSEL_16      at 0 range 16 .. 16;
+      DIFSEL_17      at 0 range 17 .. 17;
+      DIFSEL_18      at 0 range 18 .. 18;
       Reserved_19_31 at 0 range 19 .. 31;
    end record;
 
