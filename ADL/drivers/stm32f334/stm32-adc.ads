@@ -112,6 +112,58 @@ package STM32.ADC is
 
    function Enabled (This : Analog_To_Digital_Converter) return Boolean;
 
+   type Input_Convertion_Mode is (Single_Ended, Differential);
+
+   procedure Calibrate
+     (This       : in out Analog_To_Digital_Converter;
+      Convertion : Input_Convertion_Mode)
+     with Pre => not Enabled (This);
+   --  Calibration is preliminary to any ADC operation. It removes the offset
+   --  error which may vary from chip to chip due to process or bandgap variation.
+   --  During the procedure, the ADC calculates a calibration factor which is
+   --  7-bit wide and which is applied internally to the ADC until the next ADC
+   --  power-off. The calibration factor to be applied for single-ended input
+   --  conversions is different from the factor to be applied for differential
+   --  input conversions. See RM0364 rev. 4 chapter 13.3.8 Calibration.
+
+   function Get_Calibration_Factor
+     (This       : in out Analog_To_Digital_Converter;
+      Convertion : Input_Convertion_Mode) return UInt7
+     with Pre => Enabled (This);
+   --  Read the internal analog calibration factor.
+
+   procedure Set_Calibration_Factor
+     (This       : in out Analog_To_Digital_Converter;
+      Convertion : Input_Convertion_Mode;
+      Value      : UInt7)
+     with Pre => Enabled (This) and
+                 not Conversion_Started (This) and
+                 not Injected_Conversion_Started (This),
+          Post => Get_Calibration_Factor (This, Convertion) = Value;
+   --  The internal analog calibration is lost each time the power of the ADC is
+   --  removed (example, when the product enters in Standby or VBAT mode). In
+   --  this case, to avoid spending time recalibrating the ADC, it is possible
+   --  to re-write the calibration factor into the ADC_CALFACT register without
+   --  recalibrating, supposing that the software has previously saved the
+   --  calibration factor delivered during the previous calibration.
+
+   procedure Set_Convertion_Mode
+     (This       : in out Analog_To_Digital_Converter;
+      Channel    : Analog_Input_Channel;
+      Convertion : Input_Convertion_Mode)
+     with Pre => not Enabled (This) and
+                 not Conversion_Started (This) and
+                 not Injected_Conversion_Started (This);
+   --  Channels can be configured to be either single-ended input or differential
+   --  input by programming DIFSEL[i] bits in the ADC_DIFSEL register.
+   --  In single-ended input mode, the analog voltage to be converted for channel
+   --  “i” is the difference between the ADCy_INPx external voltage equal to
+   --  VINP[i] (positive input) and VREF− (negative input).
+   --  In differential input mode, the analog voltage to be converted for channel
+   --  “i” is the difference between the ADCy_INPx external voltage positive
+   --  input equal to VINP[i], and the ADCy_INNx negative input equal to VINN[i].
+   --  See RM0364 rev 4 chapter 13.3.7 Single-ended and differential input channels.
+
    type ADC_Resolution is
      (ADC_Resolution_12_Bits,  -- 15 ADC Clock cycles
       ADC_Resolution_10_Bits,  -- 12 ADC Clock cycles

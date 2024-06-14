@@ -69,6 +69,17 @@ package body STM32.ADC is
 
    procedure Enable (This : in out Analog_To_Digital_Converter) is
    begin
+      --  After reset, the ADC voltage regulator is disabled and in reset state
+      --  (ADVREGEN = 2#10# = disabled state, reset state). It must be enabled
+      --  with the sequence bellow. See RM0364 rev 4 sections 13.3.6 and 13.5.3.
+      This.CR.ADVREGEN := 2#00#; --  enabled state, reset state
+      This.CR.ADVREGEN := 2#01#; --  enabled state, on state
+
+      --  Wait the ADC voltage regulator startup time of 10 us. See data sheet
+      --  DS9994 rev. 9 chapter 6.3.19 ADC characteristics table 64 ADC
+      --  Characteristics at symbol tADCVREG_STUP.
+      Delay_Until (Clock + Microseconds (10));
+
       if not This.CR.ADEN then
          This.CR.ADEN := True;
 
@@ -85,6 +96,12 @@ package body STM32.ADC is
 
    procedure Disable (This : in out Analog_To_Digital_Converter) is
    begin
+      --  After the ADCs voltage regulator is enabled (ADVREGEN = 2#01# =
+      --  enabled state, on state). It must be disabled with the sequence bellow.
+      --  See RM0364 rev 4 sections 13.3.6 and 13.5.3.
+      This.CR.ADVREGEN := 2#00#; --  enabled state, reset state
+      This.CR.ADVREGEN := 2#10#; --  disabled state, reset state
+
       if This.CR.ADEN then
          This.CR.ADDIS := True;
       end if;
@@ -96,6 +113,121 @@ package body STM32.ADC is
 
    function Enabled (This : Analog_To_Digital_Converter) return Boolean is
      (This.CR.ADEN);
+
+   ---------------
+   -- Calibrate --
+   ---------------
+
+   procedure Calibrate
+     (This       : in out Analog_To_Digital_Converter;
+      Convertion : Input_Convertion_Mode)
+   is
+   begin
+      --  After reset, the ADC voltage regulator is disabled and in reset state
+      --  (ADVREGEN = 2#10# = disabled state, reset state). It must be enabled
+      --  with the sequence bellow. See RM0364 rev 4 sections 13.3.6 and 13.5.3.
+      This.CR.ADVREGEN := 2#00#; --  enabled state, reset state
+      This.CR.ADVREGEN := 2#01#; --  enabled state, on state
+
+      --  Wait the ADC voltage regulator startup time of 10 us. See data sheet
+      --  DS9994 rev. 9 chapter 6.3.19 ADC characteristics table 64 ADC
+      --  Characteristics at symbol tADCVREG_STUP.
+      Delay_Until (Clock + Microseconds (10));
+
+      This.CR.ADCALDIF := Convertion = Differential;
+
+      --  Start calibration
+      This.CR.ADCAL := True;
+
+      loop
+         exit when not This.CR.ADCAL;
+      end loop;
+   end Calibrate;
+
+   ----------------------------
+   -- Get_Calibration_Factor --
+   ----------------------------
+
+   function Get_Calibration_Factor
+     (This       : in out Analog_To_Digital_Converter;
+      Convertion : Input_Convertion_Mode) return UInt7
+   is
+   begin
+      if Convertion = Single_Ended then
+         return This.CALFACT.CALFACT_S;
+      else
+         return This.CALFACT.CALFACT_D;
+      end if;
+   end Get_Calibration_Factor;
+
+   ----------------------------
+   -- Set_Calibration_Factor --
+   ----------------------------
+
+   procedure Set_Calibration_Factor
+     (This       : in out Analog_To_Digital_Converter;
+      Convertion : Input_Convertion_Mode;
+      Value      : UInt7)
+   is
+   begin
+      if Convertion = Single_Ended then
+         This.CALFACT.CALFACT_S := Value;
+      else
+         This.CALFACT.CALFACT_D := Value;
+      end if;
+   end Set_Calibration_Factor;
+
+   -------------------------
+   -- Set_Convertion_Mode --
+   -------------------------
+
+   procedure Set_Convertion_Mode
+     (This       : in out Analog_To_Digital_Converter;
+      Channel    : Analog_Input_Channel;
+      Convertion : Input_Convertion_Mode)
+   is
+   begin
+      case Channel is
+         when 0 =>
+            null; --  This channel is reserved
+         when 1 =>
+            This.DIFSEL.DIFSEL_1 := Convertion = Differential;
+         when 2 =>
+            This.DIFSEL.DIFSEL_2 := Convertion = Differential;
+         when 3 =>
+            This.DIFSEL.DIFSEL_3 := Convertion = Differential;
+         when 4 =>
+            This.DIFSEL.DIFSEL_4 := Convertion = Differential;
+         when 5 =>
+            This.DIFSEL.DIFSEL_5 := Convertion = Differential;
+         when 6 =>
+            This.DIFSEL.DIFSEL_6 := Convertion = Differential;
+         when 7 =>
+            This.DIFSEL.DIFSEL_7 := Convertion = Differential;
+         when 8 =>
+            This.DIFSEL.DIFSEL_8 := Convertion = Differential;
+         when 9 =>
+            This.DIFSEL.DIFSEL_9 := Convertion = Differential;
+         when 10 =>
+            This.DIFSEL.DIFSEL_10 := Convertion = Differential;
+         when 11 =>
+            This.DIFSEL.DIFSEL_11 := Convertion = Differential;
+         when 12 =>
+            This.DIFSEL.DIFSEL_12 := Convertion = Differential;
+         when 13 =>
+            This.DIFSEL.DIFSEL_13 := Convertion = Differential;
+         when 14 =>
+            This.DIFSEL.DIFSEL_14 := Convertion = Differential;
+         when 15 =>
+            This.DIFSEL.DIFSEL_15 := Convertion = Differential;
+         when 16 =>
+            null; --  This channel is read-only
+         when 17 =>
+            null; --  This channel is read-only
+         when 18 =>
+            null; --  This channel is read-only
+      end case;
+   end Set_Convertion_Mode;
 
    --------------------
    -- Configure_Unit --
