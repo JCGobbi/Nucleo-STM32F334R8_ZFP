@@ -105,7 +105,9 @@ package body STM32.ADC is
       if This.CR.ADEN then
          This.CR.ADDIS := True;
          loop
-            exit when This.CR.ADDIS = False and This.CR.ADEN = False;
+            --  ADDIS is cleared by hardware once the ADC is effectively disabled
+            --  (ADEN is also cleared by hardware at this time).
+            exit when not (This.CR.ADDIS or This.CR.ADEN);
          end loop;
       end if;
    end Disable;
