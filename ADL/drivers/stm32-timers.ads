@@ -1110,9 +1110,12 @@ package STM32.Timers is
      (This'Address = STM32_SVD.TIM6_Base or
       This'Address = STM32_SVD.TIM7_Base);
 
-   --  Timer 1
+   --  Timer 1, 15, 16 and 17
    function Advanced_Timer (This : Timer) return Boolean is
-     (This'Address = STM32_SVD.TIM1_Base);
+     (This'Address = STM32_SVD.TIM1_Base or
+      This'Address = STM32_SVD.TIM15_Base or
+      This'Address = STM32_SVD.TIM16_Base or
+      This'Address = STM32_SVD.TIM17_Base);
 
    --  Timer 2
    function Has_32bit_Counter (This : Timer) return Boolean is
