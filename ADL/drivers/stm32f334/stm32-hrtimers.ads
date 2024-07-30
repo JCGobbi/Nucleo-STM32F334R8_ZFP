@@ -737,8 +737,8 @@ package STM32.HRTimers is
       Capture_2);
 
    function Current_Capture_Value
-     (This   : HRTimer_Channel;
-      Number : HRTimer_Capture_Number) return UInt16;
+     (This    : HRTimer_Channel;
+      Capture : HRTimer_Capture_Number) return UInt16;
    --  Read the counter value when the capture event occurred.
 
    type HRTimer_Capture_Event is

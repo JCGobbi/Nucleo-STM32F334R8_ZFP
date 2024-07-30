@@ -1156,11 +1156,11 @@ package body STM32.HRTimers is
    ------------------------
 
    function Current_Capture_Value
-     (This   : HRTimer_Channel;
-      Number : HRTimer_Capture_Number) return UInt16
+     (This    : HRTimer_Channel;
+      Capture : HRTimer_Capture_Number) return UInt16
    is
    begin
-      case Number is
+      case Capture is
          when Capture_1 =>
             return This.CPT1xR.CPT1x;
          when Capture_2 =>
