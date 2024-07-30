@@ -1756,7 +1756,7 @@ package STM32.HRTimers is
 
    type Fault_Input_Polarity is (Active_Low, Active_High);
 
-   type Fault_Input_Source is (HRTIM_FLTx_Input, FLTx_Int_Signal);
+   type Fault_Input_Source is (External_Pin, Internal_COMPx);
 
    type Fault_Input_Filter is
      (No_Filter, --  FLT acts assynchronously
@@ -1794,16 +1794,16 @@ package STM32.HRTimers is
    --  Set the division ratio between the timer clock frequency (fHRTIM) and
    --  the fault signal sampling clock (fFLTS) used by the digital filters.
 
-   --  To simplify the bit-field access to the Burst DMA Timer Update registers,
-   --  we remap them as 32-bit registers. This way we program several bits
-   --  "oring" them in a 32-bit value, instead of accessing bit-by-bit.
-
    procedure Enable_Fault_Input_Lock (Input : HRTimer_Fault_Source)
      with Post => Enabled_Fault_Input_Lock (Input);
    --  Prevents the fault enable, polarity, source and filter to be modified.
 
    function Enabled_Fault_Input_Lock
      (Input : HRTimer_Fault_Source) return Boolean;
+
+   --  To simplify the bit-field access to the Burst DMA Timer Update registers,
+   --  we remap them as 32-bit registers. This way we program several bits
+   --  "oring" them in a 32-bit value, instead of accessing bit-by-bit.
 
    type Burst_DMA_Master_Update is
      (MCR_Register,

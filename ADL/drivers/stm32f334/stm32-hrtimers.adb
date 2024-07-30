@@ -3229,27 +3229,27 @@ package body STM32.HRTimers is
          when Fault_1 =>
             HRTimer_Common_Periph.FLTINR1.FLT1E := Enable;
             HRTimer_Common_Periph.FLTINR1.FLT1P := Polarity = Active_High;
-            HRTimer_Common_Periph.FLTINR1.FLT1SRC := Source = FLTx_Int_Signal;
+            HRTimer_Common_Periph.FLTINR1.FLT1SRC := Source = Internal_COMPx;
             HRTimer_Common_Periph.FLTINR1.FLT1F := Filter'Enum_Rep;
          when Fault_2 =>
             HRTimer_Common_Periph.FLTINR1.FLT2E := Enable;
             HRTimer_Common_Periph.FLTINR1.FLT2P := Polarity = Active_High;
-            HRTimer_Common_Periph.FLTINR1.FLT2SRC := Source = FLTx_Int_Signal;
+            HRTimer_Common_Periph.FLTINR1.FLT2SRC := Source = Internal_COMPx;
             HRTimer_Common_Periph.FLTINR1.FLT2F := Filter'Enum_Rep;
          when Fault_3 =>
             HRTimer_Common_Periph.FLTINR1.FLT3E := Enable;
             HRTimer_Common_Periph.FLTINR1.FLT3P := Polarity = Active_High;
-            HRTimer_Common_Periph.FLTINR1.FLT3SRC := Source = FLTx_Int_Signal;
+            HRTimer_Common_Periph.FLTINR1.FLT3SRC := Source = Internal_COMPx;
             HRTimer_Common_Periph.FLTINR1.FLT3F := Filter'Enum_Rep;
          when Fault_4 =>
             HRTimer_Common_Periph.FLTINR1.FLT4E := Enable;
             HRTimer_Common_Periph.FLTINR1.FLT4P := Polarity = Active_High;
-            HRTimer_Common_Periph.FLTINR1.FLT4SRC := Source = FLTx_Int_Signal;
+            HRTimer_Common_Periph.FLTINR1.FLT4SRC := Source = Internal_COMPx;
             HRTimer_Common_Periph.FLTINR1.FLT4F := Filter'Enum_Rep;
          when Fault_5 =>
             HRTimer_Common_Periph.FLTINR2.FLT5E := Enable;
             HRTimer_Common_Periph.FLTINR2.FLT5P := Polarity = Active_High;
-            HRTimer_Common_Periph.FLTINR2.FLT5SRC := Source = FLTx_Int_Signal;
+            HRTimer_Common_Periph.FLTINR2.FLT5SRC := Source = Internal_COMPx;
             HRTimer_Common_Periph.FLTINR2.FLT5F := Filter'Enum_Rep;
       end case;
    end Configure_Fault_Input;
