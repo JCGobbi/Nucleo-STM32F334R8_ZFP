@@ -474,10 +474,7 @@ package body STM32.Device is
    --                                 Source : I2C_Clock_Source)
    --  is
    --  begin
-   --     case As_Port_Id (This) is
-   --        when I2C_Id_1 =>
-   --           RCC_Periph.CFGR3.I2C1SW := Source = SYSCLK;
-   --     end case;
+   --     Select_Clock_Source (As_Port_Id (This), Source);
    --  end Select_Clock_Source;
 
    -------------------------
@@ -487,9 +484,11 @@ package body STM32.Device is
    --  procedure Select_Clock_Source (This   : I2C_Port_Id;
    --                                 Source : I2C_Clock_Source)
    --  is
-   --     pragma Unreferenced (This);
    --  begin
-   --     RCC_Periph.CFGR3.I2C1SW := Source = SYSCLK;
+   --     case This is
+   --        when I2C_Id_1 =>
+   --           RCC_Periph.CFGR3.I2C1SW := Source = SYSCLK;
+   --     end case;
    --  end Select_Clock_Source;
 
    -----------------------
@@ -499,14 +498,7 @@ package body STM32.Device is
    --  function Read_Clock_Source (This : I2C_Port'Class) return I2C_Clock_Source
    --  is
    --  begin
-   --     case As_Port_Id (This) is
-   --        when I2C_Id_1 =>
-   --           if RCC_Periph.CFGR3.I2C1SW then
-   --              return SYSCLK;
-   --           else
-   --              return HSI;
-   --           end if;
-   --     end case;
+   --     return Read_Clock_Source (As_Port_Id (This));
    --  end Read_Clock_Source;
 
    ------------------------
@@ -515,9 +507,11 @@ package body STM32.Device is
 
    --  function Read_Clock_Source (This : I2C_Port_Id) return I2C_Clock_Source
    --  is
-   --     pragma Unreferenced (This);
    --  begin
-   --     return (if RCC_Periph.CFGR3.I2C1SW then SYSCLK else HSI);
+   --     case This is
+   --        when I2C_Id_1 =>
+   --           return (if RCC_Periph.CFGR3.I2C1SW then SYSCLK else HSI);
+   --     end case;
    --  end Read_Clock_Source;
 
    ------------------
