@@ -91,36 +91,13 @@ package STM32_SVD.I2C is
       Reserved_24_31 at 0 range 24 .. 31;
    end record;
 
-   --  CR2_SADD array
-   type CR2_SADD_Field_Array is array (0 .. 9) of Boolean
-     with Component_Size => 1, Size => 10;
-
-   --  Type definition for CR2_SADD
-   type CR2_SADD_Field
-     (As_Array : Boolean := False)
-   is record
-      case As_Array is
-         when False =>
-            --  SADD as a value
-            Val : HAL.UInt10;
-         when True =>
-            --  SADD as an array
-            Arr : CR2_SADD_Field_Array;
-      end case;
-   end record
-     with Unchecked_Union, Size => 10;
-
-   for CR2_SADD_Field use record
-      Val at 0 range 0 .. 9;
-      Arr at 0 range 0 .. 9;
-   end record;
-
+   subtype CR2_SADD_Field is HAL.UInt10;
    subtype CR2_NBYTES_Field is HAL.UInt8;
 
    --  Control register 2
    type CR2_Register is record
-      --  Slave address bit 0 (master mode)
-      SADD           : CR2_SADD_Field := (As_Array => False, Val => 16#0#);
+      --  Slave address (master mode)
+      SADD           : CR2_SADD_Field := 16#0#;
       --  Transfer direction (master mode)
       RD_WRN         : Boolean := False;
       --  10-bit addressing mode (master mode)

@@ -14033,74 +14033,11 @@ xs:noNamespaceSchemaLocation="CMSIS-SVD_Schema_1_1.xsd">
               <bitWidth>1</bitWidth>
             </field>
             <field>
-              <name>SADD9</name>
-              <description>Slave address bit 9 (master
-              mode)</description>
-              <bitOffset>9</bitOffset>
-              <bitWidth>1</bitWidth>
-            </field>
-            <field>
-              <name>SADD8</name>
-              <description>Slave address bit 8 (master
-              mode)</description>
-              <bitOffset>8</bitOffset>
-              <bitWidth>1</bitWidth>
-            </field>
-            <field>
-              <name>SADD7</name>
-              <description>Slave address bit 7 (master
-              mode)</description>
-              <bitOffset>7</bitOffset>
-              <bitWidth>1</bitWidth>
-            </field>
-            <field>
-              <name>SADD6</name>
-              <description>Slave address bit 6 (master
-              mode)</description>
-              <bitOffset>6</bitOffset>
-              <bitWidth>1</bitWidth>
-            </field>
-            <field>
-              <name>SADD5</name>
-              <description>Slave address bit 5 (master
-              mode)</description>
-              <bitOffset>5</bitOffset>
-              <bitWidth>1</bitWidth>
-            </field>
-            <field>
-              <name>SADD4</name>
-              <description>Slave address bit 4 (master
-              mode)</description>
-              <bitOffset>4</bitOffset>
-              <bitWidth>1</bitWidth>
-            </field>
-            <field>
-              <name>SADD3</name>
-              <description>Slave address bit 3 (master
-              mode)</description>
-              <bitOffset>3</bitOffset>
-              <bitWidth>1</bitWidth>
-            </field>
-            <field>
-              <name>SADD2</name>
-              <description>Slave address bit 2 (master
-              mode)</description>
-              <bitOffset>2</bitOffset>
-              <bitWidth>1</bitWidth>
-            </field>
-            <field>
-              <name>SADD1</name>
-              <description>Slave address bit 1 (master
-              mode)</description>
-              <bitOffset>1</bitOffset>
-              <bitWidth>1</bitWidth>
-            </field>
-            <field>
-              <name>SADD0</name>
-              <description>Slave address bit 0 (master
+              <name>SADD</name>
+              <description>Slave address (master
               mode)</description>
               <bitOffset>0</bitOffset>
-              <bitWidth>1</bitWidth>
+              <bitWidth>10</bitWidth>
             </field>
           </fields>
         </register>
