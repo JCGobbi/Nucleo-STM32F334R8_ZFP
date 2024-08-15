@@ -35,6 +35,7 @@
 private with STM32_SVD.I2C;
 with HAL.I2C;
 with STM32.GPIO; use STM32.GPIO;
+with System;
 
 package STM32.I2C is
 
@@ -70,6 +71,11 @@ package STM32.I2C is
 
    type I2C_Port (Periph : not null access Internal_I2C_Port) is
       limited new HAL.I2C.I2C_Port with private;
+
+   procedure Set_I2C_Port
+     (This    : I2C_Port;
+      Enabled : Boolean);
+   --  Enable/disable I2C port.
 
    function Port_Enabled (This : I2C_Port) return Boolean
      with Inline;
@@ -129,6 +135,87 @@ package STM32.I2C is
       Timeout       : Natural := 1000)
      with Pre => Is_Configured (This);
 
+   type I2C_Interrupt is
+     (Tx_Interrupt,
+      Rx_Interrupt,
+      Addr_Match_Interrupt,
+      Not_Ack_Received_Interrupt,
+      Stop_Detection_Interrupt,
+      Transfer_Complete_Interrupt,
+      Errors_Detected_Interrupt);
+
+   procedure Enable_Interrupt
+     (This   : in out I2C_Port;
+      Source : I2C_Interrupt)
+     with Post => Interrupt_Enabled (This, Source);
+
+   procedure Disable_Interrupt
+     (This   : in out I2C_Port;
+      Source : I2C_Interrupt)
+     with Post => not Interrupt_Enabled (This, Source);
+
+   function Interrupt_Enabled
+     (This   : I2C_Port;
+      Source : I2C_Interrupt)
+      return Boolean;
+
+   type I2C_DMA is (Tx_DMA, Rx_DMA);
+
+   procedure Enable_DMA
+     (This   : in out I2C_Port;
+      Source : I2C_DMA)
+     with Post => DMA_Enabled (This, Source);
+
+   procedure Disable_DMA
+     (This   : in out I2C_Port;
+      Source : I2C_DMA)
+     with Post => not DMA_Enabled (This, Source);
+
+   function DMA_Enabled
+     (This   : I2C_Port;
+      Source : I2C_DMA)
+      return Boolean;
+
+   type Interrupt_Status_Flag is
+     (Tx_Data_Register_Empty,
+      Tx_Data_Register_Empty_Interrupt,
+      Rx_Data_Register_Not_Empty,
+      Address_Matched,
+      Ack_Failure,
+      Stop_Detection,
+      Transfer_Complete,
+      Transfer_Complete_Reload,
+      Bus_Error,
+      Arbitration_Lost,
+      UnderOverrun,
+      Packet_Error,
+      Timeout,
+      SMB_Alert,
+      Bus_Busy,
+      Transmitter_Receiver_Mode);
+
+   type Clearable_Interrupt_Status is
+     (Address_Matched,
+      Ack_Failure,
+      Stop_Detection,
+      Bus_Error,
+      Arbitration_Lost,
+      UnderOverrun,
+      Packet_Error,
+      Timeout,
+      SMB_Alert);
+
+   --  Low level flag handling
+
+   function Interrupt_Status
+     (This : I2C_Port;
+      Flag : Interrupt_Status_Flag)
+      return Boolean;
+
+   procedure Clear_Interrupt_Status
+     (This   : in out I2C_Port;
+      Target : Clearable_Interrupt_Status);
+
 private
 
    type I2C_State is
@@ -147,46 +234,6 @@ private
          State    : I2C_State := Reset;
       end record;
 
-   type I2C_Status_Flag is
-     (Tx_Data_Register_Empty,
-      Tx_Data_Register_Empty_Interrupt,
-      Rx_Data_Register_Not_Empty,
-      Address_Matched,
-      Ack_Failure,
-      Stop_Detection,
-      Transfer_Complete,
-      Transfer_Complete_Reload,
-      Bus_Error,
-      Arbitration_Lost,
-      UnderOverrun,
-      Packet_Error,
-      Timeout,
-      SMB_Alert,
-      Bus_Busy,
-      Transmitter_Receiver_Mode);
-
-   type Clearable_I2C_Status_Flag is
-     (Address_Matched,
-      Ack_Failure,
-      Stop_Detection,
-      Bus_Error,
-      Arbitration_Lost,
-      UnderOverrun,
-      Packet_Error,
-      Timeout,
-      SMB_Alert);
-
-   --  Low level flag handling
-
-   function Flag_Status
-     (This : I2C_Port;
-      Flag : I2C_Status_Flag)
-      return Boolean;
-
-   procedure Clear_Flag
-     (This   : in out I2C_Port;
-      Target : Clearable_I2C_Status_Flag);
-
    procedure Tx_Data_Register_Flush (This : in out I2C_Port);
 
    procedure Tx_Data_Register_Gen_Event (This : in out I2C_Port);
@@ -195,9 +242,18 @@ private
 
    procedure Wait_While_Flag
      (This    : in out I2C_Port;
-      Flag    :        I2C_Status_Flag;
+      Flag    :        Interrupt_Status_Flag;
       F_State :        Boolean;
       Timeout :        Natural;
       Status  :    out HAL.I2C.I2C_Status);
+
+   --  For DMA transfer
+   function Tx_Data_Register_Address
+     (This : I2C_Port)
+      return System.Address;
+
+   function Rx_Data_Register_Address
+     (This : I2C_Port)
+      return System.Address;
 
 end STM32.I2C;

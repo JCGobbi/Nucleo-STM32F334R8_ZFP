@@ -30,10 +30,9 @@
 ------------------------------------------------------------------------------
 
 with STM32.Device;
-with SYS.Real_Time; use SYS.Real_Time;
+with Sys.Real_Time; use Sys.Real_Time;
 
 with STM32_SVD.I2C; use STM32_SVD.I2C;
-with STM32_SVD.RCC; use STM32_SVD.RCC;
 
 with HAL.I2C; use HAL.I2C;
 
@@ -79,6 +78,282 @@ package body STM32.I2C is
       Timeout : Natural;
       Status  : out I2C_Status);
 
+   ---------------------
+   -- Config_Transfer --
+   ---------------------
+
+   procedure Config_Transfer
+     (Port    : in out I2C_Port;
+      Addr    : I2C_Address;
+      Size    : UInt8;
+      Mode    : I2C_Transfer_Mode;
+      Request : I2C_Request)
+   is
+      CR2 : CR2_Register := Port.Periph.CR2;
+   begin
+      CR2.SADD := Addr;
+      CR2.NBYTES   := Size;
+      CR2.RELOAD   := Mode = Reload_Mode;
+      CR2.AUTOEND  := Mode = Autoend_Mode;
+
+      CR2.RD_WRN := False;
+      CR2.START  := False;
+      CR2.STOP   := False;
+
+      case Request is
+         when No_Start_Stop =>
+            null;
+
+         when Generate_Stop =>
+            CR2.STOP := True;
+
+         when Generate_Start_Read =>
+            CR2.RD_WRN := True;
+            CR2.START  := True;
+
+         when Generate_Start_Write =>
+            CR2.START := True;
+      end case;
+
+      Port.Periph.CR2 := CR2;
+   end Config_Transfer;
+
+   ------------------
+   -- Reset_Config --
+   ------------------
+
+   procedure Reset_Config (Port  : in out I2C_Port)
+   is
+      CR2 : CR2_Register := Port.Periph.CR2;
+   begin
+      CR2.SADD := 0;
+      CR2.HEAD10R  := False;
+      CR2.NBYTES   := 0;
+      CR2.RELOAD   := False;
+      CR2.RD_WRN   := False;
+      Port.Periph.CR2 := CR2;
+   end Reset_Config;
+
+   ----------------
+   -- Check_Nack --
+   ----------------
+
+   procedure Check_Nack
+     (Port    : in out I2C_Port;
+      Timeout : Natural;
+      Status  : out I2C_Status)
+   is
+      Start : constant Time := Clock;
+   begin
+      if Interrupt_Status (Port, Ack_Failure) then
+         if Port.State = Master_Busy_Tx
+           or else Port.State = Mem_Busy_Tx
+           or else Port.State = Mem_Busy_Rx
+         then
+            --  We generate a STOP condition if SOFTEND mode is enabled
+            if not Port.Periph.CR2.AUTOEND then
+               Port.Periph.CR2.STOP := True;
+            end if;
+         end if;
+
+         while not Interrupt_Status (Port, Stop_Detection) loop
+            if Timeout > 0
+              and then Start + Milliseconds (Timeout) < Clock
+            then
+               Port.State := Ready;
+               Status := Err_Timeout;
+               return;
+            end if;
+         end loop;
+
+         --  Clear the NACK amd STOP flags
+         Clear_Interrupt_Status (Port, Ack_Failure);
+         Clear_Interrupt_Status (Port, Stop_Detection);
+
+         --  Clear CR2
+         Reset_Config (Port);
+
+         Port.State := Ready;
+         Status := Err_Error;
+
+      else
+         Status := Ok;
+      end if;
+   end Check_Nack;
+
+   ------------------------------
+   -- Wait_Tx_Interrupt_Status --
+   ------------------------------
+
+   procedure Wait_Tx_Interrupt_Status
+     (Port    : in out I2C_Port;
+      Timeout : Natural;
+      Status  : out I2C_Status)
+   is
+      Start : constant Time := Clock;
+   begin
+      while not Interrupt_Status (Port, Tx_Data_Register_Empty_Interrupt) loop
+         Check_Nack (Port, Timeout, Status);
+
+         if Status /= Ok then
+            Port.State := Ready;
+            Status := Err_Error;
+
+            return;
+         end if;
+
+         if Timeout > 0
+           and then Start + Milliseconds (Timeout) < Clock
+         then
+            Reset_Config (Port);
+            Port.State := Ready;
+            Status := Err_Timeout;
+
+            return;
+         end if;
+      end loop;
+
+      Status := Ok;
+   end Wait_Tx_Interrupt_Status;
+
+   ---------------------------------------
+   -- Wait_Transfer_Complete_Reset_Flag --
+   ---------------------------------------
+
+   procedure Wait_Transfer_Complete_Reset_Flag
+     (Port    : in out I2C_Port;
+      Timeout : Natural;
+      Status  : out I2C_Status)
+   is
+      Start : constant Time := Clock;
+   begin
+      while not Interrupt_Status (Port, Transfer_Complete_Reload) loop
+         if Timeout > 0
+           and then Start + Milliseconds (Timeout) < Clock
+         then
+            Reset_Config (Port);
+            Status := Err_Timeout;
+            Port.State := Ready;
+
+            return;
+         end if;
+      end loop;
+
+      Status := Ok;
+   end Wait_Transfer_Complete_Reset_Flag;
+
+   --------------------
+   -- Wait_Stop_Flag --
+   --------------------
+
+   procedure Wait_Stop_Flag
+     (Port    : in out I2C_Port;
+      Timeout : Natural;
+      Status  : out I2C_Status)
+   is
+      Start : constant Time := Clock;
+   begin
+      while not Interrupt_Status (Port, Stop_Detection) loop
+         Check_Nack (Port, Timeout, Status);
+
+         if Status /= Ok then
+            Port.State := Ready;
+            Status := Err_Error;
+
+            return;
+         end if;
+
+         if Timeout > 0
+           and then Start + Milliseconds (Timeout) < Clock
+         then
+            Reset_Config (Port);
+            Status := Err_Timeout;
+            Port.State := Ready;
+
+            return;
+         end if;
+      end loop;
+
+      --  Clear the stop flag
+      Port.Periph.ICR.STOPCF := True;
+
+      Status := Ok;
+   end Wait_Stop_Flag;
+
+   -------------------------
+   -- Tx_Data_Register_Flush --
+   -------------------------
+
+   procedure Tx_Data_Register_Flush (This : in out I2C_Port) is
+   begin
+      This.Periph.ISR.TXE := True;
+   end Tx_Data_Register_Flush;
+
+   --------------------------------
+   -- Tx_Data_Register_Gen_Event --
+   --------------------------------
+
+   procedure Tx_Data_Register_Gen_Event (This : in out I2C_Port) is
+   begin
+      if This.Periph.CR1.NOSTRETCH = True then
+         This.Periph.ISR.TXIS := True;
+      end if;
+   end Tx_Data_Register_Gen_Event;
+
+   ---------------------
+   -- Wait_While_Flag --
+   ---------------------
+
+   procedure Wait_While_Flag
+     (This    : in out I2C_Port;
+      Flag    :        Interrupt_Status_Flag;
+      F_State :        Boolean;
+      Timeout :        Natural;
+      Status  :    out HAL.I2C.I2C_Status)
+   is
+      Deadline : constant Time := Clock + Milliseconds (Timeout);
+   begin
+      while Interrupt_Status (This, Flag) = F_State loop
+         if Clock > Deadline then
+            This.State := Ready;
+            Status := HAL.I2C.Err_Timeout;
+            return;
+         end if;
+      end loop;
+
+      Status := HAL.I2C.Ok;
+   end Wait_While_Flag;
+
+   ------------------------------
+   -- Tx_Data_Register_Address --
+   ------------------------------
+
+   function Tx_Data_Register_Address
+     (This : I2C_Port)
+      return System.Address
+   is (This.Periph.TXDR'Address);
+
+   ------------------------------
+   -- Rx_Data_Register_Address --
+   ------------------------------
+
+   function Rx_Data_Register_Address
+     (This : I2C_Port)
+      return System.Address
+   is (This.Periph.RXDR'Address);
+
+   ------------------
+   -- Set_I2C_Port --
+   ------------------
+
+   procedure Set_I2C_Port
+     (This    : I2C_Port;
+      Enabled : Boolean)
+   is
+   begin
+      This.Periph.CR1.PE := Enabled;
+   end Set_I2C_Port;
+
    ------------------
    -- Port_Enabled --
    ------------------
@@ -105,15 +380,21 @@ package body STM32.I2C is
       This.Config := Configuration;
 
       --  Disable the I2C port
-      This.Periph.CR1.PE := False;
+      Set_I2C_Port (This, False);
 
-      --  Reset the timing register to 100_000 Hz
+      --  Reset the timing register to Standard mode 100_000 Hz.
+      --  The STM32CubeMX tool calculates and provides the I2C_TIMINGR content
+      --  in the I2C configuration window.
+      --  For the STM32F334R8 nucleo board, the I2C Clock Mux has two options:
+      --                    PRESC   SCLDEL   SDADEL   SCLH       SCLL
+      --  HSI (8 MHz)       2       0        0        9 (09)     14 (0E)
+      --  SYSCLK (72 MHz)   1       8        0        141 (8D)   211 (D3)
       This.Periph.TIMINGR :=
-        (SCLL   => 50,
-         SCLH   => 39,
-         SDADEL => 1,
-         SCLDEL => 9,
-         PRESC  => 4,
+        (SCLL   => 211,
+         SCLH   => 141,
+         SDADEL => 0,
+         SCLDEL => 8,
+         PRESC  => 1,
          others => <>);
 
       --  I2C Own Address Register configuration
@@ -145,14 +426,19 @@ package body STM32.I2C is
          NOSTRETCH => False,
          others    => <>);
 
+      if Configuration.Enable_DMA then
+         This.Periph.CR1.TXDMAEN := True;
+         This.Periph.CR1.RXDMAEN := True;
+      end if;
+
       This.State := Ready;
       --  Enable the port
-      This.Periph.CR1.PE := True;
+      Set_I2C_Port (This, True);
    end Configure;
 
    -------------------
    -- Is_Configured --
-      -------------------
+   -------------------
 
    function Is_Configured (Port : I2C_Port) return Boolean
    is
@@ -209,327 +495,6 @@ package body STM32.I2C is
 
       Port.Configure (I2C_Conf);
    end Setup_I2C_Master;
-
-   ---------------------
-   -- Config_Transfer --
-   ---------------------
-
-   procedure Config_Transfer
-     (Port    : in out I2C_Port;
-      Addr    : I2C_Address;
-      Size    : UInt8;
-      Mode    : I2C_Transfer_Mode;
-      Request : I2C_Request)
-   is
-      CR2 : CR2_Register := Port.Periph.CR2;
-   begin
-      CR2.SADD.Val := Addr;
-      CR2.NBYTES   := Size;
-      CR2.RELOAD   := Mode = Reload_Mode;
-      CR2.AUTOEND  := Mode = Autoend_Mode;
-
-      CR2.RD_WRN := False;
-      CR2.START  := False;
-      CR2.STOP   := False;
-
-      case Request is
-         when No_Start_Stop =>
-            null;
-
-         when Generate_Stop =>
-            CR2.STOP := True;
-
-         when Generate_Start_Read =>
-            CR2.RD_WRN := True;
-            CR2.START  := True;
-
-         when Generate_Start_Write =>
-            CR2.START := True;
-      end case;
-
-      Port.Periph.CR2 := CR2;
-   end Config_Transfer;
-
-   ------------------
-   -- Reset_Config --
-   ------------------
-
-   procedure Reset_Config (Port  : in out I2C_Port)
-   is
-      CR2 : CR2_Register := Port.Periph.CR2;
-   begin
-      CR2.SADD.Val := 0;
-      CR2.HEAD10R  := False;
-      CR2.NBYTES   := 0;
-      CR2.RELOAD   := False;
-      CR2.RD_WRN   := False;
-      Port.Periph.CR2 := CR2;
-   end Reset_Config;
-
-   -----------------
-   -- Flag_Status --
-   -----------------
-
-   function Flag_Status
-     (This : I2C_Port; Flag : I2C_Status_Flag) return Boolean
-   is
-   begin
-      case Flag is
-         when Tx_Data_Register_Empty =>
-            return This.Periph.ISR.TXE;
-         when Tx_Data_Register_Empty_Interrupt =>
-            return This.Periph.ISR.TXIS;
-         when Rx_Data_Register_Not_Empty =>
-            return This.Periph.ISR.RXNE;
-         when Address_Matched =>
-            return This.Periph.ISR.ADDR;
-         when Ack_Failure =>
-            return This.Periph.ISR.NACKF;
-         when Stop_Detection =>
-            return This.Periph.ISR.STOPF;
-         when Transfer_Complete =>
-            return This.Periph.ISR.TC;
-         when Transfer_Complete_Reload =>
-            return This.Periph.ISR.TCR;
-         when Bus_Error =>
-            return This.Periph.ISR.BERR;
-         when Arbitration_Lost =>
-            return This.Periph.ISR.ARLO;
-         when UnderOverrun =>
-            return This.Periph.ISR.OVR;
-         when Packet_Error =>
-            return This.Periph.ISR.PECERR;
-         when Timeout =>
-            return This.Periph.ISR.TIMEOUT;
-         when SMB_Alert =>
-            return This.Periph.ISR.ALERT;
-         when Bus_Busy =>
-            return This.Periph.ISR.BUSY;
-         when Transmitter_Receiver_Mode =>
-            return This.Periph.ISR.DIR;
-      end case;
-   end Flag_Status;
-
-   ----------------
-   -- Clear_Flag --
-   ----------------
-
-   procedure Clear_Flag
-     (This   : in out I2C_Port;
-      Target : Clearable_I2C_Status_Flag)
-   is
-   begin
-      case Target is
-         when Address_Matched =>
-            This.Periph.ICR.ADDRCF := True;
-         when Ack_Failure =>
-            This.Periph.ICR.NACKCF := True;
-         when Stop_Detection =>
-            This.Periph.ICR.STOPCF := True;
-         when Bus_Error =>
-            This.Periph.ICR.BERRCF := True;
-         when Arbitration_Lost =>
-            This.Periph.ICR.ARLOCF := True;
-         when UnderOverrun =>
-            This.Periph.ICR.OVRCF := True;
-         when Packet_Error =>
-            This.Periph.ICR.PECCF := True;
-         when Timeout =>
-            This.Periph.ICR.TIMOUTCF := True;
-         when SMB_Alert =>
-            This.Periph.ICR.ALERTCF := True;
-      end case;
-   end Clear_Flag;
-
-   -------------------------
-   -- Tx_Data_Register_Flush --
-   -------------------------
-
-   procedure Tx_Data_Register_Flush (This : in out I2C_Port) is
-   begin
-      This.Periph.ISR.TXE := True;
-   end Tx_Data_Register_Flush;
-
-   --------------------------------
-   -- Tx_Data_Register_Gen_Event --
-   --------------------------------
-
-   procedure Tx_Data_Register_Gen_Event (This : in out I2C_Port) is
-   begin
-      if This.Periph.CR1.NOSTRETCH = True then
-         This.Periph.ISR.TXIS := True;
-      end if;
-   end Tx_Data_Register_Gen_Event;
-
-   ---------------------
-   -- Wait_While_Flag --
-   ---------------------
-
-   procedure Wait_While_Flag
-     (This    : in out I2C_Port;
-      Flag    :        I2C_Status_Flag;
-      F_State :        Boolean;
-      Timeout :        Natural;
-      Status  :    out HAL.I2C.I2C_Status)
-   is
-      Deadline : constant Time := Clock + Milliseconds (Timeout);
-   begin
-      while Flag_Status (This, Flag) = F_State loop
-         if Clock > Deadline then
-            This.State := Ready;
-            Status := HAL.I2C.Err_Timeout;
-            return;
-         end if;
-      end loop;
-
-      Status := HAL.I2C.Ok;
-   end Wait_While_Flag;
-
-   ----------------
-   -- Check_Nack --
-   ----------------
-
-   procedure Check_Nack
-     (Port    : in out I2C_Port;
-      Timeout : Natural;
-      Status  : out I2C_Status)
-   is
-      Start : constant Time := Clock;
-   begin
-      if Port.Periph.ISR.NACKF then
-         if Port.State = Master_Busy_Tx
-           or else Port.State = Mem_Busy_Tx
-           or else Port.State = Mem_Busy_Rx
-         then
-            --  We generate a STOP condition if SOFTEND mode is enabled
-            if not Port.Periph.CR2.AUTOEND then
-               Port.Periph.CR2.STOP := True;
-            end if;
-         end if;
-
-         while not Port.Periph.ISR.STOPF loop
-            if Timeout > 0
-              and then Start + Milliseconds (Timeout) < Clock
-            then
-               Port.State := Ready;
-               Status       := Err_Timeout;
-               return;
-            end if;
-         end loop;
-
-         --  Clear the MACL amd STOP flags
-         Port.Periph.ICR.NACKCF := True;
-         Port.Periph.ICR.STOPCF := True;
-
-         --  Clear CR2
-         Reset_Config (Port);
-
-         Port.State := Ready;
-         Status       := Err_Error;
-
-      else
-         Status := Ok;
-      end if;
-   end Check_Nack;
-
-   ------------------------------
-   -- Wait_Tx_Interrupt_Status --
-   ------------------------------
-
-   procedure Wait_Tx_Interrupt_Status
-     (Port    : in out I2C_Port;
-      Timeout : Natural;
-      Status  : out I2C_Status)
-   is
-      Start : constant Time := Clock;
-   begin
-      while not Port.Periph.ISR.TXIS loop
-         Check_Nack (Port, Timeout, Status);
-
-         if Status /= Ok then
-            Port.State := Ready;
-            Status       := Err_Error;
-
-            return;
-         end if;
-
-         if Timeout > 0
-           and then Start + Milliseconds (Timeout) < Clock
-         then
-            Reset_Config (Port);
-            Port.State := Ready;
-            Status       := Err_Timeout;
-
-            return;
-         end if;
-      end loop;
-
-      Status := Ok;
-   end Wait_Tx_Interrupt_Status;
-
-   ---------------------------------------
-   -- Wait_Transfer_Complete_Reset_Flag --
-   ---------------------------------------
-
-   procedure Wait_Transfer_Complete_Reset_Flag
-     (Port    : in out I2C_Port;
-      Timeout : Natural;
-      Status  : out I2C_Status)
-   is
-      Start : constant Time := Clock;
-   begin
-      while not Port.Periph.ISR.TCR loop
-         if Timeout > 0
-           and then Start + Milliseconds (Timeout) < Clock
-         then
-            Reset_Config (Port);
-            Status       := Err_Timeout;
-            Port.State := Ready;
-
-            return;
-         end if;
-      end loop;
-
-      Status := Ok;
-   end Wait_Transfer_Complete_Reset_Flag;
-
-   --------------------
-   -- Wait_Stop_Flag --
-   --------------------
-
-   procedure Wait_Stop_Flag
-     (Port    : in out I2C_Port;
-      Timeout : Natural;
-      Status  : out I2C_Status)
-   is
-      Start : constant Time := Clock;
-   begin
-      while not Port.Periph.ISR.STOPF loop
-         Check_Nack (Port, Timeout, Status);
-
-         if Status /= Ok then
-            Port.State := Ready;
-            Status       := Err_Error;
-
-            return;
-         end if;
-
-         if Timeout > 0
-           and then Start + Milliseconds (Timeout) < Clock
-         then
-            Reset_Config (Port);
-            Status       := Err_Timeout;
-            Port.State := Ready;
-
-            return;
-         end if;
-      end loop;
-
-      --  Clear the stop flag
-      Port.Periph.ICR.STOPCF := True;
-
-      Status := Ok;
-   end Wait_Stop_Flag;
 
    ---------------------
    -- Master_Transmit --
@@ -981,5 +946,214 @@ package body STM32.I2C is
       This.State := Ready;
       Status       := Ok;
    end Mem_Read;
+
+   ----------------------
+   -- Enable_Interrupt --
+   ----------------------
+
+   procedure Enable_Interrupt
+     (This   : in out I2C_Port;
+      Source : I2C_Interrupt)
+   is
+   begin
+      case Source is
+         when Tx_Interrupt =>
+            This.Periph.CR1.TXIE := True;
+         when Rx_Interrupt =>
+            This.Periph.CR1.RXIE := True;
+         when Addr_Match_Interrupt =>
+            This.Periph.CR1.ADDRIE := True;
+         when Not_Ack_Received_Interrupt =>
+            This.Periph.CR1.NACKIE := True;
+         when Stop_Detection_Interrupt =>
+            This.Periph.CR1.STOPIE := True;
+         when Transfer_Complete_Interrupt =>
+            This.Periph.CR1.TCIE := True;
+         when Errors_Detected_Interrupt =>
+            This.Periph.CR1.ERRIE := True;
+      end case;
+   end Enable_Interrupt;
+
+   -----------------------
+   -- Disable_Interrupt --
+   -----------------------
+
+   procedure Disable_Interrupt
+     (This   : in out I2C_Port;
+      Source : I2C_Interrupt)
+   is
+   begin
+      case Source is
+         when Tx_Interrupt =>
+            This.Periph.CR1.TXIE := False;
+         when Rx_Interrupt =>
+            This.Periph.CR1.RXIE := False;
+         when Addr_Match_Interrupt =>
+            This.Periph.CR1.ADDRIE := False;
+         when Not_Ack_Received_Interrupt =>
+            This.Periph.CR1.NACKIE := False;
+         when Stop_Detection_Interrupt =>
+            This.Periph.CR1.STOPIE := False;
+         when Transfer_Complete_Interrupt =>
+            This.Periph.CR1.TCIE := False;
+         when Errors_Detected_Interrupt =>
+            This.Periph.CR1.ERRIE := False;
+      end case;
+   end Disable_Interrupt;
+
+   -----------------------
+   -- Interrupt_Enabled --
+   -----------------------
+
+   function Interrupt_Enabled
+     (This   : I2C_Port;
+      Source : I2C_Interrupt)
+      return Boolean
+   is
+   begin
+      case Source is
+         when Tx_Interrupt =>
+            return This.Periph.CR1.TXIE;
+         when Rx_Interrupt =>
+            return This.Periph.CR1.RXIE;
+         when Addr_Match_Interrupt =>
+            return This.Periph.CR1.ADDRIE;
+         when Not_Ack_Received_Interrupt =>
+            return This.Periph.CR1.NACKIE;
+         when Stop_Detection_Interrupt =>
+            return This.Periph.CR1.STOPIE;
+         when Transfer_Complete_Interrupt =>
+            return This.Periph.CR1.TCIE;
+         when Errors_Detected_Interrupt =>
+            return This.Periph.CR1.ERRIE;
+      end case;
+   end Interrupt_Enabled;
+
+   ----------------------
+   -- Enable_Interrupt --
+   ----------------------
+
+   procedure Enable_DMA
+     (This   : in out I2C_Port;
+      Source : I2C_DMA)
+   is
+   begin
+      case Source is
+         when Tx_DMA =>
+            This.Periph.CR1.TXDMAEN := True;
+         when Rx_DMA =>
+            This.Periph.CR1.RXDMAEN := True;
+      end case;
+   end Enable_DMA;
+
+   -----------------
+   -- Disable_DMA --
+   -----------------
+
+   procedure Disable_DMA
+     (This   : in out I2C_Port;
+      Source : I2C_DMA)
+   is
+   begin
+      case Source is
+         when Tx_DMA =>
+            This.Periph.CR1.TXDMAEN := False;
+         when Rx_DMA =>
+            This.Periph.CR1.RXDMAEN := False;
+      end case;
+   end Disable_DMA;
+
+   -----------------
+   -- DMA_Enabled --
+   -----------------
+
+   function DMA_Enabled
+     (This   : I2C_Port;
+      Source : I2C_DMA)
+      return Boolean
+   is
+   begin
+      case Source is
+         when Tx_DMA =>
+            return This.Periph.CR1.TXDMAEN;
+         when Rx_DMA =>
+            return This.Periph.CR1.RXDMAEN;
+      end case;
+   end DMA_Enabled;
+
+   ----------------------
+   -- Interrupt_Status --
+   ----------------------
+
+   function Interrupt_Status
+     (This : I2C_Port; Flag : Interrupt_Status_Flag) return Boolean
+   is
+   begin
+      case Flag is
+         when Tx_Data_Register_Empty =>
+            return This.Periph.ISR.TXE;
+         when Tx_Data_Register_Empty_Interrupt =>
+            return This.Periph.ISR.TXIS;
+         when Rx_Data_Register_Not_Empty =>
+            return This.Periph.ISR.RXNE;
+         when Address_Matched =>
+            return This.Periph.ISR.ADDR;
+         when Ack_Failure =>
+            return This.Periph.ISR.NACKF;
+         when Stop_Detection =>
+            return This.Periph.ISR.STOPF;
+         when Transfer_Complete =>
+            return This.Periph.ISR.TC;
+         when Transfer_Complete_Reload =>
+            return This.Periph.ISR.TCR;
+         when Bus_Error =>
+            return This.Periph.ISR.BERR;
+         when Arbitration_Lost =>
+            return This.Periph.ISR.ARLO;
+         when UnderOverrun =>
+            return This.Periph.ISR.OVR;
+         when Packet_Error =>
+            return This.Periph.ISR.PECERR;
+         when Timeout =>
+            return This.Periph.ISR.TIMEOUT;
+         when SMB_Alert =>
+            return This.Periph.ISR.ALERT;
+         when Bus_Busy =>
+            return This.Periph.ISR.BUSY;
+         when Transmitter_Receiver_Mode =>
+            return This.Periph.ISR.DIR;
+      end case;
+   end Interrupt_Status;
+
+   ----------------------------
+   -- Clear_Interrupt_Status --
+   ----------------------------
+
+   procedure Clear_Interrupt_Status
+     (This   : in out I2C_Port;
+      Target : Clearable_Interrupt_Status)
+   is
+   begin
+      case Target is
+         when Address_Matched =>
+            This.Periph.ICR.ADDRCF := True;
+         when Ack_Failure =>
+            This.Periph.ICR.NACKCF := True;
+         when Stop_Detection =>
+            This.Periph.ICR.STOPCF := True;
+         when Bus_Error =>
+            This.Periph.ICR.BERRCF := True;
+         when Arbitration_Lost =>
+            This.Periph.ICR.ARLOCF := True;
+         when UnderOverrun =>
+            This.Periph.ICR.OVRCF := True;
+         when Packet_Error =>
+            This.Periph.ICR.PECCF := True;
+         when Timeout =>
+            This.Periph.ICR.TIMOUTCF := True;
+         when SMB_Alert =>
+            This.Periph.ICR.ALERTCF := True;
+      end case;
+   end Clear_Interrupt_Status;
 
 end STM32.I2C;
