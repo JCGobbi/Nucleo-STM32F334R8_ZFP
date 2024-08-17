@@ -39,6 +39,11 @@ with System;
 
 package STM32.I2C is
 
+   type I2C_Device_Mode is
+     (I2C_Mode,
+      SMBusDevice_Mode,
+      SMBusHost_Mode);
+
    type I2C_Direction is (Transmitter, Receiver);
 
    type I2C_Addressing_Mode is
@@ -47,16 +52,26 @@ package STM32.I2C is
 
    type I2C_Configuration is record
       Clock_Speed              : UInt32;
+      --  Standard Mode 1-100 kHz, Fast Mode 1-400 kHz, Fast Mode Plus 1-1000 kHz.
+      Mode                     : I2C_Device_Mode;
+      --  I2C or SMBus communication.
+
       Addressing_Mode          : I2C_Addressing_Mode;
-      Own_Address              : UInt10;
+      Own_Address              : UInt10 := 16#00#;
+      Own_Address_2            : UInt7 := 16#00#;
 
-      --  an I2C general call dispatches the same data to all connected
-      --  devices.
       General_Call_Enabled     : Boolean := False;
-
+      --  An I2C general call dispatches the same data to all connected
+      --  devices.
+      Clock_Stretching_Enabled : Boolean := True;
       --  Clock stretching is a mean for a slave device to slow down the
       --  i2c clock in order to process the communication.
-      Clock_Stretching_Enabled : Boolean := True;
+      Alert_Signal             : Boolean := False;
+      --   A slave-only device can signal the host through the SMBALERT# pin
+      --   that it wants to talk. Only used for SMBus.
+      PEC_Calculation          : Boolean := False;
+      --   Packet Error Checking is implemented by appending a Packet Error Code
+      --   (PEC) at the end of each message transfer. Only used for SMBus.
 
       Enable_DMA               : Boolean := True;
       --  For compatibility with STM32F4 implementation
@@ -72,27 +87,29 @@ package STM32.I2C is
    type I2C_Port (Periph : not null access Internal_I2C_Port) is
       limited new HAL.I2C.I2C_Port with private;
 
-   procedure Set_I2C_Port
+   procedure Set_Port_State
      (This    : I2C_Port;
-      Enabled : Boolean);
+      Enabled : Boolean)
+     with Post => Port_Enabled (This) = Enabled;
    --  Enable/disable I2C port.
 
    function Port_Enabled (This : I2C_Port) return Boolean
      with Inline;
 
    procedure Configure
-     (This          : in out I2C_Port;
-      Configuration : I2C_Configuration)
+     (This : in out I2C_Port;
+      Conf : I2C_Configuration)
      with Pre  => not Is_Configured (This),
           Post => Is_Configured (This);
 
    function Is_Configured (Port : I2C_Port) return Boolean;
 
-   procedure Setup_I2C_Master (Port           : in out I2C_Port'Class;
-                               SDA, SCL       : GPIO_Point;
-                               SDA_AF, SCL_AF : GPIO_Alternate_Function;
-                               Clock_Speed    : UInt32);
-   --  GPIO : Alternate function, High speed, open drain, floating
+   procedure Setup_I2C_Master
+     (Port           : in out I2C_Port'Class;
+      SDA, SCL       : GPIO_Point;
+      SDA_AF, SCL_AF : GPIO_Alternate_Function;
+      Clock_Speed    : UInt32);
+   --  GPIO : Alternate function, Speed_100MHz, open drain, floating
    --  I2C  : 7bit address, stretching enabled, general call disabled
 
    overriding

@@ -342,17 +342,17 @@ package body STM32.I2C is
       return System.Address
    is (This.Periph.RXDR'Address);
 
-   ------------------
-   -- Set_I2C_Port --
-   ------------------
+   --------------------
+   -- Set_Port_State --
+   --------------------
 
-   procedure Set_I2C_Port
+   procedure Set_Port_State
      (This    : I2C_Port;
       Enabled : Boolean)
    is
    begin
       This.Periph.CR1.PE := Enabled;
-   end Set_I2C_Port;
+   end Set_Port_State;
 
    ------------------
    -- Port_Enabled --
@@ -369,18 +369,20 @@ package body STM32.I2C is
    ---------------
 
    procedure Configure
-     (This          : in out I2C_Port;
-      Configuration : I2C_Configuration)
+     (This : in out I2C_Port;
+      Conf : I2C_Configuration)
    is
+      SMB_Device : Boolean;
+      SMB_Host : Boolean;
    begin
       if This.State /= Reset then
          return;
       end if;
 
-      This.Config := Configuration;
+      This.Config := Conf;
 
       --  Disable the I2C port
-      Set_I2C_Port (This, False);
+      Set_Port_State (This, False);
 
       --  Reset the timing register to Standard mode 100_000 Hz.
       --  The STM32CubeMX tool calculates and provides the I2C_TIMINGR content
@@ -400,40 +402,62 @@ package body STM32.I2C is
       --  I2C Own Address Register configuration
       This.Periph.OAR1.OA1EN := False;
 
-      if Configuration.Own_Address /= 0 then
+      --  Address mode (slave mode) configuration
+      if Conf.Own_Address /= 0 then
          This.Periph.OAR1 :=
-           (OA1     => Configuration.Own_Address,
+           (OA1     => Conf.Own_Address,
+            --  7-bit addressing mode: OA1[7:1] contains the 7-bit own slave
+            --  address. The bits OA1[9], OA1[8] and OA1[0] are don't care.
             OA1EN   => True,
-            OA1MODE => Configuration.Addressing_Mode = Addressing_Mode_10bit,
+            OA1MODE => Conf.Addressing_Mode = Addressing_Mode_10bit,
             others  => <>);
+
+         --  Optional dual address for 7-bit addressing mode
+         if Conf.Addressing_Mode = Addressing_Mode_7bit then
+            --  OAR2 configuration
+            This.Periph.OAR2 :=
+              (OA2    => Conf.Own_Address_2,
+               OA2MSK => 0,
+               OA2EN  => False,
+               others => <>);
+         end if;
       end if;
 
       --  CR2 configuration
-      --  Enable AUTOEND by default, set NACK (should be disabled only in
-      --  slave mode
-      This.Periph.CR2.ADD10 :=
-        Configuration.Addressing_Mode = Addressing_Mode_10bit;
+      --  Master operation mode 7-bit or 10-bit addressing mode.
+      This.Periph.CR2.ADD10 := Conf.Addressing_Mode = Addressing_Mode_10bit;
+      --  Enable AUTOEND by default in master mode. A STOP condition is
+      --  automatically sent when NBYTES data are transferred.
       This.Periph.CR2.AUTOEND := True;
-      This.Periph.CR2.NACK := True;
 
-      --  OAR2 configuration
-      --  ??? Add support for dual addressing
-      This.Periph.OAR2 := (others => <>);
+      --  Select I2C or SMBus (device or host) operation.
+      case Conf.Mode is
+         when I2C_Mode =>
+            SMB_Device := False;
+            SMB_Host := False;
+         when SMBusDevice_Mode =>
+            SMB_Device := True;
+            SMB_Host := False;
+         when SMBusHost_Mode =>
+            SMB_Device := True;
+            SMB_Host := True;
+      end case;
 
       --  CR1 configuration
+      --  Select SMBus or I2C operation. PEC calculation and Alert pin are only
+      --  used with SMBus mode.
       This.Periph.CR1 :=
-        (GCEN      => Configuration.General_Call_Enabled,
-         NOSTRETCH => False,
+        (SMBDEN    => SMB_Device,
+         SMBHEN    => SMB_Host,
+         PECEN     => (if Conf.Mode = I2C_Mode then False else Conf.PEC_Calculation),
+         ALERTEN   => (if Conf.Mode = I2C_Mode then False else Conf.Alert_Signal),
+         GCEN      => Conf.General_Call_Enabled,
+         NOSTRETCH => not Conf.Clock_Stretching_Enabled,
          others    => <>);
-
-      if Configuration.Enable_DMA then
-         This.Periph.CR1.TXDMAEN := True;
-         This.Periph.CR1.RXDMAEN := True;
-      end if;
 
       This.State := Ready;
       --  Enable the port
-      Set_I2C_Port (This, True);
+      Set_Port_State (This, True);
    end Configure;
 
    -------------------
@@ -468,13 +492,13 @@ package body STM32.I2C is
       Configure_IO (SDA,
                     (Mode           => Mode_AF,
                      AF             => SDA_AF,
-                     AF_Speed       => Speed_High,
+                     AF_Speed       => Speed_100MHz,
                      AF_Output_Type => Open_Drain,
                      Resistors      => Floating));
       Configure_IO (SCL,
                     (Mode           => Mode_AF,
                      AF             => SCL_AF,
-                     AF_Speed       => Speed_High,
+                     AF_Speed       => Speed_100MHz,
                      AF_Output_Type => Open_Drain,
                      Resistors      => Floating));
       Lock (SDA & SCL);
@@ -486,11 +510,14 @@ package body STM32.I2C is
       Reset (Port);
 
       I2C_Conf.Own_Address := 16#00#;
+      I2C_Conf.Clock_Speed := Clock_Speed;
       I2C_Conf.Addressing_Mode := Addressing_Mode_7bit;
       I2C_Conf.General_Call_Enabled := False;
       I2C_Conf.Clock_Stretching_Enabled := True;
+      I2C_Conf.Mode := I2C_Mode;
+      I2C_Conf.PEC_Calculation := False;
+      I2C_Conf.Alert_Signal := False;
 
-      I2C_Conf.Clock_Speed := Clock_Speed;
       I2C_Conf.Enable_DMA  := True;
 
       Port.Configure (I2C_Conf);
