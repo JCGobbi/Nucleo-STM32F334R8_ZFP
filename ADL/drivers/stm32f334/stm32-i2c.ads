@@ -57,8 +57,8 @@ package STM32.I2C is
       --  I2C or SMBus communication.
 
       Addressing_Mode          : I2C_Addressing_Mode;
-      Own_Address              : UInt10 := 16#00#;
-      Own_Address_2            : UInt7 := 16#00#;
+      Own_Address              : UInt10;
+      Own_Address_2            : UInt7;
 
       General_Call_Enabled     : Boolean := False;
       --  An I2C general call dispatches the same data to all connected
@@ -198,7 +198,7 @@ package STM32.I2C is
       Tx_Data_Register_Empty_Interrupt,
       Rx_Data_Register_Not_Empty,
       Address_Matched,
-      Ack_Failure,
+      Nack_Received,
       Stop_Detection,
       Transfer_Complete,
       Transfer_Complete_Reload,
@@ -213,7 +213,7 @@ package STM32.I2C is
 
    type Clearable_Interrupt_Status is
      (Address_Matched,
-      Ack_Failure,
+      Nack_Received,
       Stop_Detection,
       Bus_Error,
       Arbitration_Lost,

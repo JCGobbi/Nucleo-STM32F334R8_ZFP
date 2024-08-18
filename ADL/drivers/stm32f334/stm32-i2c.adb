@@ -145,7 +145,7 @@ package body STM32.I2C is
    is
       Start : constant Time := Clock;
    begin
-      if Interrupt_Status (Port, Ack_Failure) then
+      if Interrupt_Status (Port, Nack_Received) then
          if Port.State = Master_Busy_Tx
            or else Port.State = Mem_Busy_Tx
            or else Port.State = Mem_Busy_Rx
@@ -167,7 +167,7 @@ package body STM32.I2C is
          end loop;
 
          --  Clear the NACK amd STOP flags
-         Clear_Interrupt_Status (Port, Ack_Failure);
+         Clear_Interrupt_Status (Port, Nack_Received);
          Clear_Interrupt_Status (Port, Stop_Detection);
 
          --  Clear CR2
@@ -280,9 +280,9 @@ package body STM32.I2C is
       Status := Ok;
    end Wait_Stop_Flag;
 
-   -------------------------
+   ----------------------------
    -- Tx_Data_Register_Flush --
-   -------------------------
+   ----------------------------
 
    procedure Tx_Data_Register_Flush (This : in out I2C_Port) is
    begin
@@ -510,6 +510,7 @@ package body STM32.I2C is
       Reset (Port);
 
       I2C_Conf.Own_Address := 16#00#;
+      I2C_Conf.Own_Address_2 := 16#00#;
       I2C_Conf.Clock_Speed := Clock_Speed;
       I2C_Conf.Addressing_Mode := Addressing_Mode_7bit;
       I2C_Conf.General_Call_Enabled := False;
