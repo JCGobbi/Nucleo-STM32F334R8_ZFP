@@ -1058,8 +1058,83 @@ package body STM32.I2C is
    end Interrupt_Enabled;
 
    ----------------------
-   -- Enable_Interrupt --
+   -- Interrupt_Status --
    ----------------------
+
+   function Interrupt_Status
+     (This : I2C_Port; Flag : Interrupt_Status_Flag) return Boolean
+   is
+   begin
+      case Flag is
+         when Tx_Data_Register_Empty =>
+            return This.Periph.ISR.TXE;
+         when Tx_Data_Register_Empty_Interrupt =>
+            return This.Periph.ISR.TXIS;
+         when Rx_Data_Register_Not_Empty =>
+            return This.Periph.ISR.RXNE;
+         when Address_Matched =>
+            return This.Periph.ISR.ADDR;
+         when Nack_Received =>
+            return This.Periph.ISR.NACKF;
+         when Stop_Detection =>
+            return This.Periph.ISR.STOPF;
+         when Transfer_Complete =>
+            return This.Periph.ISR.TC;
+         when Transfer_Complete_Reload =>
+            return This.Periph.ISR.TCR;
+         when Bus_Error =>
+            return This.Periph.ISR.BERR;
+         when Arbitration_Lost =>
+            return This.Periph.ISR.ARLO;
+         when UnderOverrun =>
+            return This.Periph.ISR.OVR;
+         when Packet_Error =>
+            return This.Periph.ISR.PECERR;
+         when Timeout =>
+            return This.Periph.ISR.TIMEOUT;
+         when SMB_Alert =>
+            return This.Periph.ISR.ALERT;
+         when Bus_Busy =>
+            return This.Periph.ISR.BUSY;
+         when Transmitter_Receiver_Mode =>
+            return This.Periph.ISR.DIR;
+      end case;
+   end Interrupt_Status;
+
+   ----------------------------
+   -- Clear_Interrupt_Status --
+   ----------------------------
+
+   procedure Clear_Interrupt_Status
+     (This   : in out I2C_Port;
+      Target : Clearable_Interrupt_Status)
+   is
+   begin
+      case Target is
+         when Address_Matched =>
+            This.Periph.ICR.ADDRCF := True;
+         when Nack_Received =>
+            This.Periph.ICR.NACKCF := True;
+         when Stop_Detection =>
+            This.Periph.ICR.STOPCF := True;
+         when Bus_Error =>
+            This.Periph.ICR.BERRCF := True;
+         when Arbitration_Lost =>
+            This.Periph.ICR.ARLOCF := True;
+         when UnderOverrun =>
+            This.Periph.ICR.OVRCF := True;
+         when Packet_Error =>
+            This.Periph.ICR.PECCF := True;
+         when Timeout =>
+            This.Periph.ICR.TIMOUTCF := True;
+         when SMB_Alert =>
+            This.Periph.ICR.ALERTCF := True;
+      end case;
+   end Clear_Interrupt_Status;
+
+   ----------------
+   -- Enable_DMA --
+   ----------------
 
    procedure Enable_DMA
      (This   : in out I2C_Port;
@@ -1108,80 +1183,5 @@ package body STM32.I2C is
             return This.Periph.CR1.RXDMAEN;
       end case;
    end DMA_Enabled;
-
-   ----------------------
-   -- Interrupt_Status --
-   ----------------------
-
-   function Interrupt_Status
-     (This : I2C_Port; Flag : Interrupt_Status_Flag) return Boolean
-   is
-   begin
-      case Flag is
-         when Tx_Data_Register_Empty =>
-            return This.Periph.ISR.TXE;
-         when Tx_Data_Register_Empty_Interrupt =>
-            return This.Periph.ISR.TXIS;
-         when Rx_Data_Register_Not_Empty =>
-            return This.Periph.ISR.RXNE;
-         when Address_Matched =>
-            return This.Periph.ISR.ADDR;
-         when Ack_Failure =>
-            return This.Periph.ISR.NACKF;
-         when Stop_Detection =>
-            return This.Periph.ISR.STOPF;
-         when Transfer_Complete =>
-            return This.Periph.ISR.TC;
-         when Transfer_Complete_Reload =>
-            return This.Periph.ISR.TCR;
-         when Bus_Error =>
-            return This.Periph.ISR.BERR;
-         when Arbitration_Lost =>
-            return This.Periph.ISR.ARLO;
-         when UnderOverrun =>
-            return This.Periph.ISR.OVR;
-         when Packet_Error =>
-            return This.Periph.ISR.PECERR;
-         when Timeout =>
-            return This.Periph.ISR.TIMEOUT;
-         when SMB_Alert =>
-            return This.Periph.ISR.ALERT;
-         when Bus_Busy =>
-            return This.Periph.ISR.BUSY;
-         when Transmitter_Receiver_Mode =>
-            return This.Periph.ISR.DIR;
-      end case;
-   end Interrupt_Status;
-
-   ----------------------------
-   -- Clear_Interrupt_Status --
-   ----------------------------
-
-   procedure Clear_Interrupt_Status
-     (This   : in out I2C_Port;
-      Target : Clearable_Interrupt_Status)
-   is
-   begin
-      case Target is
-         when Address_Matched =>
-            This.Periph.ICR.ADDRCF := True;
-         when Ack_Failure =>
-            This.Periph.ICR.NACKCF := True;
-         when Stop_Detection =>
-            This.Periph.ICR.STOPCF := True;
-         when Bus_Error =>
-            This.Periph.ICR.BERRCF := True;
-         when Arbitration_Lost =>
-            This.Periph.ICR.ARLOCF := True;
-         when UnderOverrun =>
-            This.Periph.ICR.OVRCF := True;
-         when Packet_Error =>
-            This.Periph.ICR.PECCF := True;
-         when Timeout =>
-            This.Periph.ICR.TIMOUTCF := True;
-         when SMB_Alert =>
-            This.Periph.ICR.ALERTCF := True;
-      end case;
-   end Clear_Interrupt_Status;
 
 end STM32.I2C;

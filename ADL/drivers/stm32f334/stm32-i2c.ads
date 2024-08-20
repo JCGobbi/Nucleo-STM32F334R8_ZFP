@@ -176,23 +176,6 @@ package STM32.I2C is
       Source : I2C_Interrupt)
       return Boolean;
 
-   type I2C_DMA is (Tx_DMA, Rx_DMA);
-
-   procedure Enable_DMA
-     (This   : in out I2C_Port;
-      Source : I2C_DMA)
-     with Post => DMA_Enabled (This, Source);
-
-   procedure Disable_DMA
-     (This   : in out I2C_Port;
-      Source : I2C_DMA)
-     with Post => not DMA_Enabled (This, Source);
-
-   function DMA_Enabled
-     (This   : I2C_Port;
-      Source : I2C_DMA)
-      return Boolean;
-
    type Interrupt_Status_Flag is
      (Tx_Data_Register_Empty,
       Tx_Data_Register_Empty_Interrupt,
@@ -232,6 +215,23 @@ package STM32.I2C is
    procedure Clear_Interrupt_Status
      (This   : in out I2C_Port;
       Target : Clearable_Interrupt_Status);
+
+   type I2C_DMA is (Tx_DMA, Rx_DMA);
+
+   procedure Enable_DMA
+     (This   : in out I2C_Port;
+      Source : I2C_DMA)
+     with Post => DMA_Enabled (This, Source);
+
+   procedure Disable_DMA
+     (This   : in out I2C_Port;
+      Source : I2C_DMA)
+     with Post => not DMA_Enabled (This, Source);
+
+   function DMA_Enabled
+     (This   : I2C_Port;
+      Source : I2C_DMA)
+      return Boolean;
 
 private
 
