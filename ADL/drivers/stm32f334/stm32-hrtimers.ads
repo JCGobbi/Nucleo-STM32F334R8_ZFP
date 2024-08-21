@@ -1578,8 +1578,9 @@ package STM32.HRTimers is
    --  a prescaler as the burst mode clock source, (BMCLK[3:0] = 1010 and
    --  BMPRESC[3:0] = 0000).
 
-   procedure Set_Burst_Mode_Period (Value : UInt16);
-   --  Defines the burst mode repetition periode (corresponding to the sum of
+   procedure Set_Burst_Mode_Period (Value : UInt16)
+     with Pre => Value /= 16#0000#;
+   --  Defines the burst mode repetition period (corresponding to the sum of
    --  the idle and run periods). This register holds either the content of the
    --  preload register or the content of the active register if preload is
    --  disabled.
