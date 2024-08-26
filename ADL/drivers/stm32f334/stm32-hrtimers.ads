@@ -995,7 +995,13 @@ package STM32.HRTimers is
       External_Event_10,
       Register_Update);
    --  These events determine the set/reset crossbar of the outputs, so the
-   --  output waveform is established.
+   --  output waveform is established. Table 84 at chapter 21.3.4 in the RM0364
+   --  rev 4 summarizes the events from other timing units that can be used to
+   --  set and reset the outputs. The number corresponds to the timer events
+   --  (such as TIMEVNTx) listed in the register, and empty locations are
+   --  indicating non-available events. Table 86 at chapter 21.3.6 in the RM0364
+   --  rev 4 summarizes the available sources and features associated with each
+   --  of the 10 external events channels.
 
    for Output_Event use
      (Timer_A_Resynchronization => 16#01#,
