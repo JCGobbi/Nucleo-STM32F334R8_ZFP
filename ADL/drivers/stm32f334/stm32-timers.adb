@@ -1383,6 +1383,10 @@ package body STM32.Timers is
    procedure Enable_Main_Output (This : in out Timer) is
    begin
       This.BDTR.Main_Output_Enabled := True;
+
+      loop
+         exit when Main_Output_Enabled (This);
+      end loop;
    end Enable_Main_Output;
 
    -------------------------
@@ -1393,6 +1397,10 @@ package body STM32.Timers is
    begin
       if No_Outputs_Enabled (This) then
          This.BDTR.Main_Output_Enabled := False;
+
+         loop
+            exit when not Main_Output_Enabled (This);
+         end loop;
       end if;
    end Disable_Main_Output;
 
@@ -1536,11 +1544,19 @@ package body STM32.Timers is
       Off_State_Selection_Idle_Mode : Bit)
    is
    begin
-      This.BDTR.Automatic_Output_Enabled      := Automatic_Output_Enabled;
-      This.BDTR.Break_Polarity                := Break_Polarity;
-      This.BDTR.Break_Enable                  := Break_Enabled;
-      This.BDTR.Break_Filter                  := Break_Filter;
-      This.BDTR.Off_State_Selection_Run_Mode  := Off_State_Selection_Run_Mode;
+      This.BDTR.Automatic_Output_Enabled := Automatic_Output_Enabled;
+      This.BDTR.Break_Polarity := Break_Polarity;
+      loop
+         exit when This.BDTR.Break_Polarity = Break_Polarity;
+      end loop;
+
+      This.BDTR.Break_Enable := Break_Enabled;
+      loop
+         exit when This.BDTR.Break_Enable = Break_Enabled;
+      end loop;
+
+      This.BDTR.Break_Filter := Break_Filter;
+      This.BDTR.Off_State_Selection_Run_Mode := Off_State_Selection_Run_Mode;
       This.BDTR.Off_State_Selection_Idle_Mode := Off_State_Selection_Idle_Mode;
    end Configure_Break;
 
@@ -1561,14 +1577,30 @@ package body STM32.Timers is
       Off_State_Selection_Idle_Mode : Bit)
    is
    begin
-      This.BDTR.Automatic_Output_Enabled      := Automatic_Output_Enabled;
-      This.BDTR.Break_Polarity                := Break_Polarity;
-      This.BDTR.Break_Enable                  := Break_Enabled;
-      This.BDTR.Break_2_Filter                := Break_2_Filter;
-      This.BDTR.Break_2_Polarity              := Break_2_Polarity;
-      This.BDTR.Break_2_Enable                := Break_2_Enabled;
-      This.BDTR.Break_Filter                  := Break_Filter;
-      This.BDTR.Off_State_Selection_Run_Mode  := Off_State_Selection_Run_Mode;
+      This.BDTR.Automatic_Output_Enabled := Automatic_Output_Enabled;
+      This.BDTR.Break_Polarity := Break_Polarity;
+      loop
+         exit when This.BDTR.Break_Polarity = Break_Polarity;
+      end loop;
+
+      This.BDTR.Break_Enable := Break_Enabled;
+      loop
+         exit when This.BDTR.Break_Enable = Break_Enabled;
+      end loop;
+
+      This.BDTR.Break_Filter := Break_Filter;
+      This.BDTR.Break_2_Polarity := Break_2_Polarity;
+      loop
+         exit when This.BDTR.Break_2_Polarity = Break_2_Polarity;
+      end loop;
+
+      This.BDTR.Break_2_Enable := Break_2_Enabled;
+      loop
+         exit when This.BDTR.Break_2_Enable = Break_2_Enabled;
+      end loop;
+
+      This.BDTR.Break_2_Filter := Break_2_Filter;
+      This.BDTR.Off_State_Selection_Run_Mode := Off_State_Selection_Run_Mode;
       This.BDTR.Off_State_Selection_Idle_Mode := Off_State_Selection_Idle_Mode;
    end Configure_Break;
 
