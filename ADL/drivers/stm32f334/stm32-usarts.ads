@@ -39,7 +39,7 @@
 --   COPYRIGHT(c) 2014 STMicroelectronics                                   --
 ------------------------------------------------------------------------------
 
---  This file provides register definitions for the STM32F4 (ARM Cortex M4F)
+--  This file provides register definitions for the STM32F3 (ARM Cortex M4F)
 --  USART from ST Microelectronics.
 
 --  Note that there are board implementation assumptions represented by the
@@ -118,23 +118,109 @@ package STM32.USARTs is
       CTS_Flow_Control,
       RTS_CTS_Flow_Control);
 
-   procedure Set_Flow_Control (This : in out USART;  To : Flow_Control);
+   procedure Set_Flow_Control (This : in out USART; To : Flow_Control);
 
-   type USART_Mode is (Modbus_RTU, Modbus_ASCII, LIN);
+   type Auto_BaudRate_Mode is
+     (Falling_To_Rising,  --  Duration of start bit
+      Falling_To_Falling, --  10xx pattern, start bit + first data bit
+      Char_0x7F,          --  0x7F character frame
+      Char_0x55);         --  0x55 character frame
 
-   procedure Enable_USART_Mode
+   procedure Configure_Auto_BaudRate
+     (This : in out USART;
+      Mode : Auto_BaudRate_Mode)
+     with Pre => not Enabled (This);
+   --  Select the mode of auto baud rate: duration of start bit, start + first
+   --  data bit duration, 0x7F character or 0x55 character. The autobaud rate
+   --  function must be disabled before change.
+
+   procedure Set_Auto_BaudRate (This : in out USART; Enabled : Boolean);
+   --  Enable/disable auto baud rate detection.
+
+   procedure Request_Auto_BaudRate (This : in out USART);
+   --  Request an auto baud rate measurement on the next received data frame.
+
+   type Bit_Order is
+     (LSB_First,  --  data is transmitted/received with data bit 0 first
+      MSB_First); --  data is transmitted/received with data bit 7/8 first
+
+   procedure Set_Bit_Order (This : in out USART; Order : Bit_Order)
+     with Pre => not Enabled (This);
+   --  Select to send/receive data with LSB (bit 0) first or MSB (bit 6/7) first.
+
+   procedure Swap_Tx_Rx_Pins (This : in out USART; Swap : Boolean)
+     with Pre => not Enabled (This);
+   --  Swap Tx with Rx pins.
+
+   type Data_Inversion_Type is
+     (Logical_Data,
+      Hardware_Tx_Pin,
+      Hardware_Rx_Pin);
+
+   procedure Set_Data_Inversion
+     (This     : in out USART;
+      Mode     : Data_Inversion_Type;
+      Inverted : Boolean)
+     with Pre => not Enabled (This);
+   --  Select positive/direct or negative/invert binary data sent/received
+   --  from/to data register or Tx/Rx pins active level.
+
+   procedure Set_Half_Duplex_Mode (This : in out USART; Half : Boolean)
+     with Pre => not Enabled (This);
+   --  Selection of Single-wire Half-duplex mode.
+
+   type Break_Detection_Length is (Bits_10, Bits_11);
+   --  LIN break detection length selection, 10-bit or 11-bit break threshold.
+
+   procedure Set_Break_Detection_Length
+     (This   : in out USART;
+      Length : Break_Detection_Length);
+   --  LIN break detection length selection between 10-bit and 11-bit break.
+   --  A slave node shall use a break detection threshold of 11 dominant local
+   --  slave bit times. Slave nodes with a bit rate tolerance better than 14%,
+   --  (typically a crystal or ceramic resonator) may use a 9.5 dominant nominal
+   --  bit times break detection threshold. It is not required that a slave node
+   --  checks that the break delimiter is at least one nominal bit time long.
+   --  See LIN Specification Package revision 2.2A, section 2.3.1.1 Break Field.
+
+   procedure Request_Send_Break (This : in out USART);
+   --  Setting the SBK bit sends 13‘0 bits as a break character. Then a bit of
+   --  value 1 is sent to allow the next start detection. In total, the break
+   --  field will take 14 bits time. It can be set and cleared by software.
+   --  It should be set by software, and will be reset by hardware during the
+   --  stop bit of break.
+
+   procedure Configure_Receiver_Timeout
+     (This  : in out USART;
+      Value : UInt24);
+   --  Save the Receiver timeout value in terms of number of bits during which
+   --  there is no activity on the RX line. In standard mode, the RTOF flag is
+   --  set if, after the last received character, no new start bit is detected
+   --  for more than the RTO value.
+
+   procedure Set_Receiver_Timeout
+     (This    : in out USART;
+      Timeout : Boolean);
+   --  Enable/disable Receiver timeout during which there is no activity on the
+   --  RX line. When the receive line is idle for this duration, after the last
+   --  stop bit is received, an interrupt is generated, if enabled, informing
+   --  the software that the current block reception is completed.
+
+   type USART_Mode is (Normal, Modbus_RTU, Modbus_ASCII, LIN);
+
+   procedure Configure_Usart_Mode
      (This : in out USART;
       Mode : USART_Mode;
-      Data : UInt32 := 16#0000#);
+      Data : UInt24 := 16#000000#)
+     with Pre => not Enabled (This);
    --  For Modbus RTU mode, the timeout of 2 character times is programmed. If
-   --  the character has 11 bits, then 22 (16#16#).
-   --  For Modbus ASCII mode, the LF ASCII character (16#0A#) of the end of
-   --  blocksequence (CR/LF) is programmed.
-   --  See chapter 28.5.8 at pg. 970 in RM0364 rev. 4.
-   --  For LIN mode, See chapter 28.5.10 at pg. 972 in RM0364 rev. 4.
-
-   procedure Disable_USART_Mode (This : in out USART; Mode : USART_Mode);
-   --  Disble the selected mode.
+   --  the character has 11 bits, then program value 22 (16#16#). For LIN, this
+   --  will be the Response timeout. When the receive line is idle for this
+   --  duration, after the last stop bit is received, an interrupt is generated,
+   --  if enabled, informing the software that the current block reception is
+   --  completed. For Modbus ASCII mode, there is no need to program timeout.
+   --  See chapter 37.5.11 at pg. 1620 in RM0440 rev. 6.
+   --  For LIN mode, See chapter 37.5.13 at pg. 1622 in RM0440 rev. 6.
 
    type USART_Interrupt is
      (End_Of_Block,
@@ -182,7 +268,8 @@ package STM32.USARTs is
       Transmission_Complete_Indicated,
       Transmit_Data_Register_Empty,
       LIN_Break_Detection_Indicated,
-      Clear_To_Send_Indicated);
+      Clear_To_Send_Indicated,
+      Auto_Baud_Rate_Error_Indicated);
 
    function Status (This : USART; Flag : USART_Status_Flag) return Boolean
      with Inline;

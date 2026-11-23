@@ -107,15 +107,15 @@ package body STM32.USARTs is
    is
    begin
       case To is
+         when Word_Length_7 =>
+            This.Periph.CR1.M0 := False;
+            This.Periph.CR1.M1 := True;
          when Word_Length_8 =>
             This.Periph.CR1.M0 := False;
             This.Periph.CR1.M1 := False;
          when Word_Length_9 =>
             This.Periph.CR1.M0 := True;
             This.Periph.CR1.M1 := False;
-         when Word_Length_7 =>
-            This.Periph.CR1.M0 := False;
-            This.Periph.CR1.M1 := True;
       end case;
    end Set_Word_Length;
 
@@ -231,7 +231,8 @@ package body STM32.USARTs is
    -- Current_Input --
    -------------------
 
-   function Current_Input (This : USART) return UInt9 is (This.Periph.RDR.RDR);
+   function Current_Input (This : USART) return UInt9 is
+     (This.Periph.RDR.RDR);
 
    --------------
    -- Tx_Ready --
@@ -251,59 +252,168 @@ package body STM32.USARTs is
       return This.Periph.ISR.RXNE;
    end Rx_Ready;
 
+   -----------------------------
+   -- Configure_Auto_BaudRate --
+   -----------------------------
+
+   procedure Configure_Auto_BaudRate
+     (This : in out USART;
+      Mode : Auto_BaudRate_Mode) is
+   begin
+      This.Periph.CR2.ABRMOD.Val := Mode'Enum_Rep;
+   end Configure_Auto_BaudRate;
+
    -----------------------
-   -- Enable_USART_Mode --
+   -- Set_Auto_BaudRate --
    -----------------------
 
-   procedure Enable_USART_Mode
-     (This : in out USART;
-      Mode : USART_Mode;
-      Data : UInt32 := 16#0000#)
-   is
+   procedure Set_Auto_BaudRate (This : in out USART; Enabled : Boolean) is
+   begin
+      This.Periph.CR2.ABREN := Enabled;
+   end Set_Auto_BaudRate;
+
+   ---------------------------
+   -- Request_Auto_BaudRate --
+   ---------------------------
+
+   procedure Request_Auto_BaudRate (This : in out USART) is
+   begin
+      This.Periph.RQR.ABRRQ := True;
+   end Request_Auto_BaudRate;
+
+   -------------------
+   -- Set_Bit_Order --
+   -------------------
+
+   procedure Set_Bit_Order (This : in out USART; Order : Bit_Order) is
+   begin
+      This.Periph.CR2.MSBFIRST := Order = MSB_First;
+   end Set_Bit_Order;
+
+   ---------------------
+   -- Swap_Tx_Rx_Pins --
+   ---------------------
+
+   procedure Swap_Tx_Rx_Pins (This : in out USART; Swap : Boolean) is
+   begin
+      This.Periph.CR2.SWAP := Swap;
+   end Swap_Tx_Rx_Pins;
+
+   ------------------------
+   -- Set_Data_Inversion --
+   ------------------------
+
+   procedure Set_Data_Inversion
+     (This     : in out USART;
+      Mode     : Data_Inversion_Type;
+      Inverted : Boolean) is
    begin
       case Mode is
-         when Modbus_RTU =>
-            --  Set 2-character timeout
-            This.Periph.RTOR.RTO := UInt24 (Data);
-            This.Periph.CR2.RTOEN := True;
-         when Modbus_ASCII =>
-            --  Set LF ASCII character (16#0A#)
-            This.Periph.CR2.ADD.Val := UInt8 (Data);
-         when LIN =>
-            --  Disable USART
-            This.Periph.CR1.UE := False;
-            --  1 stop bit
-            This.Periph.CR2.STOP := Stopbits_1'Enum_Rep;
+         when Logical_Data =>
+            This.Periph.CR2.DATAINV := Inverted;
+         when Hardware_Tx_Pin =>
+            This.Periph.CR2.TXINV := Inverted;
+         when Hardware_Rx_Pin =>
+            This.Periph.CR2.RXINV := Inverted;
+      end case;
+   end Set_Data_Inversion;
+
+   --------------------------
+   -- Set_Half_Duplex_Mode --
+   --------------------------
+
+   procedure Set_Half_Duplex_Mode (This : in out USART; Half : Boolean) is
+   begin
+      This.Periph.CR3.HDSEL := Half;
+   end Set_Half_Duplex_Mode;
+
+   --------------------------------
+   -- Set_Break_Detection_Length --
+   --------------------------------
+
+   procedure Set_Break_Detection_Length
+     (This   : in out USART;
+      Length : Break_Detection_Length) is
+   begin
+      This.Periph.CR2.LBDL := Length = Bits_11;
+   end Set_Break_Detection_Length;
+
+   ------------------------
+   -- Request_Send_Break --
+   ------------------------
+
+   procedure Request_Send_Break (This : in out USART) is
+   begin
+      This.Periph.RQR.SBKRQ := True;
+   end Request_Send_Break;
+
+   --------------------------------
+   -- Configure_Receiver_Timeout --
+   --------------------------------
+
+   procedure Configure_Receiver_Timeout
+     (This  : in out USART;
+      Value : UInt24) is
+   begin
+      This.Periph.RTOR.RTO := Value;
+   end Configure_Receiver_Timeout;
+
+   --------------------------
+   -- Set_Receiver_Timeout --
+   --------------------------
+
+   procedure Set_Receiver_Timeout
+     (This    : in out USART;
+      Timeout : Boolean) is
+   begin
+      This.Periph.CR2.RTOEN := Timeout;
+   end Set_Receiver_Timeout;
+
+   --------------------------
+   -- Configure_Usart_Mode --
+   --------------------------
+
+   procedure Configure_Usart_Mode
+     (This : in out USART;
+      Mode : USART_Mode;
+      Data : UInt24 := 16#000000#)
+   is
+      --  In Modbus ASCII, the end of a block is recognized by a specific
+      --  (CR/LF) character sequence. Then we set LF ASCII character (16#0A#).
+      End_Char : constant UInt8 := 16#0A#;
+   begin
+      if Mode /= Normal then
+         --  Modbus and LIN are half-duplex protocols
+         This.Periph.CR3.HDSEL := True;
+         --  Program number of bits for Receiver timeout and enable it.
+         This.Periph.RTOR.RTO := Data;
+         This.Periph.CR2.RTOEN := True;
+
+         if Mode = Modbus_ASCII then
+            --  For Modbus ASCII mode, the LF ASCII character (16#0A#) of the
+            --  end of block sequence (CR/LF) is programmed. When the character
+            --  match occurs, an interrupt is generated if enabled.
+            This.Periph.CR2.ADD.Val := End_Char;
+         elsif Mode = LIN then
             --  Disable CK pin
             This.Periph.CR2.CLKEN := False;
             --  Disable smartcard mode
             This.Periph.CR3.SCEN := False;
-            --  Disable half-duplex mode
-            This.Periph.CR3.HDSEL := False;
             --  Disable IrDA mode
             This.Periph.CR3.IREN := False;
             --  Enable LIN mode
             This.Periph.CR2.LINEN := True;
-            --  Enable USART
-            This.Periph.CR1.UE := True;
-      end case;
-   end Enable_USART_Mode;
+         end if;
 
-   ------------------------
-   -- Disable_USART_Mode --
-   ------------------------
+      else --  Normal USART communication mode
+         This.Periph.CR2.LINEN := False;
+         --  Disable half-duplex mode
+         This.Periph.CR3.HDSEL := False;
+         --  Disable Receiver timeout
+         This.Periph.CR2.RTOEN := False;
+      end if;
 
-   procedure Disable_USART_Mode (This : in out USART; Mode : USART_Mode) is
-   begin
-      case Mode is
-         when Modbus_RTU =>
-            This.Periph.CR2.RTOEN := False;
-         when Modbus_ASCII =>
-            null;
-         when LIN =>
-            This.Periph.CR2.LINEN := False;
-      end case;
-   end Disable_USART_Mode;
+   end Configure_Usart_Mode;
 
    -----------------------
    -- Enable_Interrupts --
@@ -444,6 +554,8 @@ package body STM32.USARTs is
             return This.Periph.ISR.LBDF;
          when Clear_To_Send_Indicated =>
             return This.Periph.ISR.CTS;
+         when Auto_Baud_Rate_Error_Indicated =>
+            return This.Periph.ISR.ABRE;
       end case;
    end Status;
 
@@ -480,6 +592,8 @@ package body STM32.USARTs is
             This.Periph.ICR.LBDCF := True;
          when Clear_To_Send_Indicated =>
             This.Periph.ICR.CTSCF := True;
+         when Auto_Baud_Rate_Error_Indicated =>
+            null; --  Cleared by writing 1 to ABRRQ bit in the_RQR register
       end case;
    end Clear_Status;
 
